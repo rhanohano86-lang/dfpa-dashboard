@@ -1,0 +1,1 @@
+const s=new Date("2026-05-30");const t=new Date();document.getElementById("day").textContent="Day "+(Math.floor((t-s)/86400000)+1);
