@@ -586,4 +586,20 @@ body {
         font-size: 3rem;
     }
 
-}+
+}+html,
+body {
+    min-height: 100%;
+    height: auto;
+}
+
+body {
+    overflow: visible;
+}
+
+main {
+    min-height: 900px;
+}
+
+.dashboard-updated-card {
+    margin-bottom: 40px;
+}
