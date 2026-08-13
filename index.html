@@ -12,7 +12,12 @@
 
     <title>DFPA Fire Status Dashboard</title>
 
-<link rel="stylesheet" href="./style.css">
+    <!-- DFPA DASHBOARD STYLES -->
+    <!-- IMPORTANT: "assests" is the actual folder name in GitHub -->
+    <link
+        rel="stylesheet"
+        href="./assests/css/styles.css"
+    >
 
 </head>
 
@@ -37,9 +42,8 @@
 
             <div class="header-content">
 
-
                 <img
-                    src="images/dfpa-logo.png"
+                    src="./images/dfpa-logo.png"
                     alt="Douglas Forest Protective Association logo"
                     class="dfpa-logo"
                 >
@@ -163,7 +167,8 @@
 
                 <!-- ==================================================
                      FIRE DANGER + PUBLIC USE RESTRICTIONS
-                     THESE ARE SYNCHRONIZED
+
+                     THESE TWO VALUES ARE SYNCHRONIZED
                      ================================================== -->
 
                 <section class="card fire-danger-card">
@@ -241,6 +246,8 @@
 
                 <!-- ==================================================
                      IFPL
+
+                     IFPL IS INDEPENDENT OF FIRE DANGER/PUR
                      ================================================== -->
 
                 <section class="card ifpl-card">
@@ -328,7 +335,11 @@
          DASHBOARD JAVASCRIPT
          ================================================== -->
 
-   <script src="./script.js"></script>
+    <!-- IMPORTANT: "assests" is the actual folder name in GitHub -->
+
+    <script
+        src="./assests/js/script.js"
+    ></script>
 
 
 </body>
