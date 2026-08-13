@@ -1,23 +1,589 @@
-/* DFPA Dashboard Styles */
+/* ======================================================
+   DFPA Fire Status Dashboard
+   Version 2.4
+
+   Design Principle:
+   Clarity over Decoration
+   ====================================================== */
+
+:root {
+
+    /* DFPA Branding */
+    --dfpa-blue: #33439A;
+
+    /* Backgrounds */
+    --background: #F5F7FA;
+    --card: #FFFFFF;
+
+    /* Typography */
+    --text: #1A1A1A;
+    --muted: #6B7280;
+
+    /* Fire Danger */
+    --low: #4CAF50;
+    --moderate: #1976D2;
+    --high: #F4C430;
+    --extreme: #D32F2F;
+
+    /* Effects */
+    --radius: 18px;
+    --shadow: 0 6px 20px rgba(0, 0, 0, .08);
+}
+
+
+/* ======================================================
+   GLOBAL
+   ====================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 
 body {
-    margin: 0;
     font-family: Arial, Helvetica, sans-serif;
-    background-color: #f4f6f8;
+    background: var(--background);
+    color: var(--text);
 }
 
-header {
-    background-color: #0b3d2e;
+
+/* ======================================================
+   ACCESSIBILITY
+   ====================================================== */
+
+.skip-link {
+    position: absolute;
+    left: -9999px;
+}
+
+
+.skip-link:focus {
+    left: 20px;
+    top: 20px;
+    background: white;
+    padding: 12px;
+    border: 2px solid black;
+    z-index: 1000;
+}
+
+
+/* ======================================================
+   LAYOUT
+   ====================================================== */
+
+.container {
+    width: min(1600px, 96%);
+    margin: auto;
+}
+
+
+/* ======================================================
+   HEADER
+   ====================================================== */
+
+.dashboard-header {
+    background: var(--dfpa-blue);
     color: white;
-    text-align: center;
-    padding: 30px;
+    padding: 34px 0;
 }
 
-header h1 {
-    margin: 0;
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 28px;
 }
 
-header p {
-    margin-top: 10px;
-    font-size: 18px;
+
+.dfpa-logo {
+    width: 120px;
+    height: auto;
 }
+
+
+.header-text h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+
+.header-text h2 {
+    font-size: 1.75rem;
+    font-weight: 400;
+    margin-bottom: 12px;
+}
+
+
+.header-text p {
+    font-size: 1.35rem;
+    font-style: italic;
+    opacity: .90;
+}
+
+
+/* ======================================================
+   HEADER MOBILE
+   ====================================================== */
+
+@media (max-width: 768px) {
+
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .header-text h1 {
+        font-size: 2.2rem;
+    }
+
+    .header-text h2 {
+        font-size: 1.35rem;
+    }
+
+    .header-text p {
+        font-size: 1rem;
+    }
+
+    .dfpa-logo {
+        width: 90px;
+    }
+
+}
+
+
+/* ======================================================
+   REUSABLE CARD
+   ====================================================== */
+
+.card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 40px;
+    margin-top: 30px;
+}
+
+
+/* ======================================================
+   REUSABLE COMPONENTS
+   ====================================================== */
+
+
+/* ======================================================
+   STATUS PILL
+   ====================================================== */
+
+.status-pill {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 18px 28px;
+
+    background: #FFFFFF;
+
+    border: 2px solid #D1D5DB;
+
+    border-left: 8px solid;
+
+    border-radius: 12px;
+}
+
+
+.status-dot {
+
+    width: 12px;
+
+    height: 12px;
+
+    border-radius: 50%;
+
+    flex-shrink: 0;
+}
+
+
+.status-text {
+
+    font-size: 2rem;
+
+    font-weight: 700;
+
+    color: var(--text);
+
+    line-height: 1;
+}
+
+
+/* ======================================================
+   STATUS COLORS
+   ====================================================== */
+
+.status-low {
+    border-left-color: var(--low);
+}
+
+
+.status-low .status-dot {
+    background: var(--low);
+}
+
+
+.status-moderate {
+    border-left-color: var(--moderate);
+}
+
+
+.status-moderate .status-dot {
+    background: var(--moderate);
+}
+
+
+.status-high {
+    border-left-color: var(--high);
+}
+
+
+.status-high .status-dot {
+    background: var(--high);
+}
+
+
+.status-extreme {
+    border-left-color: var(--extreme);
+}
+
+
+.status-extreme .status-dot {
+    background: var(--extreme);
+}
+
+
+/* ======================================================
+   FIRE SEASON CARD
+   ====================================================== */
+
+.fire-season-card h2 {
+
+    font-size: 2.25rem;
+
+    font-weight: 700;
+
+    margin-bottom: 40px;
+
+    letter-spacing: .5px;
+}
+
+
+.season-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 40px;
+}
+
+
+.season-item {
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: flex-start;
+
+    min-height: 180px;
+}
+
+
+.season-item:not(:last-child) {
+
+    border-right: 2px solid #E5E7EB;
+
+    padding-right: 40px;
+}
+
+
+.label {
+
+    font-size: 1.15rem;
+
+    font-weight: 700;
+
+    color: #6B7280;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.04em;
+
+    margin-bottom: 18px;
+}
+
+
+/* ======================================================
+   FIRE SEASON STATUS
+   ====================================================== */
+
+.status-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: var(--dfpa-blue);
+
+    color: white;
+
+    padding: 18px 24px;
+
+    min-width: 160px;
+
+    height: 56px;
+
+    border-radius: 999px;
+
+    font-size: 1.85rem;
+
+    font-weight: 700;
+
+    letter-spacing: .03em;
+}
+
+
+.status-badge.active {
+    background: var(--dfpa-blue);
+}
+
+
+.status-badge.inactive {
+    background: #6B7280;
+}
+
+
+/* ======================================================
+   SEASON VALUES
+   ====================================================== */
+
+.value {
+
+    font-size: 2.5rem;
+
+    font-weight: 700;
+
+    margin-top: auto;
+}
+
+
+.value.large {
+
+    font-size: 4rem;
+}
+
+
+/* ======================================================
+   FIRE STATUS ROW
+   ====================================================== */
+
+.status-row {
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 30px;
+
+    margin-top: 30px;
+}
+
+
+.status-row .card {
+
+    padding: 32px;
+
+    min-height: 0;
+
+    margin-top: 0;
+}
+
+
+/* ======================================================
+   FIRE DANGER & PUBLIC USE RESTRICTIONS
+   ====================================================== */
+
+.fire-danger-card h2 {
+
+    font-size: 2rem;
+
+    font-weight: 700;
+
+    line-height: 1.15;
+
+    margin-bottom: 30px;
+}
+
+
+.fire-danger-card .card-content {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 28px;
+}
+
+
+.fire-danger-card .status-section {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+}
+
+
+/* ======================================================
+   IFPL CARD
+   ====================================================== */
+
+.ifpl-card h2 {
+
+    font-size: 2rem;
+
+    font-weight: 700;
+
+    margin-bottom: 30px;
+}
+
+
+.ifpl-card .card-content {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 28px;
+}
+
+
+.ifpl-card .status-pill {
+
+    width: fit-content;
+}
+
+
+/* ======================================================
+   DASHBOARD UPDATED CARD
+   ====================================================== */
+
+.dashboard-updated-card .card-content {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+
+.dashboard-updated-card {
+
+    padding: 28px 32px;
+}
+
+
+.dashboard-updated-card .update-date {
+
+    font-size: 2rem;
+
+    font-weight: 700;
+
+    color: var(--text);
+}
+
+
+.dashboard-updated-card .update-time {
+
+    font-size: 1.1rem;
+
+    color: var(--muted);
+}
+
+
+/* ======================================================
+   MOBILE
+   ====================================================== */
+
+@media (max-width: 900px) {
+
+    .season-grid {
+
+        grid-template-columns: 1fr;
+
+        gap: 30px;
+    }
+
+
+    .season-item {
+
+        border-right: none !important;
+
+        padding-right: 0 !important;
+    }
+
+
+    .status-row {
+
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .card {
+
+        padding: 25px;
+    }
+
+
+    .status-text {
+
+        font-size: 1.5rem;
+    }
+
+
+    .status-pill {
+
+        padding: 15px 20px;
+    }
+
+
+    .fire-season-card h2 {
+
+        font-size: 1.8rem;
+    }
+
+
+    .fire-danger-card h2,
+    .ifpl-card h2 {
+
+        font-size: 1.6rem;
+    }
+
+
+    .value.large {
+
+        font-size: 3rem;
+    }
+
+}+
