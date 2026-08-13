@@ -2,18 +2,340 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>DFPA Fire Status Dashboard</title>
 
-    <link rel="stylesheet" href="assets/css/styles.css">
+    <link
+        rel="stylesheet"
+        href="assets/css/styles.css"
+    >
+
 </head>
+
 
 <body>
 
-</body>
+    <a
+        href="#main-content"
+        class="skip-link"
+    >
+        Skip to main content
+    </a>
 
-<script src="assets/js/script.js"></script>
+
+    <!-- ==================================================
+         HEADER
+         ================================================== -->
+
+    <header class="dashboard-header">
+
+        <div class="container">
+
+            <div class="header-content">
+
+
+                <img
+                    src="images/dfpa-logo.png"
+                    alt="Douglas Forest Protective Association logo"
+                    class="dfpa-logo"
+                >
+
+
+                <div class="header-text">
+
+                    <h1>
+                        Fire Status Dashboard
+                    </h1>
+
+
+                    <h2>
+                        Douglas Forest Protective Association
+                    </h2>
+
+
+                    <p>
+                        Current Fire Conditions for DFPA protected lands in the Douglas District
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- ==================================================
+         MAIN CONTENT
+         ================================================== -->
+
+    <main id="main-content">
+
+        <div class="container">
+
+
+            <!-- ==================================================
+                 FIRE SEASON
+                 ================================================== -->
+
+            <section class="card fire-season-card">
+
+                <h2>
+                    FIRE SEASON
+                </h2>
+
+
+                <div class="season-grid">
+
+
+                    <!-- STATUS -->
+
+                    <div class="season-item">
+
+                        <span class="label">
+                            Status
+                        </span>
+
+
+                        <div
+                            class="status-badge active"
+                            id="season-status"
+                        >
+                            ACTIVE
+                        </div>
+
+                    </div>
+
+
+                    <!-- CURRENT DAY -->
+
+                    <div class="season-item">
+
+                        <span class="label">
+                            Current Day
+                        </span>
+
+
+                        <span
+                            class="value large"
+                            id="season-day"
+                        >
+                            —
+                        </span>
+
+                    </div>
+
+
+                    <!-- START DATE -->
+
+                    <div class="season-item">
+
+                        <span class="label">
+                            Since
+                        </span>
+
+
+                        <span
+                            class="value"
+                            id="season-start-date"
+                        >
+                            May 30, 2026
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ==================================================
+                 FIRE STATUS ROW
+                 ================================================== -->
+
+            <div class="status-row">
+
+
+                <!-- ==================================================
+                     FIRE DANGER + PUBLIC USE RESTRICTIONS
+                     THESE ARE SYNCHRONIZED
+                     ================================================== -->
+
+                <section class="card fire-danger-card">
+
+                    <h2>
+                        FIRE DANGER &amp;<br>
+                        PUBLIC USE RESTRICTIONS
+                    </h2>
+
+
+                    <div class="card-content">
+
+
+                        <!-- FIRE DANGER -->
+
+                        <div class="status-section">
+
+                            <div class="label">
+                                Fire Danger
+                            </div>
+
+
+                            <div class="status-pill status-high">
+
+                                <span
+                                    class="status-dot"
+                                    aria-hidden="true"
+                                ></span>
+
+
+                                <span
+                                    class="status-text"
+                                    id="fire-danger"
+                                >
+                                    HIGH
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- PUBLIC USE RESTRICTIONS -->
+
+                        <div class="status-section">
+
+                            <div class="label">
+                                Public Use Restrictions
+                            </div>
+
+
+                            <div class="status-pill status-high">
+
+                                <span
+                                    class="status-dot"
+                                    aria-hidden="true"
+                                ></span>
+
+
+                                <span
+                                    class="status-text"
+                                    id="public-use-restrictions"
+                                >
+                                    HIGH
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ==================================================
+                     IFPL
+                     ================================================== -->
+
+                <section class="card ifpl-card">
+
+                    <h2>
+                        IFPL
+                    </h2>
+
+
+                    <div class="card-content">
+
+                        <div class="label">
+                            Industrial Fire Precaution Level
+                        </div>
+
+
+                        <div class="status-pill status-high">
+
+                            <span
+                                class="status-dot"
+                                aria-hidden="true"
+                            ></span>
+
+
+                            <span
+                                class="status-text"
+                                id="ifpl-level"
+                            >
+                                LEVEL 3
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+
+            <!-- ==================================================
+                 DASHBOARD UPDATED
+                 ================================================== -->
+
+            <section class="card dashboard-updated-card">
+
+                <h2>
+                    Dashboard Updated
+                </h2>
+
+
+                <div class="card-content">
+
+                    <div class="label">
+                        Last Updated
+                    </div>
+
+
+                    <div
+                        class="update-date"
+                        id="last-updated-date"
+                    >
+                        August 12, 2026
+                    </div>
+
+
+                    <div
+                        class="update-time"
+                        id="last-updated-time"
+                    >
+                        2:30 PM
+                    </div>
+
+                </div>
+
+            </section>
+
+
+        </div>
+
+    </main>
+
+
+    <!-- ==================================================
+         DASHBOARD JAVASCRIPT
+         ================================================== -->
+
+    <script
+        src="assets/js/script.js"
+    ></script>
+
+
+</body>
 
 </html>
