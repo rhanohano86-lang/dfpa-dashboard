@@ -602,4 +602,157 @@ main {
 
 .dashboard-updated-card {
     margin-bottom: 40px;
+}/* ======================================================
+   MOBILE EMBED OPTIMIZATION
+   Designed for Wix HTML iframe
+   ====================================================== */
+
+@media (max-width: 600px) {
+
+    body {
+        overflow-x: hidden;
+    }
+
+    .container {
+        width: 94%;
+    }
+
+    .dashboard-header {
+        padding: 20px 0;
+    }
+
+    .header-content {
+        gap: 12px;
+    }
+
+    .dfpa-logo {
+        width: 70px;
+    }
+
+    .header-text h1 {
+        font-size: 1.55rem;
+        margin-bottom: 5px;
+    }
+
+    .header-text h2 {
+        font-size: 1rem;
+        margin-bottom: 6px;
+    }
+
+    .header-text p {
+        font-size: 0.75rem;
+        line-height: 1.25;
+    }
+
+    /* FIRE SEASON */
+
+    .card {
+        padding: 20px;
+        margin-top: 15px;
+        border-radius: 12px;
+    }
+
+    .fire-season-card h2 {
+        font-size: 1.45rem;
+        margin-bottom: 20px;
+    }
+
+    .season-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .season-item {
+        min-height: auto;
+        padding: 0 !important;
+        border-right: none !important;
+        border-bottom: 1px solid #E5E7EB;
+        padding-bottom: 16px !important;
+    }
+
+    .season-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0 !important;
+    }
+
+    .label {
+        font-size: 0.75rem;
+        margin-bottom: 8px;
+    }
+
+    .status-badge {
+        width: 100%;
+        min-width: 0;
+        height: 42px;
+        padding: 8px 14px;
+        font-size: 1.25rem;
+    }
+
+    .value {
+        font-size: 1.5rem;
+        margin-top: 0;
+    }
+
+    .value.large {
+        font-size: 2rem;
+    }
+
+    /* FIRE DANGER + IFPL */
+
+    .status-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .status-row .card {
+        padding: 20px;
+    }
+
+    .fire-danger-card h2,
+    .ifpl-card h2 {
+        font-size: 1.35rem;
+        margin-bottom: 18px;
+    }
+
+    .fire-danger-card .card-content,
+    .ifpl-card .card-content {
+        gap: 16px;
+    }
+
+    .fire-danger-card .status-section {
+        gap: 7px;
+    }
+
+    .status-pill {
+        padding: 12px 16px;
+        gap: 9px;
+        border-radius: 9px;
+    }
+
+    .status-dot {
+        width: 9px;
+        height: 9px;
+    }
+
+    .status-text {
+        font-size: 1.2rem;
+    }
+
+    /* DASHBOARD UPDATED */
+
+    .dashboard-updated-card {
+        padding: 18px 20px;
+        margin-top: 15px;
+    }
+
+    .dashboard-updated-card .update-date {
+        font-size: 1.3rem;
+    }
+
+    .dashboard-updated-card .update-time {
+        font-size: 0.9rem;
+    }
 }
