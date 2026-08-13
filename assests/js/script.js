@@ -1,510 +1,128 @@
 /* ======================================================
    DFPA FIRE STATUS DASHBOARD
-   Version 2.4
-
-   Fire Danger + Public Use Restrictions:
-   SYNCHRONIZED
-
-   IFPL:
-   INDEPENDENT
-
-   Fire Season:
-   AUTOMATICALLY CALCULATED
-
-   Time Zone:
-   Pacific Time
+   Automatic Scheduling + Responsive Wix Height
    ====================================================== */
 
 
 /* ======================================================
-   DFPA DASHBOARD CONTROL CENTER
-
-   THIS IS THE ONLY SECTION YOU SHOULD NORMALLY EDIT.
-
+   DASHBOARD DATA
    ====================================================== */
 
 const dashboardData = {
 
-
-    /* ==================================================
-       FIRE SEASON
-       ================================================== */
-
     fireSeason: {
-
-        startDateTime: "2026-05-30T00:01:00",
-
-        endDateTime: null
-
+        active: true,
+        startDate: "May 30, 2026"
     },
 
+    /*
+     * FIRE DANGER + PUBLIC USE RESTRICTIONS
+     * These are intentionally synchronized.
+     *
+     * Change BOTH together by changing "level".
+     */
 
-    /* ==================================================
-       FIRE DANGER + PUBLIC USE RESTRICTIONS
-       SYNCHRONIZED
-       ==================================================
-
-       Both Fire Danger and Public Use Restrictions
-       use this SAME schedule.
-
-       They will always display the same level
-       and the same color.
-
-       ================================================== */
-
-    fireDangerAndRestrictions: [
+    fireRestrictionsSchedule: [
 
         {
-            effective: "2026-07-11T00:01:00",
+            effective: "2026-08-12T00:01:00",
             level: "HIGH"
         }
+
+        /*
+         * Future scheduled changes can be added here.
+         *
+         * Example:
+         *
+         * {
+         *     effective: "2026-08-20T00:01:00",
+         *     level: "EXTREME"
+         * }
+         */
 
     ],
 
 
-    /* ==================================================
-       IFPL
-       ==================================================
+    /*
+     * IFPL operates independently.
+     */
 
-       IFPL has its own independent schedule.
-
-       ================================================== */
-
-    ifpl: [
+    ifplSchedule: [
 
         {
             effective: "2026-07-15T00:01:00",
             level: "LEVEL 3"
         }
 
+        /*
+         * Future example:
+         *
+         * {
+         *     effective: "2026-08-20T00:01:00",
+         *     level: "LEVEL 4"
+         * }
+         */
+
     ],
 
 
-    /* ==================================================
-       DASHBOARD LAST UPDATED
-       ==================================================
-
-       This represents the date/time the dashboard
-       information was last reviewed or updated.
-
-       ================================================== */
-
     lastUpdated: {
-
         date: "August 12, 2026",
-
         time: "2:30 PM"
-
     }
 
 };
 
 
 /* ======================================================
-   SYSTEM SETTINGS
-   ====================================================== */
-
-const DASHBOARD_TIME_ZONE =
-    "America/Los_Angeles";
-
-const REFRESH_INTERVAL =
-    30000;
-
-
-/* ======================================================
-   GET CURRENT PACIFIC DATE
-   ====================================================== */
-
-function getPacificDateParts() {
-
-    const now =
-        new Date();
-
-
-    const formatter =
-        new Intl.DateTimeFormat(
-            "en-US",
-            {
-                timeZone:
-                    DASHBOARD_TIME_ZONE,
-
-                year: "numeric",
-
-                month: "numeric",
-
-                day: "numeric"
-            }
-        );
-
-
-    const parts =
-        formatter.formatToParts(now);
-
-
-    let year;
-    let month;
-    let day;
-
-
-    parts.forEach(
-        part => {
-
-            if (
-                part.type === "year"
-            ) {
-
-                year =
-                    Number(part.value);
-
-            }
-
-
-            if (
-                part.type === "month"
-            ) {
-
-                month =
-                    Number(part.value);
-
-            }
-
-
-            if (
-                part.type === "day"
-            ) {
-
-                day =
-                    Number(part.value);
-
-            }
-
-        }
-    );
-
-
-    return {
-
-        year: year,
-
-        month: month,
-
-        day: day
-
-    };
-
-}
-
-
-/* ======================================================
-   PARSE SCHEDULED PACIFIC DATE/TIME
-   ====================================================== */
-
-function parsePacificDateTime(value) {
-
-    const match =
-        value.match(
-            /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/
-        );
-
-
-    if (!match) {
-
-        console.error(
-            "Invalid scheduled date/time:",
-            value
-        );
-
-        return new Date(NaN);
-
-    }
-
-
-    const year =
-        Number(match[1]);
-
-    const month =
-        Number(match[2]);
-
-    const day =
-        Number(match[3]);
-
-    const hour =
-        Number(match[4]);
-
-    const minute =
-        Number(match[5]);
-
-    const second =
-        Number(match[6] || 0);
-
-
-    const utcGuess =
-        Date.UTC(
-            year,
-            month - 1,
-            day,
-            hour,
-            minute,
-            second
-        );
-
-
-    const formatter =
-        new Intl.DateTimeFormat(
-            "en-US",
-            {
-                timeZone:
-                    DASHBOARD_TIME_ZONE,
-
-                year: "numeric",
-
-                month: "2-digit",
-
-                day: "2-digit",
-
-                hour: "2-digit",
-
-                minute: "2-digit",
-
-                second: "2-digit",
-
-                hourCycle: "h23"
-            }
-        );
-
-
-    const parts =
-        formatter.formatToParts(
-            new Date(utcGuess)
-        );
-
-
-    const values = {};
-
-
-    parts.forEach(
-        part => {
-
-            if (
-                part.type !== "literal"
-            ) {
-
-                values[part.type] =
-                    Number(part.value);
-
-            }
-
-        }
-    );
-
-
-    const pacificAsUTC =
-        Date.UTC(
-            values.year,
-            values.month - 1,
-            values.day,
-            values.hour,
-            values.minute,
-            values.second
-        );
-
-
-    const offset =
-        pacificAsUTC - utcGuess;
-
-
-    return new Date(
-        utcGuess - offset
-    );
-
-}
-
-
-/* ======================================================
    GET CURRENT SCHEDULED VALUE
    ====================================================== */
 
-function getCurrentScheduledValue(schedule) {
+function getScheduledValue(schedule, fallback) {
 
-    if (
-        !Array.isArray(schedule) ||
-        schedule.length === 0
-    ) {
+    const now = new Date();
 
-        return null;
+    let currentValue = fallback;
 
-    }
+    schedule.forEach(item => {
 
+        const effectiveDate = new Date(item.effective);
 
-    const now =
-        new Date();
-
-
-    let currentValue =
-        null;
-
-
-    let latestEffective =
-        null;
-
-
-    schedule.forEach(
-        entry => {
-
-            const effective =
-                parsePacificDateTime(
-                    entry.effective
-                );
-
-
-            if (
-                Number.isNaN(
-                    effective.getTime()
-                )
-            ) {
-
-                return;
-
-            }
-
-
-            if (
-                effective <= now
-            ) {
-
-                if (
-                    latestEffective === null ||
-                    effective > latestEffective
-                ) {
-
-                    latestEffective =
-                        effective;
-
-                    currentValue =
-                        entry.level;
-
-                }
-
-            }
-
+        if (now >= effectiveDate) {
+            currentValue = item.level;
         }
-    );
 
+    });
 
     return currentValue;
-
 }
 
 
 /* ======================================================
-   STATUS COLOR
+   GET STATUS CSS CLASS
    ====================================================== */
 
-function getStatusClass(status) {
+function getStatusClass(level) {
 
-    if (!status) {
+    const normalized = level.toUpperCase();
 
-        return "";
-
+    if (normalized === "LOW") {
+        return "status-low";
     }
 
-
-    switch (
-        status
-            .toUpperCase()
-            .trim()
-    ) {
-
-        case "LOW":
-
-            return "status-low";
-
-
-        case "MODERATE":
-
-            return "status-moderate";
-
-
-        case "HIGH":
-
-            return "status-high";
-
-
-        case "EXTREME":
-
-            return "status-extreme";
-
-
-        default:
-
-            return "";
-
+    if (normalized === "MODERATE") {
+        return "status-moderate";
     }
 
-}
-
-
-/* ======================================================
-   UPDATE STATUS PILL
-   ====================================================== */
-
-function updateStatusPill(
-    element,
-    status
-) {
-
-    if (
-        !element ||
-        !status
-    ) {
-
-        return;
-
+    if (normalized === "HIGH") {
+        return "status-high";
     }
 
-
-    element.textContent =
-        status;
-
-
-    const pill =
-        element.closest(
-            ".status-pill"
-        );
-
-
-    if (!pill) {
-
-        return;
-
+    if (normalized === "EXTREME") {
+        return "status-extreme";
     }
 
-
-    pill.classList.remove(
-
-        "status-low",
-
-        "status-moderate",
-
-        "status-high",
-
-        "status-extreme"
-
-    );
-
-
-    const statusClass =
-        getStatusClass(status);
-
-
-    if (statusClass) {
-
-        pill.classList.add(
-            statusClass
-        );
-
-    }
-
+    return "status-high";
 }
 
 
@@ -514,210 +132,78 @@ function updateStatusPill(
 
 function updateFireSeason() {
 
-    const status =
-        document.getElementById(
-            "season-status"
-        );
+    const seasonStatus =
+        document.getElementById("season-status");
+
+    const seasonDay =
+        document.getElementById("season-day");
+
+    const seasonStartDate =
+        document.getElementById("season-start-date");
 
 
-    const day =
-        document.getElementById(
-            "season-day"
-        );
+    if (!seasonStatus || !seasonDay || !seasonStartDate) {
+        return;
+    }
 
 
-    const startDisplay =
-        document.getElementById(
-            "season-start-date"
-        );
+    seasonStatus.textContent =
+        dashboardData.fireSeason.active
+            ? "ACTIVE"
+            : "INACTIVE";
 
 
-    if (
-        !status ||
-        !day ||
-        !startDisplay
-    ) {
+    seasonStatus.classList.remove(
+        "active",
+        "inactive"
+    );
+
+
+    seasonStatus.classList.add(
+        dashboardData.fireSeason.active
+            ? "active"
+            : "inactive"
+    );
+
+
+    seasonStartDate.textContent =
+        dashboardData.fireSeason.startDate;
+
+
+    if (!dashboardData.fireSeason.active) {
+
+        seasonDay.textContent = "—";
 
         return;
-
     }
 
 
-    const startDateOnly =
-        dashboardData
-            .fireSeason
-            .startDateTime
-            .split("T")[0];
-
-
-    const startParts =
-        startDateOnly.split("-");
-
-
-    const startYear =
-        Number(startParts[0]);
-
-
-    const startMonth =
-        Number(startParts[1]);
-
-
-    const startDay =
-        Number(startParts[2]);
-
-
-    const today =
-        getPacificDateParts();
-
-
-    const startCalendar =
-        Date.UTC(
-            startYear,
-            startMonth - 1,
-            startDay
-        );
-
-
-    const todayCalendar =
-        Date.UTC(
-            today.year,
-            today.month - 1,
-            today.day
-        );
-
-
-    const now =
-        new Date();
-
-
-    const seasonStart =
-        parsePacificDateTime(
-            dashboardData
-                .fireSeason
-                .startDateTime
-        );
-
-
-    let seasonEnd =
-        null;
-
-
-    if (
-        dashboardData
-            .fireSeason
-            .endDateTime
-    ) {
-
-        seasonEnd =
-            parsePacificDateTime(
-                dashboardData
-                    .fireSeason
-                    .endDateTime
-            );
-
-    }
-
-
-    const active =
-        now >= seasonStart &&
-        (
-            seasonEnd === null ||
-            now < seasonEnd
-        );
-
-
-    /* ==================================================
-       Status
-       ================================================== */
-
-    if (active) {
-
-        status.textContent =
-            "ACTIVE";
-
-        status.classList.remove(
-            "inactive"
-        );
-
-        status.classList.add(
-            "active"
-        );
-
-    } else {
-
-        status.textContent =
-            "INACTIVE";
-
-        status.classList.remove(
-            "active"
-        );
-
-        status.classList.add(
-            "inactive"
-        );
-
-    }
-
-
-    /* ==================================================
-       Start Date
-       ================================================== */
-
-    startDisplay.textContent =
+    const startDate =
         new Date(
-            Date.UTC(
-                startYear,
-                startMonth - 1,
-                startDay
-            )
-        ).toLocaleDateString(
-            "en-US",
-            {
-                month: "long",
-
-                day: "numeric",
-
-                year: "numeric",
-
-                timeZone: "UTC"
-            }
+            dashboardData.fireSeason.startDate
         );
 
 
-    /* ==================================================
-       Current Fire Season Day
-       ================================================== */
+    const today = new Date();
 
-    if (!active) {
 
-        day.textContent =
-            "—";
-
-        return;
-
-    }
+    startDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
 
 
     const millisecondsPerDay =
-        86400000;
+        1000 * 60 * 60 * 24;
 
 
-    const difference =
-        todayCalendar -
-        startCalendar;
-
-
-    const seasonDay =
+    const dayCount =
         Math.floor(
-            difference /
+            (today - startDate) /
             millisecondsPerDay
         ) + 1;
 
 
-    day.textContent =
-        seasonDay >= 1
-            ? seasonDay
-            : "—";
+    seasonDay.textContent =
+        Math.max(dayCount, 1);
 
 }
 
@@ -727,44 +213,78 @@ function updateFireSeason() {
    SYNCHRONIZED
    ====================================================== */
 
-function updateFireDangerAndRestrictions() {
-
-    const currentLevel =
-        getCurrentScheduledValue(
-            dashboardData
-                .fireDangerAndRestrictions
-        );
-
-
-    if (!currentLevel) {
-
-        return;
-
-    }
-
+function updateFireRestrictions() {
 
     const fireDanger =
-        document.getElementById(
-            "fire-danger"
-        );
+        document.getElementById("fire-danger");
 
-
-    const restrictions =
+    const publicUseRestrictions =
         document.getElementById(
             "public-use-restrictions"
         );
 
 
-    updateStatusPill(
-        fireDanger,
-        currentLevel
-    );
+    if (!fireDanger || !publicUseRestrictions) {
+        return;
+    }
 
 
-    updateStatusPill(
-        restrictions,
-        currentLevel
-    );
+    const level =
+        getScheduledValue(
+            dashboardData.fireRestrictionsSchedule,
+            "LOW"
+        );
+
+
+    fireDanger.textContent = level;
+
+    publicUseRestrictions.textContent = level;
+
+
+    const statusClass =
+        getStatusClass(level);
+
+
+    const fireDangerPill =
+        fireDanger.closest(".status-pill");
+
+
+    const publicUsePill =
+        publicUseRestrictions.closest(
+            ".status-pill"
+        );
+
+
+    if (fireDangerPill) {
+
+        fireDangerPill.classList.remove(
+            "status-low",
+            "status-moderate",
+            "status-high",
+            "status-extreme"
+        );
+
+        fireDangerPill.classList.add(
+            statusClass
+        );
+
+    }
+
+
+    if (publicUsePill) {
+
+        publicUsePill.classList.remove(
+            "status-low",
+            "status-moderate",
+            "status-high",
+            "status-extreme"
+        );
+
+        publicUsePill.classList.add(
+            statusClass
+        );
+
+    }
 
 }
 
@@ -775,93 +295,23 @@ function updateFireDangerAndRestrictions() {
 
 function updateIFPL() {
 
-    const currentIFPL =
-        getCurrentScheduledValue(
-            dashboardData.ifpl
-        );
+    const ifplLevel =
+        document.getElementById("ifpl-level");
 
 
-    const element =
-        document.getElementById(
-            "ifpl-level"
-        );
-
-
-    if (
-        !currentIFPL ||
-        !element
-    ) {
-
+    if (!ifplLevel) {
         return;
-
     }
 
 
-    element.textContent =
-        currentIFPL;
-
-
-    const pill =
-        element.closest(
-            ".status-pill"
+    const level =
+        getScheduledValue(
+            dashboardData.ifplSchedule,
+            "LEVEL 1"
         );
 
 
-    if (!pill) {
-
-        return;
-
-    }
-
-
-    pill.classList.remove(
-
-        "status-low",
-
-        "status-moderate",
-
-        "status-high",
-
-        "status-extreme"
-
-    );
-
-
-    const ifplColors = {
-
-        "LEVEL 1":
-            "status-low",
-
-        "LEVEL 2":
-            "status-moderate",
-
-        "LEVEL 3":
-            "status-high",
-
-        "LEVEL 4":
-            "status-extreme",
-
-        "LEVEL 5":
-            "status-extreme"
-
-    };
-
-
-    const colorClass =
-        ifplColors[
-            currentIFPL
-                .toUpperCase()
-                .trim()
-        ];
-
-
-    if (colorClass) {
-
-        pill.classList.add(
-            colorClass
-        );
-
-    }
+    ifplLevel.textContent = level;
 
 }
 
@@ -872,34 +322,30 @@ function updateIFPL() {
 
 function updateLastUpdated() {
 
-    const date =
+    const lastUpdatedDate =
         document.getElementById(
             "last-updated-date"
         );
 
 
-    const time =
+    const lastUpdatedTime =
         document.getElementById(
             "last-updated-time"
         );
 
 
-    if (date) {
+    if (lastUpdatedDate) {
 
-        date.textContent =
-            dashboardData
-                .lastUpdated
-                .date;
+        lastUpdatedDate.textContent =
+            dashboardData.lastUpdated.date;
 
     }
 
 
-    if (time) {
+    if (lastUpdatedTime) {
 
-        time.textContent =
-            dashboardData
-                .lastUpdated
-                .time;
+        lastUpdatedTime.textContent =
+            dashboardData.lastUpdated.time;
 
     }
 
@@ -907,18 +353,76 @@ function updateLastUpdated() {
 
 
 /* ======================================================
-   UPDATE ENTIRE DASHBOARD
+   WIX AUTO HEIGHT
    ====================================================== */
 
-function updateDashboard() {
+function sendHeightToWix() {
 
-    updateFireSeason();
+    const height =
+        document.documentElement.scrollHeight;
 
-    updateFireDangerAndRestrictions();
 
-    updateIFPL();
+    window.parent.postMessage(
+        {
+            type: "DFPA_DASHBOARD_HEIGHT",
+            height: height
+        },
+        "*"
+    );
 
-    updateLastUpdated();
+}
+
+
+/* ======================================================
+   SEND HEIGHT AFTER PAGE LOAD
+   ====================================================== */
+
+function initializeHeightMessaging() {
+
+    sendHeightToWix();
+
+
+    /*
+     * Recheck after the browser finishes
+     * rendering fonts, images and layout.
+     */
+
+    setTimeout(
+        sendHeightToWix,
+        100
+    );
+
+
+    setTimeout(
+        sendHeightToWix,
+        500
+    );
+
+
+    setTimeout(
+        sendHeightToWix,
+        1000
+    );
+
+
+    /*
+     * Watch for any changes to the
+     * dashboard's size.
+     */
+
+    if (typeof ResizeObserver !== "undefined") {
+
+        const observer =
+            new ResizeObserver(
+                sendHeightToWix
+            );
+
+
+        observer.observe(
+            document.documentElement
+        );
+
+    }
 
 }
 
@@ -929,20 +433,31 @@ function updateDashboard() {
 
 document.addEventListener(
     "DOMContentLoaded",
-    function () {
+    () => {
 
-        updateDashboard();
+        updateFireSeason();
+
+        updateFireRestrictions();
+
+        updateIFPL();
+
+        updateLastUpdated();
+
+        initializeHeightMessaging();
+
+    }
+);
 
 
-        /*
-           Check every 30 seconds for scheduled
-           changes.
-        */
+/* ======================================================
+   WINDOW LOAD
+   ====================================================== */
 
-        setInterval(
-            updateDashboard,
-            REFRESH_INTERVAL
-        );
+window.addEventListener(
+    "load",
+    () => {
+
+        sendHeightToWix();
 
     }
 );
