@@ -1,1 +1,421 @@
-<html><body><h1>Admin page coming soon</h1></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>DFPA Fire Status Administration</title>
+
+    <style>
+        :root {
+            --dfpa-blue: #33439A;
+            --dfpa-dark-blue: #243477;
+            --background: #f4f6f8;
+            --card: #ffffff;
+            --text: #111111;
+            --muted: #687386;
+            --border: #d8dde5;
+            --success: #2e7d32;
+            --danger: #c62828;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--background);
+            color: var(--text);
+        }
+
+        header {
+            background: var(--dfpa-blue);
+            color: white;
+            padding: 28px 30px;
+        }
+
+        header .header-inner {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 30px;
+        }
+
+        header p {
+            margin: 6px 0 0;
+            font-size: 16px;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 30px auto 60px;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 3px 12px rgba(0,0,0,.08);
+        }
+
+        .card h2 {
+            margin: 0 0 22px;
+            font-size: 22px;
+        }
+
+        .current-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .condition {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 22px;
+        }
+
+        .condition-label {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            margin-bottom: 10px;
+        }
+
+        .condition-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            font: inherit;
+            background: white;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        button {
+            border: 0;
+            border-radius: 7px;
+            padding: 12px 20px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .primary {
+            background: var(--dfpa-blue);
+            color: white;
+        }
+
+        .primary:hover {
+            background: var(--dfpa-dark-blue);
+        }
+
+        .secondary {
+            background: #e9edf3;
+            color: #222;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 13px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            color: var(--muted);
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .scheduled {
+            background: #e8f5e9;
+            color: var(--success);
+        }
+
+        .message {
+            display: none;
+            margin-bottom: 20px;
+            padding: 14px;
+            border-radius: 7px;
+            font-weight: bold;
+        }
+
+        .message.success {
+            display: block;
+            background: #e8f5e9;
+            color: var(--success);
+        }
+
+        .message.error {
+            display: block;
+            background: #ffebee;
+            color: var(--danger);
+        }
+
+        @media (max-width: 700px) {
+            header {
+                padding: 22px 20px;
+            }
+
+            header h1 {
+                font-size: 24px;
+            }
+
+            main {
+                margin-top: 20px;
+                padding: 0 14px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .current-grid,
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: auto;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="header-inner">
+        <h1>DFPA Fire Status Administration</h1>
+        <p>Manage scheduled fire restrictions and IFPL changes.</p>
+    </div>
+</header>
+
+<main>
+
+    <div id="message" class="message"></div>
+
+    <!-- CURRENT CONDITIONS -->
+    <section class="card">
+        <h2>Current Conditions</h2>
+
+        <div class="current-grid">
+
+            <div class="condition">
+                <div class="condition-label">
+                    Fire Danger & Public Use Restrictions
+                </div>
+
+                <div id="currentFireLevel" class="condition-value">
+                    Loading...
+                </div>
+            </div>
+
+            <div class="condition">
+                <div class="condition-label">
+                    Industrial Fire Precaution Level
+                </div>
+
+                <div id="currentIfpl" class="condition-value">
+                    Loading...
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- SCHEDULE CHANGE -->
+    <section class="card">
+
+        <h2>Schedule a Change</h2>
+
+        <form id="scheduleForm">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="changeType">
+                        Change Type
+                    </label>
+
+                    <select id="changeType" required>
+                        <option value="fire">
+                            Fire Danger & Public Use Restrictions
+                        </option>
+
+                        <option value="ifpl">
+                            Industrial Fire Precaution Level
+                        </option>
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="newLevel">
+                        New Level
+                    </label>
+
+                    <select id="newLevel" required></select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="effectiveDate">
+                        Effective Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="effectiveDate"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="effectiveTime">
+                        Effective Time
+                    </label>
+
+                    <input
+                        type="time"
+                        id="effectiveTime"
+                        value="00:01"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group full">
+                    <label for="notes">
+                        Notes
+                    </label>
+
+                    <textarea
+                        id="notes"
+                        placeholder="Optional administrative note about this change."
+                    ></textarea>
+                </div>
+
+            </div>
+
+
+            <div class="button-row">
+
+                <button
+                    type="submit"
+                    class="primary"
+                >
+                    Schedule Change
+                </button>
+
+                <button
+                    type="reset"
+                    class="secondary"
+                >
+                    Clear
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+
+    <!-- UPCOMING CHANGES -->
+    <section class="card">
+
+        <h2>Upcoming Changes</h2>
+
+        <div id="upcomingContainer">
+            Loading...
+        </div>
+
+    </section>
+
+
+    <!-- CHANGE HISTORY -->
+    <section class="card">
+
+        <h2>Change History</h2>
+
+        <div id="historyContainer">
+            Loading...
+        </div>
+
+    </section>
+
+</main>
+
+
+<script src="admin.js"></script>
+
+</body>
+</html>
