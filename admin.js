@@ -340,6 +340,21 @@ scheduleForm.addEventListener("submit", async event => {
         return;
     }
 
+    const confirmed = window.confirm(
+    `Schedule this change?\n\n` +
+    `Type: ${
+        changeType === "fire"
+            ? "Fire Danger & Public Use Restrictions"
+            : "Industrial Fire Precaution Level"
+    }\n` +
+    `Level: ${level}\n` +
+    `Effective: ${formatDate(effectiveAt)}`
+);
+
+if (!confirmed) {
+    return;
+}
+
     const submitButton =
         scheduleForm.querySelector(
             'button[type="submit"]'
