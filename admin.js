@@ -122,19 +122,20 @@ async function loadAdminData() {
 
 function renderCurrentConditions(data) {
 
-    /*
-     * The API provides the current values directly.
-     */
+    const fireRestriction =
+        data.current?.fire_restrictions;
 
-    if (data.current) {
+    const ifpl =
+        data.current?.ifpl;
 
-        currentFireLevelEl.textContent =
-            data.current.fire_level ||
-            "Not set";
+    currentFireLevelEl.textContent =
+        fireRestriction?.level ||
+        "Not set";
 
-        currentIfplEl.textContent =
-            data.current.ifpl_level ||
-            "Not set";
+    currentIfplEl.textContent =
+        ifpl?.level ||
+        "Not set";
+}
 
     } else {
 
