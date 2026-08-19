@@ -153,21 +153,40 @@ function renderCurrentConditions(data) {
 
 function renderUpcomingChanges(data) {
 
-    const upcoming =
-        Array.isArray(data.upcoming)
-            ? data.upcoming
+    const fireChanges =
+        Array.isArray(data.upcoming?.fire_restrictions)
+            ? data.upcoming.fire_restrictions.map(record => ({
+                ...record,
+                changeType:
+                    "Fire Danger & Public Use Restrictions"
+            }))
             : [];
 
-    if (upcoming.length === 0) {
+    const ifplChanges =
+        Array.isArray(data.upcoming?.ifpl)
+            ? data.upcoming.ifpl.map(record => ({
+                ...record,
+                changeType:
+                    "Industrial Fire Precaution Level"
+            }))
+            : [];
 
+    const upcoming = [
+        ...fireChanges,
+        ...ifplChanges
+    ].sort(
+        (a, b) =>
+            new Date(a.effective_at) -
+            new Date(b.effective_at)
+    );
+
+    if (upcoming.length === 0) {
         upcomingContainer.innerHTML =
             "<p>No upcoming changes scheduled.</p>";
-
         return;
     }
 
-    const table =
-        document.createElement("table");
+    const table = document.createElement("table");
 
     table.innerHTML = `
         <thead>
@@ -178,45 +197,32 @@ function renderUpcomingChanges(data) {
                 <th>Created By</th>
             </tr>
         </thead>
-
         <tbody></tbody>
     `;
 
-    const tbody =
-        table.querySelector("tbody");
+    const tbody = table.querySelector("tbody");
 
     upcoming.forEach(record => {
 
-        const row =
-            document.createElement("tr");
+        const row = document.createElement("tr");
 
         row.innerHTML = `
             <td>
-                ${escapeHtml(
-                    record.section ||
-                    record.type ||
-                    "Change"
-                )}
+                ${escapeHtml(record.changeType)}
             </td>
 
             <td>
                 <span class="status scheduled">
-                    ${escapeHtml(
-                        record.level || ""
-                    )}
+                    ${escapeHtml(record.level)}
                 </span>
             </td>
 
             <td>
-                ${formatDate(
-                    record.effective_at
-                )}
+                ${formatDate(record.effective_at)}
             </td>
 
             <td>
-                ${escapeHtml(
-                    record.created_by || ""
-                )}
+                ${escapeHtml(record.created_by)}
             </td>
         `;
 
@@ -224,7 +230,6 @@ function renderUpcomingChanges(data) {
     });
 
     upcomingContainer.innerHTML = "";
-
     upcomingContainer.appendChild(table);
 }
 
@@ -235,98 +240,79 @@ function renderUpcomingChanges(data) {
 
 function renderHistory(data) {
 
-    const history =
-        Array.isArray(data.history)
-            ? data.history
+    const fireHistory =
+        Array.isArray(data.history?.fire_restrictions)
+            ? data.history.fire_restrictions.map(record => ({
+                ...record,
+                changeType:
+                    "Fire Danger & Public Use Restrictions"
+            }))
             : [];
 
-    if (history.length === 0) {
+    const ifplHistory =
+        Array.isArray(data.history?.ifpl)
+            ? data.history.ifpl.map(record => ({
+                ...record,
+                changeType:
+                    "Industrial Fire Precaution Level"
+            }))
+            : [];
 
+    const history = [
+        ...fireHistory,
+        ...ifplHistory
+    ].sort(
+        (a, b) =>
+            new Date(b.effective_at) -
+            new Date(a.effective_at)
+    );
+
+    if (history.length === 0) {
         historyContainer.innerHTML =
             "<p>No change history available.</p>";
-
         return;
     }
 
-    const table =
-        document.createElement("table");
+    const table = document.createElement("table");
 
     table.innerHTML = `
         <thead>
             <tr>
-                <th>Action</th>
-                <th>Section</th>
-                <th>Details</th>
-                <th>Performed By</th>
-                <th>Performed At</th>
+                <th>Change</th>
+                <th>Level</th>
+                <th>Effective</th>
+                <th>Created By</th>
+                <th>Created</th>
             </tr>
         </thead>
-
         <tbody></tbody>
     `;
 
-    const tbody =
-        table.querySelector("tbody");
+    const tbody = table.querySelector("tbody");
 
     history.forEach(record => {
 
-        const row =
-            document.createElement("tr");
-
-        let details = "";
-
-        if (record.details) {
-
-            try {
-
-                const parsed =
-                    typeof record.details === "string"
-                        ? JSON.parse(record.details)
-                        : record.details;
-
-                details =
-                    `${parsed.level || ""}` +
-                    `${parsed.effective_at
-                        ? " — " +
-                          formatDate(parsed.effective_at)
-                        : ""}`;
-
-            } catch {
-
-                details =
-                    record.details;
-            }
-        }
+        const row = document.createElement("tr");
 
         row.innerHTML = `
             <td>
-                ${escapeHtml(
-                    record.action || ""
-                )}
+                ${escapeHtml(record.changeType)}
             </td>
 
             <td>
-                ${escapeHtml(
-                    record.section || ""
-                )}
+                ${escapeHtml(record.level)}
             </td>
 
             <td>
-                ${escapeHtml(
-                    details
-                )}
+                ${formatDate(record.effective_at)}
             </td>
 
             <td>
-                ${escapeHtml(
-                    record.performed_by || ""
-                )}
+                ${escapeHtml(record.created_by)}
             </td>
 
             <td>
-                ${formatDate(
-                    record.performed_at
-                )}
+                ${escapeHtml(record.created_at)}
             </td>
         `;
 
@@ -334,7 +320,6 @@ function renderHistory(data) {
     });
 
     historyContainer.innerHTML = "";
-
     historyContainer.appendChild(table);
 }
 
