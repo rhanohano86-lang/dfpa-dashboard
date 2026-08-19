@@ -381,19 +381,7 @@ scheduleForm.addEventListener(
             return;
         }
 
-        if (
-            effectiveDate <= new Date()
-        ) {
-
-            showMessage(
-                "The effective date and time must be in the future.",
-                "error"
-            );
-
-            return;
-        }
-
-
+       
         /* Confirmation */
 
         const confirmed =
