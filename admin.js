@@ -36,7 +36,7 @@ const historyContainer =
 
 
 /* --------------------------------------------------
-   MESSAGE
+   MESSAGES
 -------------------------------------------------- */
 
 function showMessage(text, type = "success") {
@@ -51,7 +51,7 @@ function clearMessage() {
 
 
 /* --------------------------------------------------
-   LEVEL DROPDOWN
+   LEVEL OPTIONS
 -------------------------------------------------- */
 
 function updateLevelOptions() {
@@ -64,15 +64,17 @@ function updateLevelOptions() {
 
     levels.forEach(level => {
         const option = document.createElement("option");
+
         option.value = level;
         option.textContent = level;
+
         newLevelEl.appendChild(option);
     });
 }
 
 
 /* --------------------------------------------------
-   LOAD DATA
+   LOAD ADMIN DATA
 -------------------------------------------------- */
 
 async function loadAdminData() {
@@ -80,7 +82,8 @@ async function loadAdminData() {
         const response = await fetch(
             `${API_BASE}/admin-data`,
             {
-                credentials: "same-origin"
+                credentials: "same-origin",
+                cache: "no-store"
             }
         );
 
@@ -88,16 +91,22 @@ async function loadAdminData() {
 
         if (!response.ok || !data.success) {
             throw new Error(
-                data.error || "Unable to load dashboard data."
+                data.error ||
+                "Unable to load administrative data."
             );
         }
+
+        console.log("Admin data loaded:", data);
 
         renderCurrentConditions(data);
         renderUpcomingChanges(data);
         renderHistory(data);
 
     } catch (error) {
-        console.error(error);
+        console.error(
+            "Admin data loading error:",
+            error
+        );
 
         showMessage(
             "Unable to load administrative data.",
@@ -112,45 +121,29 @@ async function loadAdminData() {
 -------------------------------------------------- */
 
 function renderCurrentConditions(data) {
-    const now = new Date();
 
-    const fireChanges =
-        data.fire_restrictions || [];
+    /*
+     * The API provides the current values directly.
+     */
 
-    const ifplChanges =
-        data.ifpl_schedule || [];
+    if (data.current) {
 
-    const currentFire =
-        fireChanges
-            .filter(record =>
-                new Date(record.effective_at) <= now
-            )
-            .sort(
-                (a, b) =>
-                    new Date(b.effective_at) -
-                    new Date(a.effective_at)
-            )[0];
+        currentFireLevelEl.textContent =
+            data.current.fire_level ||
+            "Not set";
 
-    const currentIfpl =
-        ifplChanges
-            .filter(record =>
-                new Date(record.effective_at) <= now
-            )
-            .sort(
-                (a, b) =>
-                    new Date(b.effective_at) -
-                    new Date(a.effective_at)
-            )[0];
+        currentIfplEl.textContent =
+            data.current.ifpl_level ||
+            "Not set";
 
-    currentFireLevelEl.textContent =
-        currentFire
-            ? currentFire.level
-            : "Not set";
+    } else {
 
-    currentIfplEl.textContent =
-        currentIfpl
-            ? currentIfpl.level
-            : "Not set";
+        currentFireLevelEl.textContent =
+            "Not set";
+
+        currentIfplEl.textContent =
+            "Not set";
+    }
 }
 
 
@@ -159,44 +152,22 @@ function renderCurrentConditions(data) {
 -------------------------------------------------- */
 
 function renderUpcomingChanges(data) {
-    const now = new Date();
 
-    const fireChanges =
-        (data.fire_restrictions || [])
-            .filter(record =>
-                new Date(record.effective_at) > now
-            )
-            .map(record => ({
-                ...record,
-                type: "Fire Danger & Public Use Restrictions"
-            }));
-
-    const ifplChanges =
-        (data.ifpl_schedule || [])
-            .filter(record =>
-                new Date(record.effective_at) > now
-            )
-            .map(record => ({
-                ...record,
-                type: "Industrial Fire Precaution Level"
-            }));
-
-    const upcoming = [
-        ...fireChanges,
-        ...ifplChanges
-    ].sort(
-        (a, b) =>
-            new Date(a.effective_at) -
-            new Date(b.effective_at)
-    );
+    const upcoming =
+        Array.isArray(data.upcoming)
+            ? data.upcoming
+            : [];
 
     if (upcoming.length === 0) {
+
         upcomingContainer.innerHTML =
             "<p>No upcoming changes scheduled.</p>";
+
         return;
     }
 
-    const table = document.createElement("table");
+    const table =
+        document.createElement("table");
 
     table.innerHTML = `
         <thead>
@@ -207,90 +178,163 @@ function renderUpcomingChanges(data) {
                 <th>Created By</th>
             </tr>
         </thead>
+
         <tbody></tbody>
     `;
 
-    const tbody = table.querySelector("tbody");
+    const tbody =
+        table.querySelector("tbody");
 
     upcoming.forEach(record => {
-        const row = document.createElement("tr");
+
+        const row =
+            document.createElement("tr");
 
         row.innerHTML = `
-            <td>${escapeHtml(record.type)}</td>
+            <td>
+                ${escapeHtml(
+                    record.section ||
+                    record.type ||
+                    "Change"
+                )}
+            </td>
+
             <td>
                 <span class="status scheduled">
-                    ${escapeHtml(record.level)}
+                    ${escapeHtml(
+                        record.level || ""
+                    )}
                 </span>
             </td>
-            <td>${formatDate(record.effective_at)}</td>
-            <td>${escapeHtml(record.created_by)}</td>
+
+            <td>
+                ${formatDate(
+                    record.effective_at
+                )}
+            </td>
+
+            <td>
+                ${escapeHtml(
+                    record.created_by || ""
+                )}
+            </td>
         `;
 
         tbody.appendChild(row);
     });
 
     upcomingContainer.innerHTML = "";
+
     upcomingContainer.appendChild(table);
 }
 
 
 /* --------------------------------------------------
-   HISTORY
+   CHANGE HISTORY
 -------------------------------------------------- */
 
 function renderHistory(data) {
-    const allChanges = [
-        ...(data.fire_restrictions || []).map(record => ({
-            ...record,
-            type: "Fire Danger & Public Use Restrictions"
-        })),
 
-        ...(data.ifpl_schedule || []).map(record => ({
-            ...record,
-            type: "Industrial Fire Precaution Level"
-        }))
-    ].sort(
-        (a, b) =>
-            new Date(b.effective_at) -
-            new Date(a.effective_at)
-    );
+    const history =
+        Array.isArray(data.history)
+            ? data.history
+            : [];
 
-    if (allChanges.length === 0) {
+    if (history.length === 0) {
+
         historyContainer.innerHTML =
             "<p>No change history available.</p>";
+
         return;
     }
 
-    const table = document.createElement("table");
+    const table =
+        document.createElement("table");
 
     table.innerHTML = `
         <thead>
             <tr>
-                <th>Change</th>
-                <th>Level</th>
-                <th>Effective</th>
-                <th>Created By</th>
+                <th>Action</th>
+                <th>Section</th>
+                <th>Details</th>
+                <th>Performed By</th>
+                <th>Performed At</th>
             </tr>
         </thead>
+
         <tbody></tbody>
     `;
 
-    const tbody = table.querySelector("tbody");
+    const tbody =
+        table.querySelector("tbody");
 
-    allChanges.forEach(record => {
-        const row = document.createElement("tr");
+    history.forEach(record => {
+
+        const row =
+            document.createElement("tr");
+
+        let details = "";
+
+        if (record.details) {
+
+            try {
+
+                const parsed =
+                    typeof record.details === "string"
+                        ? JSON.parse(record.details)
+                        : record.details;
+
+                details =
+                    `${parsed.level || ""}` +
+                    `${parsed.effective_at
+                        ? " — " +
+                          formatDate(parsed.effective_at)
+                        : ""}`;
+
+            } catch {
+
+                details =
+                    record.details;
+            }
+        }
 
         row.innerHTML = `
-            <td>${escapeHtml(record.type)}</td>
-            <td>${escapeHtml(record.level)}</td>
-            <td>${formatDate(record.effective_at)}</td>
-            <td>${escapeHtml(record.created_by)}</td>
+            <td>
+                ${escapeHtml(
+                    record.action || ""
+                )}
+            </td>
+
+            <td>
+                ${escapeHtml(
+                    record.section || ""
+                )}
+            </td>
+
+            <td>
+                ${escapeHtml(
+                    details
+                )}
+            </td>
+
+            <td>
+                ${escapeHtml(
+                    record.performed_by || ""
+                )}
+            </td>
+
+            <td>
+                ${formatDate(
+                    record.performed_at
+                )}
+            </td>
         `;
 
         tbody.appendChild(row);
     });
 
     historyContainer.innerHTML = "";
+
     historyContainer.appendChild(table);
 }
 
@@ -299,124 +343,192 @@ function renderHistory(data) {
    SCHEDULE CHANGE
 -------------------------------------------------- */
 
-scheduleForm.addEventListener("submit", async event => {
-    event.preventDefault();
+scheduleForm.addEventListener(
+    "submit",
+    async event => {
 
-    clearMessage();
+        event.preventDefault();
 
-    const changeType = changeTypeEl.value;
-    const level = newLevelEl.value;
-    const date = effectiveDateEl.value;
-    const time = effectiveTimeEl.value;
-    const notes = notesEl.value.trim();
+        clearMessage();
 
-    if (!date || !time) {
-        showMessage(
-            "Please enter an effective date and time.",
-            "error"
-        );
-        return;
-    }
+        const changeType =
+            changeTypeEl.value;
 
-    const effectiveAt =
-        `${date}T${time}`;
+        const level =
+            newLevelEl.value;
 
-    const effectiveDate =
-        new Date(effectiveAt);
+        const date =
+            effectiveDateEl.value;
 
-    if (Number.isNaN(effectiveDate.getTime())) {
-        showMessage(
-            "Please enter a valid effective date and time.",
-            "error"
-        );
-        return;
-    }
+        const time =
+            effectiveTimeEl.value;
 
-    if (effectiveDate <= new Date()) {
-        showMessage(
-            "The effective date and time must be in the future.",
-            "error"
-        );
-        return;
-    }
+        const notes =
+            notesEl.value.trim();
 
-    const confirmed = window.confirm(
-    `Schedule this change?\n\n` +
-    `Type: ${
-        changeType === "fire"
-            ? "Fire Danger & Public Use Restrictions"
-            : "Industrial Fire Precaution Level"
-    }\n` +
-    `Level: ${level}\n` +
-    `Effective: ${formatDate(effectiveAt)}`
-);
+        if (!date || !time) {
 
-if (!confirmed) {
-    return;
-}
-
-    const submitButton =
-        scheduleForm.querySelector(
-            'button[type="submit"]'
-        );
-
-    submitButton.disabled = true;
-    submitButton.textContent = "Scheduling...";
-
-    try {
-        const response = await fetch(
-            `${API_BASE}/admin-write`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                credentials: "same-origin",
-                body: JSON.stringify({
-                    changeType,
-                    level,
-                    effectiveAt,
-                    notes
-                })
-            }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-            throw new Error(
-                data.error ||
-                "Unable to schedule the change."
+            showMessage(
+                "Please enter an effective date and time.",
+                "error"
             );
+
+            return;
         }
 
-        showMessage(
-            "Change scheduled successfully.",
-            "success"
-        );
+        const effectiveAt =
+            `${date}T${time}`;
 
-        scheduleForm.reset();
+        const effectiveDate =
+            new Date(effectiveAt);
 
-        effectiveTimeEl.value = "00:01";
+        if (
+            Number.isNaN(
+                effectiveDate.getTime()
+            )
+        ) {
 
-        updateLevelOptions();
+            showMessage(
+                "Please enter a valid effective date and time.",
+                "error"
+            );
 
-        await loadAdminData();
+            return;
+        }
 
-    } catch (error) {
-        console.error(error);
+        if (
+            effectiveDate <= new Date()
+        ) {
 
-        showMessage(
-            error.message ||
-            "Unable to schedule the change.",
-            "error"
-        );
+            showMessage(
+                "The effective date and time must be in the future.",
+                "error"
+            );
 
-    } finally {
-        submitButton.disabled = false;
-        submitButton.textContent = "Schedule Change";
+            return;
+        }
+
+
+        /* Confirmation */
+
+        const confirmed =
+            window.confirm(
+                `Schedule this change?\n\n` +
+
+                `Type: ${
+                    changeType === "fire"
+                        ? "Fire Danger & Public Use Restrictions"
+                        : "Industrial Fire Precaution Level"
+                }\n` +
+
+                `Level: ${level}\n` +
+
+                `Effective: ${
+                    formatDate(effectiveAt)
+                }`
+            );
+
+        if (!confirmed) {
+            return;
+        }
+
+
+        const submitButton =
+            scheduleForm.querySelector(
+                'button[type="submit"]'
+            );
+
+        submitButton.disabled = true;
+
+        submitButton.textContent =
+            "Scheduling...";
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `${API_BASE}/admin-write`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        credentials:
+                            "same-origin",
+
+                        body: JSON.stringify({
+                            changeType,
+                            level,
+                            effectiveAt,
+                            notes
+                        })
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+
+                throw new Error(
+                    data.error ||
+                    "Unable to schedule the change."
+                );
+            }
+
+
+            showMessage(
+                "Change scheduled successfully.",
+                "success"
+            );
+
+
+            scheduleForm.reset();
+
+            effectiveTimeEl.value =
+                "00:01";
+
+            updateLevelOptions();
+
+
+            /*
+             * Reload the data immediately.
+             */
+
+            await loadAdminData();
+
+
+        } catch (error) {
+
+            console.error(
+                "Schedule change error:",
+                error
+            );
+
+            showMessage(
+                error.message ||
+                "Unable to schedule the change.",
+                "error"
+            );
+
+
+        } finally {
+
+            submitButton.disabled =
+                false;
+
+            submitButton.textContent =
+                "Schedule Change";
+        }
     }
-});
+);
 
 
 /* --------------------------------------------------
@@ -424,9 +536,15 @@ if (!confirmed) {
 -------------------------------------------------- */
 
 function formatDate(value) {
-    const date = new Date(value);
 
-    if (Number.isNaN(date.getTime())) {
+    const date =
+        new Date(value);
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
         return "Invalid date";
     }
 
@@ -439,13 +557,18 @@ function formatDate(value) {
     );
 }
 
+
 function escapeHtml(value) {
+
     return String(value)
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 }
 
 
