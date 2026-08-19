@@ -15,64 +15,123 @@ const dashboardData = {
         startDate: "May 30, 2026"
     },
 
-    /*
-     * FIRE DANGER + PUBLIC USE RESTRICTIONS
-     * These are intentionally synchronized.
-     *
-     * Change BOTH together by changing "level".
-     */
+    fireRestrictionsLevel: "LOW",
 
-    fireRestrictionsSchedule: [
-
-        {
-            effective: "2026-08-12T00:01:00",
-            level: "HIGH"
-        }
-
-        /*
-         * Future scheduled changes can be added here.
-         *
-         * Example:
-         *
-         * {
-         *     effective: "2026-08-20T00:01:00",
-         *     level: "EXTREME"
-         * }
-         */
-
-    ],
-
-
-    /*
-     * IFPL operates independently.
-     */
-
-    ifplSchedule: [
-
-        {
-            effective: "2026-07-15T00:01:00",
-            level: "LEVEL 3"
-        }
-
-        /*
-         * Future example:
-         *
-         * {
-         *     effective: "2026-08-20T00:01:00",
-         *     level: "LEVEL 4"
-         * }
-         */
-
-    ],
-
+    ifplLevel: "LEVEL 1",
 
     lastUpdated: {
-        date: "August 12, 2026",
-        time: "2:30 PM"
+        date: "",
+        time: ""
     }
 
 };
 
+/* ======================================================
+   LOAD PUBLIC STATUS FROM D1
+   ====================================================== */
+
+async function loadPublicStatus() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/public-status",
+                {
+                    cache: "no-store"
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+            throw new Error(
+                "Unable to load current fire status."
+            );
+        }
+
+
+        if (data.current?.fire_restrictions) {
+
+            dashboardData.fireRestrictionsLevel =
+                data.current.fire_restrictions.level;
+        }
+
+
+        if (data.current?.ifpl) {
+
+            dashboardData.ifplLevel =
+                data.current.ifpl.level;
+        }
+
+
+        /*
+         * Use the most recent effective timestamp
+         * as the dashboard's data update time.
+         */
+
+        const fireEffective =
+            data.current?.fire_restrictions?.effective_at;
+
+        const ifplEffective =
+            data.current?.ifpl?.effective_at;
+
+
+        const timestamps = [
+            fireEffective,
+            ifplEffective
+        ]
+            .filter(Boolean)
+            .map(
+                timestamp =>
+                    new Date(timestamp)
+            )
+            .sort(
+                (a, b) => b - a
+            );
+
+
+        if (timestamps.length > 0) {
+
+            const latest =
+                timestamps[0];
+
+            dashboardData.lastUpdated.date =
+                latest.toLocaleDateString(
+                    "en-US",
+                    {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric"
+                    }
+                );
+
+            dashboardData.lastUpdated.time =
+                latest.toLocaleTimeString(
+                    "en-US",
+                    {
+                        hour: "numeric",
+                        minute: "2-digit"
+                    }
+                );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "Public status loading error:",
+            error
+        );
+
+    }
+
+}
 
 /* ======================================================
    GET CURRENT SCHEDULED VALUE
@@ -229,11 +288,8 @@ function updateFireRestrictions() {
     }
 
 
-    const level =
-        getScheduledValue(
-            dashboardData.fireRestrictionsSchedule,
-            "LOW"
-        );
+   const level =
+       dashboardData.fireRestrictionsLevel;
 
 
     fireDanger.textContent = level;
@@ -305,10 +361,7 @@ function updateIFPL() {
 
 
     const level =
-        getScheduledValue(
-            dashboardData.ifplSchedule,
-            "LEVEL 1"
-        );
+        dashboardData.ifplLevel;
 
 
     ifplLevel.textContent = level;
@@ -433,7 +486,9 @@ function initializeHeightMessaging() {
 
 document.addEventListener(
     "DOMContentLoaded",
-    () => {
+    async () => {
+
+        await loadPublicStatus();
 
         updateFireSeason();
 
