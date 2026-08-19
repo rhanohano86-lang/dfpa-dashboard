@@ -372,11 +372,83 @@ scheduleForm.addEventListener(
             return;
         }
 
-        const effectiveAt =
-            `${date}T${time}`;
+ const localDateTime =
+    `${date}T${time}`;
 
-        const effectiveDate =
-            new Date(effectiveAt);
+function convertPacificToUTC(localDateTime) {
+
+    const [datePart, timePart] =
+        localDateTime.split("T");
+
+    const [year, month, day] =
+        datePart.split("-").map(Number);
+
+    const [hour, minute] =
+        timePart.split(":").map(Number);
+
+    const targetUTC =
+        Date.UTC(
+            year,
+            month - 1,
+            day,
+            hour,
+            minute
+        );
+
+    const formatter =
+        new Intl.DateTimeFormat(
+            "en-US",
+            {
+                timeZone: "America/Los_Angeles",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                hourCycle: "h23"
+            }
+        );
+
+    const parts =
+        formatter.formatToParts(
+            new Date(targetUTC)
+        );
+
+    const values = {};
+
+    parts.forEach(part => {
+        if (part.type !== "literal") {
+            values[part.type] = Number(part.value);
+        }
+    });
+
+    const displayedAsUTC =
+        Date.UTC(
+            values.year,
+            values.month - 1,
+            values.day,
+            values.hour,
+            values.minute
+        );
+
+    const offset =
+        displayedAsUTC - targetUTC;
+
+    const utcTime =
+        new Date(
+            targetUTC - offset
+        );
+
+    return utcTime.toISOString();
+}
+
+const effectiveAt =
+    convertPacificToUTC(
+        localDateTime
+    );
+
+const effectiveDate =
+    new Date(effectiveAt);
 
         if (
             Number.isNaN(
