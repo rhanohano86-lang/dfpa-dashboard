@@ -137,16 +137,6 @@ function renderCurrentConditions(data) {
         "Not set";
 }
 
-    } else {
-
-        currentFireLevelEl.textContent =
-            "Not set";
-
-        currentIfplEl.textContent =
-            "Not set";
-    }
-}
-
 
 /* --------------------------------------------------
    UPCOMING CHANGES
@@ -155,21 +145,29 @@ function renderCurrentConditions(data) {
 function renderUpcomingChanges(data) {
 
     const fireChanges =
-        Array.isArray(data.upcoming?.fire_restrictions)
-            ? data.upcoming.fire_restrictions.map(record => ({
-                ...record,
-                changeType:
-                    "Fire Danger & Public Use Restrictions"
-            }))
+        Array.isArray(
+            data.upcoming?.fire_restrictions
+        )
+            ? data.upcoming.fire_restrictions.map(
+                record => ({
+                    ...record,
+                    changeType:
+                        "Fire Danger & Public Use Restrictions"
+                })
+            )
             : [];
 
     const ifplChanges =
-        Array.isArray(data.upcoming?.ifpl)
-            ? data.upcoming.ifpl.map(record => ({
-                ...record,
-                changeType:
-                    "Industrial Fire Precaution Level"
-            }))
+        Array.isArray(
+            data.upcoming?.ifpl
+        )
+            ? data.upcoming.ifpl.map(
+                record => ({
+                    ...record,
+                    changeType:
+                        "Industrial Fire Precaution Level"
+                })
+            )
             : [];
 
     const upcoming = [
@@ -187,7 +185,8 @@ function renderUpcomingChanges(data) {
         return;
     }
 
-    const table = document.createElement("table");
+    const table =
+        document.createElement("table");
 
     table.innerHTML = `
         <thead>
@@ -201,11 +200,13 @@ function renderUpcomingChanges(data) {
         <tbody></tbody>
     `;
 
-    const tbody = table.querySelector("tbody");
+    const tbody =
+        table.querySelector("tbody");
 
     upcoming.forEach(record => {
 
-        const row = document.createElement("tr");
+        const row =
+            document.createElement("tr");
 
         row.innerHTML = `
             <td>
@@ -242,21 +243,29 @@ function renderUpcomingChanges(data) {
 function renderHistory(data) {
 
     const fireHistory =
-        Array.isArray(data.history?.fire_restrictions)
-            ? data.history.fire_restrictions.map(record => ({
-                ...record,
-                changeType:
-                    "Fire Danger & Public Use Restrictions"
-            }))
+        Array.isArray(
+            data.history?.fire_restrictions
+        )
+            ? data.history.fire_restrictions.map(
+                record => ({
+                    ...record,
+                    changeType:
+                        "Fire Danger & Public Use Restrictions"
+                })
+            )
             : [];
 
     const ifplHistory =
-        Array.isArray(data.history?.ifpl)
-            ? data.history.ifpl.map(record => ({
-                ...record,
-                changeType:
-                    "Industrial Fire Precaution Level"
-            }))
+        Array.isArray(
+            data.history?.ifpl
+        )
+            ? data.history.ifpl.map(
+                record => ({
+                    ...record,
+                    changeType:
+                        "Industrial Fire Precaution Level"
+                })
+            )
             : [];
 
     const history = [
@@ -274,7 +283,8 @@ function renderHistory(data) {
         return;
     }
 
-    const table = document.createElement("table");
+    const table =
+        document.createElement("table");
 
     table.innerHTML = `
         <thead>
@@ -289,11 +299,13 @@ function renderHistory(data) {
         <tbody></tbody>
     `;
 
-    const tbody = table.querySelector("tbody");
+    const tbody =
+        table.querySelector("tbody");
 
     history.forEach(record => {
 
-        const row = document.createElement("tr");
+        const row =
+            document.createElement("tr");
 
         row.innerHTML = `
             <td>
@@ -353,12 +365,10 @@ scheduleForm.addEventListener(
             notesEl.value.trim();
 
         if (!date || !time) {
-
             showMessage(
                 "Please enter an effective date and time.",
                 "error"
             );
-
             return;
         }
 
@@ -373,39 +383,28 @@ scheduleForm.addEventListener(
                 effectiveDate.getTime()
             )
         ) {
-
             showMessage(
                 "Please enter a valid effective date and time.",
                 "error"
             );
-
             return;
         }
-
-       
-        /* Confirmation */
 
         const confirmed =
             window.confirm(
                 `Schedule this change?\n\n` +
-
                 `Type: ${
                     changeType === "fire"
                         ? "Fire Danger & Public Use Restrictions"
                         : "Industrial Fire Precaution Level"
                 }\n` +
-
                 `Level: ${level}\n` +
-
-                `Effective: ${
-                    formatDate(effectiveAt)
-                }`
+                `Effective: ${formatDate(effectiveAt)}`
             );
 
         if (!confirmed) {
             return;
         }
-
 
         const submitButton =
             scheduleForm.querySelector(
@@ -413,10 +412,8 @@ scheduleForm.addEventListener(
             );
 
         submitButton.disabled = true;
-
         submitButton.textContent =
             "Scheduling...";
-
 
         try {
 
@@ -450,19 +447,16 @@ scheduleForm.addEventListener(
                 !response.ok ||
                 !data.success
             ) {
-
                 throw new Error(
                     data.error ||
                     "Unable to schedule the change."
                 );
             }
 
-
             showMessage(
                 "Change scheduled successfully.",
                 "success"
             );
-
 
             scheduleForm.reset();
 
@@ -471,13 +465,7 @@ scheduleForm.addEventListener(
 
             updateLevelOptions();
 
-
-            /*
-             * Reload the data immediately.
-             */
-
             await loadAdminData();
-
 
         } catch (error) {
 
@@ -491,7 +479,6 @@ scheduleForm.addEventListener(
                 "Unable to schedule the change.",
                 "error"
             );
-
 
         } finally {
 
