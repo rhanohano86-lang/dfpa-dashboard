@@ -117,6 +117,37 @@ async function loadAdminData() {
 
 
 /* --------------------------------------------------
+   FORMAT PACIFIC DATE
+-------------------------------------------------- */
+
+function formatPacificDate(value) {
+
+    const date =
+        new Date(value);
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+        return "Invalid date";
+    }
+
+    return date.toLocaleString(
+        "en-US",
+        {
+            timeZone: "America/Los_Angeles",
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit"
+        }
+    );
+}
+
+
+/* --------------------------------------------------
    CURRENT CONDITIONS
 -------------------------------------------------- */
 
@@ -128,6 +159,17 @@ function renderCurrentConditions(data) {
     const ifpl =
         data.current?.ifpl;
 
+    const currentFireEffectiveEl =
+        document.getElementById(
+            "currentFireEffective"
+        );
+
+    const currentIfplEffectiveEl =
+        document.getElementById(
+            "currentIfplEffective"
+        );
+
+
     currentFireLevelEl.textContent =
         fireRestriction?.level ||
         "Not set";
@@ -135,8 +177,25 @@ function renderCurrentConditions(data) {
     currentIfplEl.textContent =
         ifpl?.level ||
         "Not set";
-}
 
+
+    currentFireEffectiveEl.textContent =
+        fireRestriction?.effective_at
+            ? "Effective: " +
+              formatPacificDate(
+                  fireRestriction.effective_at
+              )
+            : "Effective: —";
+
+
+    currentIfplEffectiveEl.textContent =
+        ifpl?.effective_at
+            ? "Effective: " +
+              formatPacificDate(
+                  ifpl.effective_at
+              )
+            : "Effective: —";
+}
 
 /* --------------------------------------------------
    UPCOMING CHANGES
@@ -584,6 +643,7 @@ function formatDate(value) {
     return date.toLocaleString(
         "en-US",
         {
+            timeZone: "America/Los_Angeles",
             dateStyle: "medium",
             timeStyle: "short"
         }
