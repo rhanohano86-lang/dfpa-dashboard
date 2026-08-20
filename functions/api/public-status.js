@@ -31,7 +31,20 @@ export async function onRequestGet(context) {
                 `)
                 .bind(now)
                 .first();
-
+        
+        const lastUpdated =
+            await context.env.DFPA_DB
+                .prepare(`
+                    SELECT
+                        value,
+                        updated_at,
+                        updated_by
+                    FROM dashboard_settings
+                    WHERE setting = ?
+                    LIMIT 1
+                `)
+                .bind("last_updated")
+                .first();
         return Response.json({
             success: true,
 
@@ -57,6 +70,11 @@ export async function onRequestGet(context) {
                         : null
             },
 
+            last_updated:
+                lastUpdated
+                    ? lastUpdated.value
+                    : null,
+            
             generated_at: now
         });
 
