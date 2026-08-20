@@ -184,6 +184,33 @@ export async function onRequestPost(context) {
             )
             .run();
 
+                /*
+         * Update the dashboard-level "Last Updated" timestamp.
+         * This records when an administrator made a successful
+         * status change, independently of the effective date.
+         */
+        await context.env.DFPA_DB
+            .prepare(`
+                INSERT INTO dashboard_settings
+                (
+                    setting,
+                    value,
+                    updated_by
+                )
+                VALUES (?, ?, ?)
+                ON CONFLICT(setting)
+                DO UPDATE SET
+                    value = excluded.value,
+                    updated_at = CURRENT_TIMESTAMP,
+                    updated_by = excluded.updated_by
+            `)
+            .bind(
+                "last_updated",
+                new Date().toISOString(),
+                email
+            )
+            .run();
+
         return Response.json({
             success: true,
             message: "Change scheduled successfully.",
