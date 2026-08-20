@@ -25,7 +25,37 @@ const dashboardData = {
     }
 
 };
+        /*
+         * Format an ISO timestamp for public display
+         * using Pacific Time.
+         */
+        function formatPacificDateTime(timestamp) {
 
+            if (!timestamp) {
+                return "Effective: —";
+            }
+
+            const date =
+                new Date(timestamp);
+
+            if (Number.isNaN(date.getTime())) {
+                return "Effective: —";
+            }
+
+            return "Effective: " +
+                date.toLocaleString(
+                    "en-US",
+                    {
+                        timeZone: "America/Los_Angeles",
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit"
+                    }
+                );
+
+        }
 /* ======================================================
    LOAD PUBLIC STATUS FROM D1
    ====================================================== */
@@ -61,14 +91,40 @@ async function loadPublicStatus() {
                 data.current.fire_restrictions.level;
         }
 
+        const fireRestrictionsEffective =
+            document.getElementById(
+                "fire-restrictions-effective"
+            );
 
+        if (fireRestrictionsEffective) {
+
+            fireRestrictionsEffective.textContent =
+                formatPacificDateTime(
+                    data.current?.fire_restrictions?.effective_at
+                );
+
+        }
+       
         if (data.current?.ifpl) {
 
             dashboardData.ifplLevel =
                 data.current.ifpl.level;
         }
 
+        const ifplEffective =
+            document.getElementById(
+                "ifpl-effective"
+            );
 
+        if (ifplEffective) {
+
+            ifplEffective.textContent =
+                formatPacificDateTime(
+                    data.current?.ifpl?.effective_at
+                );
+
+        }
+      
         /*
          * Use the authoritative dashboard-level
          * last updated timestamp from D1.
