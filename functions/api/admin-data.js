@@ -44,22 +44,28 @@ export async function onRequestGet(context) {
             .bind(now)
             .all();
 
-        const historyFire = await context.env.DFPA_DB
-            .prepare(`
-                SELECT *
-                FROM fire_restrictions
-                ORDER BY effective_at DESC
-                LIMIT 20
-            `)
+     const historyFire = await context.env.DFPA_DB
+    .prepare(`
+        SELECT *
+        FROM fire_restrictions
+        WHERE effective_at <= ?
+        ORDER BY effective_at DESC
+        LIMIT 20
+    `)
+    .bind(now)
+    .all();
             .all();
 
-        const historyIfpl = await context.env.DFPA_DB
-            .prepare(`
-                SELECT *
-                FROM ifpl_schedule
-                ORDER BY effective_at DESC
-                LIMIT 20
-            `)
+const historyIfpl = await context.env.DFPA_DB
+    .prepare(`
+        SELECT *
+        FROM ifpl_schedule
+        WHERE effective_at <= ?
+        ORDER BY effective_at DESC
+        LIMIT 20
+    `)
+    .bind(now)
+    .all();
             .all();
 
         return Response.json({
