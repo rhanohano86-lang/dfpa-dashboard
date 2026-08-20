@@ -54,8 +54,7 @@ export async function onRequestGet(context) {
     `)
     .bind(now)
     .all();
-            .all();
-
+        
 const historyIfpl = await context.env.DFPA_DB
     .prepare(`
         SELECT *
@@ -66,7 +65,6 @@ const historyIfpl = await context.env.DFPA_DB
     `)
     .bind(now)
     .all();
-            .all();
 
         return Response.json({
             success: true,
