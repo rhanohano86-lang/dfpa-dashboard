@@ -70,38 +70,19 @@ async function loadPublicStatus() {
 
 
         /*
-         * Use the most recent effective timestamp
-         * as the dashboard's data update time.
+         * Use the authoritative dashboard-level
+         * last updated timestamp from D1.
          */
 
-        const fireEffective =
-            data.current?.fire_restrictions?.effective_at;
+        if (data.last_updated) {
 
-        const ifplEffective =
-            data.current?.ifpl?.effective_at;
-
-
-        const timestamps = [
-            fireEffective,
-            ifplEffective
-        ]
-            .filter(Boolean)
-            .map(
-                timestamp =>
-                    new Date(timestamp)
-            )
-            .sort(
-                (a, b) => b - a
-            );
-
-
-        if (timestamps.length > 0) {
-
-            const latest =
-                timestamps[0];
+            const lastUpdated =
+                new Date(
+                    data.last_updated
+                );
 
             dashboardData.lastUpdated.date =
-                latest.toLocaleDateString(
+                lastUpdated.toLocaleDateString(
                     "en-US",
                     {
                         month: "long",
@@ -111,7 +92,7 @@ async function loadPublicStatus() {
                 );
 
             dashboardData.lastUpdated.time =
-                latest.toLocaleTimeString(
+                lastUpdated.toLocaleTimeString(
                     "en-US",
                     {
                         hour: "numeric",
