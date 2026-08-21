@@ -211,7 +211,9 @@ function renderUpcomingChanges(data) {
                 record => ({
                     ...record,
                     changeType:
-                        "Fire Danger & Public Use Restrictions"
+                        "Fire Danger & Public Use Restrictions",
+                    tableName:
+                        "fire_restrictions"
                 })
             )
             : [];
@@ -224,10 +226,13 @@ function renderUpcomingChanges(data) {
                 record => ({
                     ...record,
                     changeType:
-                        "Industrial Fire Precaution Level"
+                        "Industrial Fire Precaution Level",
+                    tableName:
+                        "ifpl_schedule"
                 })
             )
             : [];
+
 
     const upcoming = [
         ...fireChanges,
@@ -238,14 +243,19 @@ function renderUpcomingChanges(data) {
             new Date(b.effective_at)
     );
 
+
     if (upcoming.length === 0) {
+
         upcomingContainer.innerHTML =
             "<p>No upcoming changes scheduled.</p>";
+
         return;
     }
 
+
     const table =
         document.createElement("table");
+
 
     table.innerHTML = `
         <thead>
@@ -254,18 +264,23 @@ function renderUpcomingChanges(data) {
                 <th>New Level</th>
                 <th>Effective</th>
                 <th>Created By</th>
+                <th>Action</th>
             </tr>
         </thead>
+
         <tbody></tbody>
     `;
 
+
     const tbody =
         table.querySelector("tbody");
+
 
     upcoming.forEach(record => {
 
         const row =
             document.createElement("tr");
+
 
         row.innerHTML = `
             <td>
@@ -285,15 +300,145 @@ function renderUpcomingChanges(data) {
             <td>
                 ${escapeHtml(record.created_by)}
             </td>
+
+            <td>
+                <button
+                    type="button"
+                    class="secondary cancel-change-button"
+                >
+                    Cancel
+                </button>
+            </td>
         `;
 
+
+        const cancelButton =
+            row.querySelector(
+                ".cancel-change-button"
+            );
+
+
+        cancelButton.addEventListener(
+            "click",
+            () => {
+
+                cancelScheduledChange(
+                    record.id,
+                    record.tableName,
+                    record.level,
+                    record.effective_at
+                );
+
+            }
+        );
+
+
         tbody.appendChild(row);
+
     });
 
+
     upcomingContainer.innerHTML = "";
+
     upcomingContainer.appendChild(table);
+
 }
 
+/* --------------------------------------------------
+   CANCEL FUTURE SCHEDULED CHANGE
+-------------------------------------------------- */
+
+async function cancelScheduledChange(
+    id,
+    table,
+    level,
+    effectiveAt
+) {
+
+    const confirmed =
+        window.confirm(
+            "Are you sure you want to cancel this scheduled change?\n\n" +
+            "Level: " +
+            level +
+            "\n" +
+            "Effective: " +
+            formatPacificDate(effectiveAt)
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        showMessage(
+            "Cancelling scheduled change...",
+            "success"
+        );
+
+
+        const response =
+            await fetch(
+                "/api/admin-delete",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        id,
+                        table,
+                        reason:
+                            "Scheduled change cancelled by administrator."
+                    })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+            throw new Error(
+                data.error ||
+                "Unable to cancel the scheduled change."
+            );
+        }
+
+
+        showMessage(
+            "Scheduled change cancelled successfully.",
+            "success"
+        );
+
+
+        await loadAdminData();
+
+
+    } catch (error) {
+
+        console.error(
+            "Cancel scheduled change error:",
+            error
+        );
+
+        showMessage(
+            error.message ||
+            "Unable to cancel the scheduled change.",
+            "error"
+        );
+
+    }
+
+}
 
 /* --------------------------------------------------
    CHANGE HISTORY
