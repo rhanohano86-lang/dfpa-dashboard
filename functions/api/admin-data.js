@@ -23,7 +23,23 @@ export async function onRequestGet(context) {
             `)
             .bind(now)
             .first();
-
+        
+        const ifplZones = await context.env.DFPA_DB
+            .prepare(`
+                SELECT
+                    id,
+                    zone,
+                    effective_at,
+                    level,
+                    created_by,
+                    created_at
+                FROM ifpl_schedule_zoned
+                WHERE effective_at <= ?
+                ORDER BY zone ASC, effective_at DESC
+            `)
+            .bind(now)
+            .all();
+        
         const upcomingFire = await context.env.DFPA_DB
             .prepare(`
                 SELECT *
@@ -69,9 +85,10 @@ const historyIfpl = await context.env.DFPA_DB
         return Response.json({
             success: true,
             current: {
-                fire_restrictions: fireRestrictions,
-                ifpl: ifpl
-            },
+    fire_restrictions: fireRestrictions,
+    ifpl: ifpl,
+    ifpl_zones: ifplZones.results
+},
             upcoming: {
                 fire_restrictions: upcomingFire.results,
                 ifpl: upcomingIfpl.results
