@@ -1,14 +1,22 @@
+/* ======================================================
+   DFPA ADMIN DELETE / CANCEL API
+   Preserves status history by marking events CANCELLED
+   ====================================================== */
+
 export async function onRequestPost(context) {
     try {
 
         /*
-         * Cloudflare Access provides the authenticated
-         * administrator's email address.
+         * --------------------------------------------------
+         * AUTHENTICATION
+         * --------------------------------------------------
          */
+
         const email =
             context.request.headers.get(
                 "CF-Access-Authenticated-User-Email"
             );
+
 
         if (!email) {
             return Response.json(
@@ -23,13 +31,15 @@ export async function onRequestPost(context) {
 
 
         /*
-         * Confirm that the authenticated user is an
+         * Confirm the authenticated user is an
          * active DFPA administrator.
          */
         const administrator =
             await context.env.DFPA_DB
                 .prepare(`
-                    SELECT email, role
+                    SELECT
+                        email,
+                        role
                     FROM administrators
                     WHERE lower(email) = lower(?)
                       AND active = 1
@@ -37,6 +47,7 @@ export async function onRequestPost(context) {
                 `)
                 .bind(email)
                 .first();
+
 
         if (!administrator) {
             return Response.json(
@@ -51,16 +62,22 @@ export async function onRequestPost(context) {
 
 
         /*
-         * Read request body.
+         * --------------------------------------------------
+         * REQUEST BODY
+         * --------------------------------------------------
          */
+
         const body =
             await context.request.json();
+
 
         const table =
             body.table;
 
+
         const recordId =
             Number(body.id);
+
 
         const reason =
             body.reason ||
@@ -68,7 +85,7 @@ export async function onRequestPost(context) {
 
 
         /*
-         * Only these schedule tables may be
+         * Only supported schedule tables can be
          * cancelled through this endpoint.
          */
         const allowedTables = [
@@ -76,7 +93,12 @@ export async function onRequestPost(context) {
             "ifpl_schedule_zoned"
         ];
 
-        if (!allowedTables.includes(table)) {
+
+        if (
+            !allowedTables.includes(
+                table
+            )
+        ) {
             return Response.json(
                 {
                     success: false,
@@ -89,10 +111,15 @@ export async function onRequestPost(context) {
 
 
         /*
-         * Validate record ID.
+         * --------------------------------------------------
+         * VALIDATE RECORD ID
+         * --------------------------------------------------
          */
+
         if (
-            !Number.isInteger(recordId) ||
+            !Number.isInteger(
+                recordId
+            ) ||
             recordId <= 0
         ) {
             return Response.json(
@@ -106,15 +133,17 @@ export async function onRequestPost(context) {
         }
 
 
-        /*
-         * --------------------------------------------------
-         * FIRE DANGER / PUBLIC USE RESTRICTIONS
-         * --------------------------------------------------
-         *
-         * One record = one scheduled change.
-         */
-        if (table === "fire_restrictions") {
+        /* ==================================================
+           FIRE DANGER / PUBLIC USE RESTRICTIONS
+           ================================================== */
 
+        if (
+            table === "fire_restrictions"
+        ) {
+
+            /*
+             * Find the scheduled record.
+             */
             const record =
                 await context.env.DFPA_DB
                     .prepare(`
@@ -144,8 +173,12 @@ export async function onRequestPost(context) {
             }
 
 
+            /*
+             * Only future changes can be cancelled.
+             */
             const now =
                 new Date();
+
 
             const effectiveDate =
                 new Date(
@@ -169,7 +202,9 @@ export async function onRequestPost(context) {
             }
 
 
-            if (effectiveDate <= now) {
+            if (
+                effectiveDate <= now
+            ) {
                 return Response.json(
                     {
                         success: false,
@@ -181,6 +216,9 @@ export async function onRequestPost(context) {
             }
 
 
+            /*
+             * Build audit details.
+             */
             const auditDetails =
                 JSON.stringify({
                     reason,
@@ -188,8 +226,10 @@ export async function onRequestPost(context) {
                         record.level,
                     effective_at:
                         record.effective_at,
-                    zone: null,
-                    change_group_id: null,
+                    zone:
+                        null,
+                    change_group_id:
+                        null,
                     created_by:
                         record.created_by,
                     created_at:
@@ -198,18 +238,51 @@ export async function onRequestPost(context) {
 
 
             /*
-             * Delete the Fire/PUR record and preserve
-             * its DELETE audit entry in the same batch.
+             * Cancel the historical event, delete the
+             * scheduled source record, and create the
+             * audit record.
+             *
+             * IMPORTANT:
+             * The status-change event is retained rather
+             * than deleted.
              */
             await context.env.DFPA_DB.batch([
 
+                /*
+                 * Mark the corresponding event cancelled.
+                 */
+                context.env.DFPA_DB
+                    .prepare(`
+                        UPDATE status_change_events
+                        SET
+                            status = 'CANCELLED'
+                        WHERE source_table = ?
+                          AND source_record_id = ?
+                          AND status = 'ACTIVE'
+                    `)
+                    .bind(
+                        "fire_restrictions",
+                        recordId
+                    ),
+
+
+                /*
+                 * Delete the future scheduled source record.
+                 */
                 context.env.DFPA_DB
                     .prepare(`
                         DELETE FROM fire_restrictions
                         WHERE id = ?
                     `)
-                    .bind(recordId),
+                    .bind(
+                        recordId
+                    ),
 
+
+                /*
+                 * Preserve the administrative cancellation
+                 * in the audit log.
+                 */
                 context.env.DFPA_DB
                     .prepare(`
                         INSERT INTO audit_log
@@ -228,6 +301,34 @@ export async function onRequestPost(context) {
                         recordId,
                         auditDetails,
                         email
+                    ),
+
+
+                /*
+                 * Update dashboard Last Updated.
+                 */
+                context.env.DFPA_DB
+                    .prepare(`
+                        INSERT INTO dashboard_settings
+                        (
+                            setting,
+                            value,
+                            updated_by
+                        )
+                        VALUES (?, ?, ?)
+                        ON CONFLICT(setting)
+                        DO UPDATE SET
+                            value =
+                                excluded.value,
+                            updated_at =
+                                CURRENT_TIMESTAMP,
+                            updated_by =
+                                excluded.updated_by
+                    `)
+                    .bind(
+                        "last_updated",
+                        new Date().toISOString(),
+                        email
                     )
 
             ]);
@@ -235,15 +336,18 @@ export async function onRequestPost(context) {
 
             return Response.json({
                 success: true,
+
                 message:
                     "Scheduled change cancelled successfully.",
+
                 records: [
                     {
                         id:
                             recordId,
                         type:
                             "fire",
-                        zone: null,
+                        zone:
+                            null,
                         change_group_id:
                             null,
                         level:
@@ -258,18 +362,16 @@ export async function onRequestPost(context) {
         }
 
 
+        /* ==================================================
+           IFPL
+           ================================================== */
+
         /*
-         * --------------------------------------------------
-         * IFPL
-         * --------------------------------------------------
-         *
          * One IFPL administrative action is represented
          * by one change_group_id.
          *
-         * Therefore:
-         *
-         * Apply to All → four records deleted together.
-         * Individual Zone → one record deleted.
+         * Apply to All → all four records are cancelled.
+         * Individual Zone → one record is cancelled.
          */
         const selectedRecord =
             await context.env.DFPA_DB
@@ -286,7 +388,9 @@ export async function onRequestPost(context) {
                     WHERE id = ?
                     LIMIT 1
                 `)
-                .bind(recordId)
+                .bind(
+                    recordId
+                )
                 .first();
 
 
@@ -302,7 +406,9 @@ export async function onRequestPost(context) {
         }
 
 
-        if (!selectedRecord.change_group_id) {
+        if (
+            !selectedRecord.change_group_id
+        ) {
             return Response.json(
                 {
                     success: false,
@@ -342,7 +448,9 @@ export async function onRequestPost(context) {
             group.results || [];
 
 
-        if (groupRecords.length === 0) {
+        if (
+            groupRecords.length === 0
+        ) {
             return Response.json(
                 {
                     success: false,
@@ -356,12 +464,16 @@ export async function onRequestPost(context) {
 
         /*
          * Make sure every record in the group is still
-         * in the future before deleting any of them.
+         * in the future before cancelling any of them.
          */
         const now =
             new Date();
 
-        for (const record of groupRecords) {
+
+        for (
+            const record
+            of groupRecords
+        ) {
 
             const effectiveDate =
                 new Date(
@@ -385,7 +497,9 @@ export async function onRequestPost(context) {
             }
 
 
-            if (effectiveDate <= now) {
+            if (
+                effectiveDate <= now
+            ) {
                 return Response.json(
                     {
                         success: false,
@@ -399,12 +513,41 @@ export async function onRequestPost(context) {
 
 
         /*
-         * Build one DELETE audit record for each zone.
+         * --------------------------------------------------
+         * BUILD TRANSACTION
+         * --------------------------------------------------
          */
+
         const statements = [];
 
 
-        for (const record of groupRecords) {
+        /*
+         * Mark every corresponding event CANCELLED.
+         */
+        statements.push(
+            context.env.DFPA_DB
+                .prepare(`
+                    UPDATE status_change_events
+                    SET
+                        status = 'CANCELLED'
+                    WHERE source_table = ?
+                      AND change_group_id = ?
+                      AND status = 'ACTIVE'
+                `)
+                .bind(
+                    "ifpl_schedule_zoned",
+                    selectedRecord.change_group_id
+                )
+        );
+
+
+        /*
+         * Build one DELETE audit record for each zone.
+         */
+        for (
+            const record
+            of groupRecords
+        ) {
 
             const auditDetails =
                 JSON.stringify({
@@ -449,7 +592,7 @@ export async function onRequestPost(context) {
 
 
         /*
-         * Delete the entire IFPL group.
+         * Delete the entire IFPL source group.
          */
         statements.push(
             context.env.DFPA_DB
@@ -464,8 +607,37 @@ export async function onRequestPost(context) {
 
 
         /*
-         * Execute the audit inserts and group deletion
-         * together.
+         * Update dashboard Last Updated.
+         */
+        statements.push(
+            context.env.DFPA_DB
+                .prepare(`
+                    INSERT INTO dashboard_settings
+                    (
+                        setting,
+                        value,
+                        updated_by
+                    )
+                    VALUES (?, ?, ?)
+                    ON CONFLICT(setting)
+                    DO UPDATE SET
+                        value =
+                            excluded.value,
+                        updated_at =
+                            CURRENT_TIMESTAMP,
+                        updated_by =
+                            excluded.updated_by
+                `)
+                .bind(
+                    "last_updated",
+                    new Date().toISOString(),
+                    email
+                )
+        );
+
+
+        /*
+         * Execute everything together.
          */
         await context.env.DFPA_DB.batch(
             statements
@@ -474,8 +646,10 @@ export async function onRequestPost(context) {
 
         return Response.json({
             success: true,
+
             message:
                 "Scheduled IFPL change cancelled successfully.",
+
             records:
                 groupRecords.map(
                     record => ({
@@ -504,6 +678,7 @@ export async function onRequestPost(context) {
             "Admin delete error:",
             error
         );
+
 
         return Response.json(
             {
