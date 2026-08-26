@@ -808,11 +808,6 @@ function updateIFPL() {
         legacyIfplEffective
     ) {
 
-        /*
-         * The legacy API response is no longer
-         * stored separately, so leave this as-is
-         * if no zone data exists.
-         */
         legacyIfplEffective.textContent =
             "Effective: —";
 
@@ -869,18 +864,46 @@ function updateLastUpdated() {
    WIX AUTO HEIGHT
    ====================================================== */
 
+function getDashboardHeight() {
+
+    const documentHeight =
+        document.documentElement
+            ? document.documentElement.scrollHeight
+            : 0;
+
+
+    const bodyHeight =
+        document.body
+            ? document.body.scrollHeight
+            : 0;
+
+
+    const offsetHeight =
+        document.documentElement
+            ? document.documentElement.offsetHeight
+            : 0;
+
+
+    return Math.max(
+        documentHeight,
+        bodyHeight,
+        offsetHeight
+    );
+}
+
+
 function sendHeightToWix() {
 
     const height =
-        document.documentElement
-            .scrollHeight;
+        getDashboardHeight();
 
 
     window.parent.postMessage(
         {
             type:
                 "DFPA_DASHBOARD_HEIGHT",
-            height
+            height:
+                height
         },
         "*"
     );
@@ -894,17 +917,25 @@ function sendHeightToWix() {
 
 function initializeHeightMessaging() {
 
+    /*
+     * Send immediately.
+     */
     sendHeightToWix();
 
 
     /*
      * Recheck after the browser finishes
-     * rendering fonts, images and layout.
+     * rendering content.
      */
-
     setTimeout(
         sendHeightToWix,
         100
+    );
+
+
+    setTimeout(
+        sendHeightToWix,
+        300
     );
 
 
@@ -920,11 +951,21 @@ function initializeHeightMessaging() {
     );
 
 
-    /*
-     * Watch for changes to the
-     * dashboard's size.
-     */
+    setTimeout(
+        sendHeightToWix,
+        1500
+    );
 
+
+    setTimeout(
+        sendHeightToWix,
+        2500
+    );
+
+
+    /*
+     * Watch for layout changes.
+     */
     if (
         typeof ResizeObserver !==
         "undefined"
@@ -932,12 +973,83 @@ function initializeHeightMessaging() {
 
         const observer =
             new ResizeObserver(
-                sendHeightToWix
+                () => {
+                    sendHeightToWix();
+                }
             );
 
 
         observer.observe(
             document.documentElement
+        );
+
+
+        if (
+            document.body
+        ) {
+
+            observer.observe(
+                document.body
+            );
+
+        }
+
+    }
+
+
+    /*
+     * Watch for browser/window resizing.
+     */
+    window.addEventListener(
+        "resize",
+        () => {
+            sendHeightToWix();
+        }
+    );
+
+
+    /*
+     * Watch for device orientation changes.
+     */
+    window.addEventListener(
+        "orientationchange",
+        () => {
+
+            setTimeout(
+                sendHeightToWix,
+                100
+            );
+
+            setTimeout(
+                sendHeightToWix,
+                500
+            );
+
+        }
+    );
+
+
+    /*
+     * Mobile browsers expose a visual viewport
+     * that can change independently of the window.
+     */
+    if (
+        window.visualViewport
+    ) {
+
+        window.visualViewport.addEventListener(
+            "resize",
+            () => {
+                sendHeightToWix();
+            }
+        );
+
+
+        window.visualViewport.addEventListener(
+            "scroll",
+            () => {
+                sendHeightToWix();
+            }
         );
 
     }
