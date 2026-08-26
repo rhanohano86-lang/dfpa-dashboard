@@ -10,7 +10,9 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-   <title>DFPA Fire Danger Level Status Dashboard</title>
+    <title>
+        DFPA Fire Danger Level Status Dashboard
+    </title>
 
     <!-- DFPA DASHBOARD STYLES -->
     <!-- IMPORTANT: "assests" is the actual folder name in GitHub -->
@@ -61,10 +63,10 @@
                     </h2>
 
 
-                   <p>
+                    <p>
                         Current Fire Danger, Public Use Restrictions, and Industrial Fire Precaution Level for DFPA protected lands in the Douglas District
-                   </p>
-                    
+                    </p>
+
                 </div>
 
             </div>
@@ -165,98 +167,96 @@
             <div class="status-row">
 
 
-<!-- ==================================================
-     FIRE DANGER + PUBLIC USE RESTRICTIONS
+                <!-- ==================================================
+                     FIRE DANGER + PUBLIC USE RESTRICTIONS
+                     ================================================== -->
 
-     THESE TWO VALUES ARE SYNCHRONIZED
-     ================================================== -->
+                <section class="card fire-danger-card">
 
-<section class="card fire-danger-card">
-
-    <h2>
-        FIRE DANGER LEVEL &amp;<br>
-        PUBLIC USE RESTRICTIONS
-    </h2>
+                    <h2>
+                        FIRE DANGER LEVEL &amp;<br>
+                        PUBLIC USE RESTRICTIONS
+                    </h2>
 
 
-    <div class="card-content">
+                    <div class="card-content">
 
 
-        <!-- FIRE DANGER -->
+                        <!-- FIRE DANGER LEVEL -->
 
-        <div class="status-section">
+                        <div class="status-section">
 
-            <div class="label">
-                Fire Danger Level
-            </div>
-
-
-            <div class="status-pill status-high">
-
-                <span
-                    class="status-dot"
-                    aria-hidden="true"
-                ></span>
+                            <div class="label">
+                                Fire Danger Level
+                            </div>
 
 
-                <span
-                    class="status-text"
-                    id="fire-danger"
-                >
-                    HIGH
-                </span>
+                            <div class="status-pill status-high">
 
-            </div>
-
-        </div>
+                                <span
+                                    class="status-dot"
+                                    aria-hidden="true"
+                                ></span>
 
 
-        <!-- PUBLIC USE RESTRICTIONS -->
+                                <span
+                                    class="status-text"
+                                    id="fire-danger"
+                                >
+                                    HIGH
+                                </span>
 
-        <div class="status-section">
+                            </div>
 
-            <div class="label">
-                Public Use Restrictions
-            </div>
-
-
-            <div class="status-pill status-high">
-
-                <span
-                    class="status-dot"
-                    aria-hidden="true"
-                ></span>
+                        </div>
 
 
-                <span
-                    class="status-text"
-                    id="public-use-restrictions"
-                >
-                    HIGH
-                </span>
+                        <!-- PUBLIC USE RESTRICTIONS -->
 
-            </div>
+                        <div class="status-section">
 
-        </div>
+                            <div class="label">
+                                Public Use Restrictions
+                            </div>
 
 
-        <!-- EFFECTIVE DATE -->
+                            <div class="status-pill status-high">
 
-        <div
-            class="effective-date"
-            id="fire-restrictions-effective"
-        >
-            Effective: —
-        </div>
+                                <span
+                                    class="status-dot"
+                                    aria-hidden="true"
+                                ></span>
 
 
-    </div>
+                                <span
+                                    class="status-text"
+                                    id="public-use-restrictions"
+                                >
+                                    HIGH
+                                </span>
 
-</section>
+                            </div>
+
+                        </div>
+
+
+                        <!-- EFFECTIVE DATE -->
+
+                        <div
+                            class="effective-date"
+                            id="fire-restrictions-effective"
+                        >
+                            Effective: —
+                        </div>
+
+
+                    </div>
+
+                </section>
+
+
                 <!-- ==================================================
                      IFPL
-
-                     IFPL IS INDEPENDENT OF FIRE DANGER/PUR
                      ================================================== -->
 
                 <section class="card ifpl-card">
@@ -273,28 +273,203 @@
                         </div>
 
 
-                        <div class="status-pill status-high">
+                        <!-- ==================================================
+                             ZONE-AWARE IFPL DISPLAY
 
-                            <span
-                                class="status-dot"
-                                aria-hidden="true"
-                            ></span>
+                             script.js will populate this container
+                             with DG-1, DG-2, UA-1, and UA-2.
+                             ================================================== -->
 
+                        <div
+                            id="ifpl-zones"
+                            class="ifpl-zone-list"
+                        >
 
-                            <span
-                                class="status-text"
-                                id="ifpl-level"
+                            <!-- DG-1 -->
+
+                            <div
+                                class="ifpl-zone-item"
+                                data-zone="DG-1"
                             >
-                                LEVEL 3
-                            </span>
+
+                                <div class="ifpl-zone-name">
+                                    DG-1
+                                </div>
+
+
+                                <div
+                                    class="status-pill status-high"
+                                >
+
+                                    <span
+                                        class="status-dot"
+                                        aria-hidden="true"
+                                    ></span>
+
+
+                                    <span
+                                        class="status-text ifpl-zone-level"
+                                    >
+                                        LEVEL 3
+                                    </span>
+
+                                </div>
+
+
+                                <div
+                                    class="effective-date ifpl-zone-effective"
+                                >
+                                    Effective: —
+                                </div>
+
+                            </div>
+
+
+                            <!-- DG-2 -->
+
+                            <div
+                                class="ifpl-zone-item"
+                                data-zone="DG-2"
+                            >
+
+                                <div class="ifpl-zone-name">
+                                    DG-2
+                                </div>
+
+
+                                <div
+                                    class="status-pill status-high"
+                                >
+
+                                    <span
+                                        class="status-dot"
+                                        aria-hidden="true"
+                                    ></span>
+
+
+                                    <span
+                                        class="status-text ifpl-zone-level"
+                                    >
+                                        LEVEL 3
+                                    </span>
+
+                                </div>
+
+
+                                <div
+                                    class="effective-date ifpl-zone-effective"
+                                >
+                                    Effective: —
+                                </div>
+
+                            </div>
+
+
+                            <!-- UA-1 -->
+
+                            <div
+                                class="ifpl-zone-item"
+                                data-zone="UA-1"
+                            >
+
+                                <div class="ifpl-zone-name">
+                                    UA-1
+                                </div>
+
+
+                                <div
+                                    class="status-pill status-high"
+                                >
+
+                                    <span
+                                        class="status-dot"
+                                        aria-hidden="true"
+                                    ></span>
+
+
+                                    <span
+                                        class="status-text ifpl-zone-level"
+                                    >
+                                        LEVEL 3
+                                    </span>
+
+                                </div>
+
+
+                                <div
+                                    class="effective-date ifpl-zone-effective"
+                                >
+                                    Effective: —
+                                </div>
+
+                            </div>
+
+
+                            <!-- UA-2 -->
+
+                            <div
+                                class="ifpl-zone-item"
+                                data-zone="UA-2"
+                            >
+
+                                <div class="ifpl-zone-name">
+                                    UA-2
+                                </div>
+
+
+                                <div
+                                    class="status-pill status-high"
+                                >
+
+                                    <span
+                                        class="status-dot"
+                                        aria-hidden="true"
+                                    ></span>
+
+
+                                    <span
+                                        class="status-text ifpl-zone-level"
+                                    >
+                                        LEVEL 3
+                                    </span>
+
+                                </div>
+
+
+                                <div
+                                    class="effective-date ifpl-zone-effective"
+                                >
+                                    Effective: —
+                                </div>
+
+                            </div>
 
                         </div>
+
+
+                        <!-- ==================================================
+                             LEGACY IFPL ELEMENTS
+
+                             Retained temporarily so the existing script
+                             does not fail while the JavaScript migration
+                             is completed.
+                             ================================================== -->
+
                         <div
-                            class="effective-date"
+                            id="ifpl-level"
+                            hidden
+                        >
+                            LEVEL 3
+                        </div>
+
+
+                        <div
                             id="ifpl-effective"
+                            hidden
                         >
                             Effective: —
                         </div>
+
                     </div>
 
                 </section>
@@ -324,7 +499,7 @@
                         class="update-date"
                         id="last-updated-date"
                     >
-                        August 12, 2026
+                        August 21, 2026
                     </div>
 
 
@@ -332,7 +507,7 @@
                         class="update-time"
                         id="last-updated-time"
                     >
-                        2:30 PM
+                        11:31 AM
                     </div>
 
                 </div>
