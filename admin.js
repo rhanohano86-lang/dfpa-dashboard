@@ -129,6 +129,20 @@ const fireSeasonHistoryContainer =
         "fireSeasonHistoryContainer"
     );
 
+const seasonTotalDaysEl =
+    document.getElementById(
+        "seasonTotalDays"
+    );
+
+const fireSeasonStatsBody =
+    document.getElementById(
+        "fireSeasonStatsBody"
+    );
+
+const ifplSeasonStatsBody =
+    document.getElementById(
+        "ifplSeasonStatsBody"
+    );
 
 /* ======================================================
    MESSAGES
@@ -485,7 +499,21 @@ async function loadFireSeasonData() {
             data
         );
 
+const currentYear =
+    data.current?.year ||
+    (
+        Array.isArray(data.history) &&
+        data.history.length > 0
+            ? data.history[0].year
+            : null
+    );
 
+if (currentYear) {
+    await loadFireSeasonReport(
+        currentYear
+    );
+}
+        
     } catch (error) {
 
         console.error(
@@ -508,6 +536,244 @@ async function loadFireSeasonData() {
     }
 }
 
+/* ======================================================
+   LOAD FIRE SEASON REPORT
+   ====================================================== */
+
+async function loadFireSeasonReport(
+    year
+) {
+
+    try {
+
+        if (!year) {
+            return;
+        }
+
+
+        const response =
+            await fetch(
+                `${API_BASE}/season-report?year=${encodeURIComponent(year)}`,
+                {
+                    credentials:
+                        "same-origin",
+                    cache:
+                        "no-store"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+                data.error ||
+                "Unable to load fire season statistics."
+            );
+        }
+
+
+        renderFireSeasonReport(
+            data.report
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Fire season report loading error:",
+            error
+        );
+
+
+        if (
+            seasonTotalDaysEl
+        ) {
+
+            seasonTotalDaysEl.textContent =
+                "—";
+        }
+
+
+        if (
+            fireSeasonStatsBody
+        ) {
+
+            fireSeasonStatsBody.innerHTML = `
+                <tr>
+                    <td colspan="2">
+                        Unable to load statistics.
+                    </td>
+                </tr>
+            `;
+        }
+
+
+        if (
+            ifplSeasonStatsBody
+        ) {
+
+            ifplSeasonStatsBody.innerHTML = `
+                <tr>
+                    <td colspan="5">
+                        Unable to load statistics.
+                    </td>
+                </tr>
+            `;
+        }
+    }
+}
+
+
+/* ======================================================
+   RENDER FIRE SEASON REPORT
+   ====================================================== */
+
+function renderFireSeasonReport(
+    report
+) {
+
+    if (!report) {
+        return;
+    }
+
+
+    /*
+     * Total season days.
+     */
+    if (
+        seasonTotalDaysEl
+    ) {
+
+        seasonTotalDaysEl.textContent =
+            report.season?.total_days ??
+            "—";
+    }
+
+
+    /* ==================================================
+       FIRE DANGER / PUR STATISTICS
+       ================================================== */
+
+    if (
+        fireSeasonStatsBody
+    ) {
+
+        const fireDanger =
+            report.fire_danger || {};
+
+
+        fireSeasonStatsBody.innerHTML = `
+            <tr>
+                <td>LOW</td>
+                <td>${escapeHtml(
+                    fireDanger.LOW ?? 0
+                )}</td>
+            </tr>
+
+            <tr>
+                <td>MODERATE</td>
+                <td>${escapeHtml(
+                    fireDanger.MODERATE ?? 0
+                )}</td>
+            </tr>
+
+            <tr>
+                <td>HIGH</td>
+                <td>${escapeHtml(
+                    fireDanger.HIGH ?? 0
+                )}</td>
+            </tr>
+
+            <tr>
+                <td>EXTREME</td>
+                <td>${escapeHtml(
+                    fireDanger.EXTREME ?? 0
+                )}</td>
+            </tr>
+
+            <tr>
+                <td><strong>Total</strong></td>
+                <td><strong>${escapeHtml(
+                    fireDanger.total ?? 0
+                )}</strong></td>
+            </tr>
+        `;
+    }
+
+
+    /* ==================================================
+       IFPL STATISTICS
+       ================================================== */
+
+    if (
+        ifplSeasonStatsBody
+    ) {
+
+        const ifpl =
+            report.ifpl || {};
+
+
+        const zones = [
+            "DG-1",
+            "DG-2",
+            "UA-1",
+            "UA-2"
+        ];
+
+
+        ifplSeasonStatsBody.innerHTML =
+            zones.map(
+                zone => {
+
+                    const zoneData =
+                        ifpl[zone] || {};
+
+
+                    return `
+                        <tr>
+                            <td>
+                                <strong>
+                                    ${escapeHtml(zone)}
+                                </strong>
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    zoneData["LEVEL 1"] ?? 0
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    zoneData["LEVEL 2"] ?? 0
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    zoneData["LEVEL 3"] ?? 0
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    zoneData["LEVEL 4"] ?? 0
+                                )}
+                            </td>
+                        </tr>
+                    `;
+                }
+            )
+            .join("");
+    }
+}
 
 /* ======================================================
    CURRENT CONDITIONS
