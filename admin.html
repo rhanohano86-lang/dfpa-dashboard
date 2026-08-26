@@ -1,12 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>DFPA Fire Danger Level Administration</title>
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        DFPA Fire Danger Level Administration
+    </title>
+
 
     <style>
+
         :root {
             --dfpa-blue: #33439A;
             --dfpa-dark-blue: #243477;
@@ -19,9 +29,11 @@
             --danger: #c62828;
         }
 
+
         * {
             box-sizing: border-box;
         }
+
 
         body {
             margin: 0;
@@ -30,26 +42,32 @@
             color: var(--text);
         }
 
+
         header {
             background: var(--dfpa-blue);
             color: white;
             padding: 28px 30px;
         }
 
+
         header .header-inner {
             max-width: 1100px;
             margin: auto;
         }
+
 
         header h1 {
             margin: 0;
             font-size: 30px;
         }
 
+
         header p {
             margin: 6px 0 0;
             font-size: 16px;
+            line-height: 1.45;
         }
+
 
         main {
             max-width: 1100px;
@@ -57,18 +75,25 @@
             padding: 0 20px;
         }
 
+
         .card {
             background: var(--card);
             border-radius: 12px;
             padding: 28px;
             margin-bottom: 24px;
-            box-shadow: 0 3px 12px rgba(0,0,0,.08);
+            box-shadow: 0 3px 12px rgba(0, 0, 0, .08);
         }
+
 
         .card h2 {
             margin: 0 0 22px;
             font-size: 22px;
         }
+
+
+        /* --------------------------------------------------
+           CURRENT CONDITIONS
+        -------------------------------------------------- */
 
         .current-grid {
             display: grid;
@@ -76,11 +101,13 @@
             gap: 20px;
         }
 
+
         .condition {
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 22px;
         }
+
 
         .condition-label {
             font-size: 13px;
@@ -88,13 +115,87 @@
             color: var(--muted);
             text-transform: uppercase;
             letter-spacing: .05em;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
+
 
         .condition-value {
             font-size: 28px;
             font-weight: bold;
         }
+
+
+        .condition-effective {
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+
+        /* --------------------------------------------------
+           IFPL ZONES
+        -------------------------------------------------- */
+
+        .ifpl-zone-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+
+        .ifpl-zone-item {
+            min-width: 0;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            background: #f8fafc;
+        }
+
+
+        .ifpl-zone-name {
+            margin-bottom: 7px;
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+
+        .ifpl-zone-item .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            padding: 6px 10px;
+        }
+
+
+        .ifpl-zone-item .status-dot {
+            width: 8px;
+            height: 8px;
+        }
+
+
+        .ifpl-zone-level {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+
+        .ifpl-zone-effective {
+            margin-top: 7px;
+            font-size: 12px;
+            line-height: 1.35;
+            color: var(--muted);
+        }
+
+
+        /* --------------------------------------------------
+           FORM
+        -------------------------------------------------- */
 
         .form-grid {
             display: grid;
@@ -102,19 +203,23 @@
             gap: 20px;
         }
 
+
         .form-group {
             margin-bottom: 18px;
         }
 
+
         .form-group.full {
             grid-column: 1 / -1;
         }
+
 
         label {
             display: block;
             font-weight: bold;
             margin-bottom: 7px;
         }
+
 
         input,
         select,
@@ -125,18 +230,31 @@
             border-radius: 7px;
             font: inherit;
             background: white;
+            color: var(--text);
         }
+
+
+        input:focus,
+        select:focus,
+        textarea:focus,
+        button:focus {
+            outline: 3px solid rgba(51, 67, 154, .25);
+            outline-offset: 2px;
+        }
+
 
         textarea {
             min-height: 90px;
             resize: vertical;
         }
 
+
         .button-row {
             display: flex;
             gap: 12px;
             margin-top: 8px;
         }
+
 
         button {
             border: 0;
@@ -147,37 +265,65 @@
             cursor: pointer;
         }
 
+
+        button:disabled {
+            opacity: .65;
+            cursor: not-allowed;
+        }
+
+
         .primary {
             background: var(--dfpa-blue);
             color: white;
         }
 
-        .primary:hover {
+
+        .primary:hover:not(:disabled) {
             background: var(--dfpa-dark-blue);
         }
+
 
         .secondary {
             background: #e9edf3;
             color: #222;
         }
 
+
+        .secondary:hover:not(:disabled) {
+            background: #dfe4eb;
+        }
+
+
+        /* --------------------------------------------------
+           TABLES
+        -------------------------------------------------- */
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
+
 
         th,
         td {
             text-align: left;
             padding: 13px 10px;
             border-bottom: 1px solid var(--border);
+            vertical-align: middle;
         }
+
 
         th {
             color: var(--muted);
             font-size: 13px;
             text-transform: uppercase;
+            letter-spacing: .03em;
         }
+
+
+        /* --------------------------------------------------
+           STATUS
+        -------------------------------------------------- */
 
         .status {
             display: inline-block;
@@ -187,10 +333,16 @@
             font-weight: bold;
         }
 
+
         .scheduled {
             background: #e8f5e9;
             color: var(--success);
         }
+
+
+        /* --------------------------------------------------
+           MESSAGES
+        -------------------------------------------------- */
 
         .message {
             display: none;
@@ -200,11 +352,13 @@
             font-weight: bold;
         }
 
+
         .message.success {
             display: block;
             background: #e8f5e9;
             color: var(--success);
         }
+
 
         .message.error {
             display: block;
@@ -212,301 +366,523 @@
             color: var(--danger);
         }
 
+
+        /* --------------------------------------------------
+           MOBILE
+        -------------------------------------------------- */
+
         @media (max-width: 700px) {
+
             header {
                 padding: 22px 20px;
             }
 
+
             header h1 {
                 font-size: 24px;
             }
+
 
             main {
                 margin-top: 20px;
                 padding: 0 14px;
             }
 
+
             .card {
                 padding: 20px;
             }
+
 
             .current-grid,
             .form-grid {
                 grid-template-columns: 1fr;
             }
 
+
             .form-group.full {
                 grid-column: auto;
             }
+
+
+            .ifpl-zone-list {
+                grid-template-columns: 1fr;
+            }
+
 
             table {
                 display: block;
                 overflow-x: auto;
             }
+
         }
+
     </style>
+
 </head>
+
 
 <body>
 
+
 <header>
+
     <div class="header-inner">
-        <h1>DFPA Fire Danger Level Administration</h1>
-        <p>Manage current and scheduled Fire Danger, Public Use Restrictions, and IFPL changes.</p>
+
+        <h1>
+            DFPA Fire Danger Level Administration
+        </h1>
+
+        <p>
+            Manage current and scheduled Fire Danger,
+            Public Use Restrictions, and IFPL changes.
+        </p>
+
     </div>
+
 </header>
+
 
 <main>
 
-    <div id="message" class="message"></div>
 
-    <!-- CURRENT CONDITIONS -->
+    <div
+        id="message"
+        class="message"
+    ></div>
+
+
+    <!-- ==================================================
+         CURRENT CONDITIONS
+         ================================================== -->
+
     <section class="card">
-        <h2>Current Conditions</h2>
+
+        <h2>
+            Current Conditions
+        </h2>
+
 
         <div class="current-grid">
 
+
+            <!-- FIRE DANGER + PUR -->
+
             <div class="condition">
+
                 <div class="condition-label">
-                    Fire Danger Level & Public Use Restrictions
+                    Fire Danger Level &amp; Public Use Restrictions
                 </div>
 
-                <div id="currentFireLevel" class="condition-value">
+
+                <div
+                    id="currentFireLevel"
+                    class="condition-value"
+                >
                     Loading...
                 </div>
-                <div id="currentFireEffective" class="condition-effective">
-                     Effective: —
+
+
+                <div
+                    id="currentFireEffective"
+                    class="condition-effective"
+                >
+                    Effective: —
                 </div>
+
             </div>
 
+
+            <!-- IFPL -->
+
             <div class="condition">
+
                 <div class="condition-label">
                     Industrial Fire Precaution Level
                 </div>
 
-                <div id="currentIfpl" class="condition-value">
-                    Loading...
+
+                <div id="currentIfpl">
+
+                    <div class="ifpl-zone-list">
+
+
+                        <!-- DG-1 -->
+
+                        <div
+                            class="ifpl-zone-item"
+                            data-zone="DG-1"
+                        >
+
+                            <div class="ifpl-zone-name">
+                                DG-1
+                            </div>
+
+
+                            <div class="status-pill status-high">
+
+                                <span
+                                    class="status-dot"
+                                    aria-hidden="true"
+                                ></span>
+
+
+                                <span class="status-text ifpl-zone-level">
+                                    LEVEL 3
+                                </span>
+
+                            </div>
+
+
+                            <div class="ifpl-zone-effective">
+                                Effective: —
+                            </div>
+
+                        </div>
+
+
+                        <!-- DG-2 -->
+
+                        <div
+                            class="ifpl-zone-item"
+                            data-zone="DG-2"
+                        >
+
+                            <div class="ifpl-zone-name">
+                                DG-2
+                            </div>
+
+
+                            <div class="status-pill status-high">
+
+                                <span
+                                    class="status-dot"
+                                    aria-hidden="true"
+                                ></span>
+
+
+                                <span class="status-text ifpl-zone-level">
+                                    LEVEL 3
+                                </span>
+
+                            </div>
+
+
+                            <div class="ifpl-zone-effective">
+                                Effective: —
+                            </div>
+
+                        </div>
+
+
+                        <!-- UA-1 -->
+
+                        <div
+                            class="ifpl-zone-item"
+                            data-zone="UA-1"
+                        >
+
+                            <div class="ifpl-zone-name">
+                                UA-1
+                            </div>
+
+
+                            <div class="status-pill status-high">
+
+                                <span
+                                    class="status-dot"
+                                    aria-hidden="true"
+                                ></span>
+
+
+                                <span class="status-text ifpl-zone-level">
+                                    LEVEL 3
+                                </span>
+
+                            </div>
+
+
+                            <div class="ifpl-zone-effective">
+                                Effective: —
+                            </div>
+
+                        </div>
+
+
+                        <!-- UA-2 -->
+
+                        <div
+                            class="ifpl-zone-item"
+                            data-zone="UA-2"
+                        >
+
+                            <div class="ifpl-zone-name">
+                                UA-2
+                            </div>
+
+
+                            <div class="status-pill status-high">
+
+                                <span
+                                    class="status-dot"
+                                    aria-hidden="true"
+                                ></span>
+
+
+                                <span class="status-text ifpl-zone-level">
+                                    LEVEL 3
+                                </span>
+
+                            </div>
+
+
+                            <div class="ifpl-zone-effective">
+                                Effective: —
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
                 </div>
-                <div id="currentIfplEffective" class="condition-effective">
+
+
+                <!-- Legacy compatibility element -->
+
+                <div
+                    id="currentIfplEffective"
+                    class="condition-effective"
+                    hidden
+                >
                     Effective: —
                 </div>
+
             </div>
 
         </div>
+
     </section>
 
 
-   <!-- ==================================================
-     SCHEDULE CHANGE
-     ================================================== -->
+    <!-- ==================================================
+         SCHEDULE A CHANGE
+         ================================================== -->
 
-<section class="card">
-
-    <h2>
-        Schedule a Change
-    </h2>
-
-
-    <form id="scheduleForm">
-
-        <div class="form-grid">
-
-
-            <!-- CHANGE TYPE -->
-
-            <div class="form-group">
-
-                <label for="changeType">
-                    Change Type
-                </label>
-
-
-                <select
-                    id="changeType"
-                    required
-                >
-
-                    <option value="fire">
-                        Fire Danger Level & Public Use Restrictions
-                    </option>
-
-                    <option value="ifpl">
-                        Industrial Fire Precaution Level
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <!-- NEW LEVEL -->
-
-            <div class="form-group">
-
-                <label for="newLevel">
-                    New Level
-                </label>
-
-
-                <select
-                    id="newLevel"
-                    required
-                ></select>
-
-            </div>
-
-
-            <!-- IFPL APPLY TO -->
-
-            <div
-                class="form-group"
-                id="ifplScopeContainer"
-            >
-
-                <label for="ifplScope">
-                    Apply IFPL To
-                </label>
-
-
-                <select
-                    id="ifplScope"
-                >
-
-                    <option value="all">
-                        All Regulation Use Zones
-                    </option>
-
-                    <option value="zone">
-                        Individual Regulation Use Zone
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <!-- IFPL ZONE -->
-
-            <div
-                class="form-group"
-                id="ifplZoneContainer"
-                style="display: none;"
-            >
-
-                <label for="ifplZone">
-                    Regulation Use Zone
-                </label>
-
-
-                <select
-                    id="ifplZone"
-                >
-
-                    <option value="DG-1">
-                        DG-1
-                    </option>
-
-                    <option value="DG-2">
-                        DG-2
-                    </option>
-
-                    <option value="UA-1">
-                        UA-1
-                    </option>
-
-                    <option value="UA-2">
-                        UA-2
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <!-- EFFECTIVE DATE -->
-
-            <div class="form-group">
-
-                <label for="effectiveDate">
-                    Effective Date
-                </label>
-
-
-                <input
-                    type="date"
-                    id="effectiveDate"
-                    required
-                >
-
-            </div>
-
-
-            <!-- EFFECTIVE TIME -->
-
-            <div class="form-group">
-
-                <label for="effectiveTime">
-                    Effective Time
-                </label>
-
-
-                <input
-                    type="time"
-                    id="effectiveTime"
-                    value="00:01"
-                    required
-                >
-
-            </div>
-
-
-            <!-- NOTES -->
-
-            <div class="form-group full">
-
-                <label for="notes">
-                    Notes
-                </label>
-
-
-                <textarea
-                    id="notes"
-                    placeholder="Optional administrative note about this change."
-                ></textarea>
-
-            </div>
-
-        </div>
-
-
-        <div class="button-row">
-
-            <button
-                type="submit"
-                class="primary"
-            >
-                Schedule Change
-            </button>
-
-
-            <button
-                type="reset"
-                class="secondary"
-            >
-                Clear
-            </button>
-
-        </div>
-
-    </form>
-
-</section>
-
-
-    <!-- UPCOMING CHANGES -->
     <section class="card">
 
-        <h2>Upcoming Changes</h2>
+        <h2>
+            Schedule a Change
+        </h2>
+
+
+        <form id="scheduleForm">
+
+            <div class="form-grid">
+
+
+                <!-- CHANGE TYPE -->
+
+                <div class="form-group">
+
+                    <label for="changeType">
+                        Change Type
+                    </label>
+
+
+                    <select
+                        id="changeType"
+                        required
+                    >
+
+                        <option value="fire">
+                            Fire Danger Level &amp; Public Use Restrictions
+                        </option>
+
+                        <option value="ifpl">
+                            Industrial Fire Precaution Level
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- NEW LEVEL -->
+
+                <div class="form-group">
+
+                    <label for="newLevel">
+                        New Level
+                    </label>
+
+
+                    <select
+                        id="newLevel"
+                        required
+                    ></select>
+
+                </div>
+
+
+                <!-- IFPL APPLY TO -->
+
+                <div
+                    class="form-group"
+                    id="ifplScopeContainer"
+                    style="display: none;"
+                >
+
+                    <label for="ifplScope">
+                        Apply IFPL To
+                    </label>
+
+
+                    <select
+                        id="ifplScope"
+                    >
+
+                        <option value="all">
+                            All Regulation Use Zones
+                        </option>
+
+                        <option value="zone">
+                            Individual Regulation Use Zone
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- IFPL ZONE -->
+
+                <div
+                    class="form-group"
+                    id="ifplZoneContainer"
+                    style="display: none;"
+                >
+
+                    <label for="ifplZone">
+                        Regulation Use Zone
+                    </label>
+
+
+                    <select
+                        id="ifplZone"
+                    >
+
+                        <option value="DG-1">
+                            DG-1
+                        </option>
+
+                        <option value="DG-2">
+                            DG-2
+                        </option>
+
+                        <option value="UA-1">
+                            UA-1
+                        </option>
+
+                        <option value="UA-2">
+                            UA-2
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- EFFECTIVE DATE -->
+
+                <div class="form-group">
+
+                    <label for="effectiveDate">
+                        Effective Date
+                    </label>
+
+
+                    <input
+                        type="date"
+                        id="effectiveDate"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- EFFECTIVE TIME -->
+
+                <div class="form-group">
+
+                    <label for="effectiveTime">
+                        Effective Time
+                    </label>
+
+
+                    <input
+                        type="time"
+                        id="effectiveTime"
+                        value="00:01"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- NOTES -->
+
+                <div class="form-group full">
+
+                    <label for="notes">
+                        Notes
+                    </label>
+
+
+                    <textarea
+                        id="notes"
+                        placeholder="Optional administrative note about this change."
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <div class="button-row">
+
+                <button
+                    type="submit"
+                    class="primary"
+                >
+                    Schedule Change
+                </button>
+
+
+                <button
+                    type="reset"
+                    class="secondary"
+                >
+                    Clear
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+
+    <!-- ==================================================
+         UPCOMING CHANGES
+         ================================================== -->
+
+    <section class="card">
+
+        <h2>
+            Upcoming Changes
+        </h2>
+
 
         <div id="upcomingContainer">
             Loading...
@@ -515,10 +891,16 @@
     </section>
 
 
-    <!-- CHANGE HISTORY -->
+    <!-- ==================================================
+         CHANGE HISTORY
+         ================================================== -->
+
     <section class="card">
 
-        <h2>Change History</h2>
+        <h2>
+            Change History
+        </h2>
+
 
         <div id="historyContainer">
             Loading...
@@ -526,10 +908,13 @@
 
     </section>
 
+
 </main>
 
 
 <script src="admin.js"></script>
 
+
 </body>
+
 </html>
