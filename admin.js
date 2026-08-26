@@ -22,6 +22,10 @@ const IFPL_ZONES = [
 ];
 
 
+/* ======================================================
+   ELEMENT REFERENCES
+   ====================================================== */
+
 const messageEl =
     document.getElementById("message");
 
@@ -56,16 +60,91 @@ const historyContainer =
     document.getElementById("historyContainer");
 
 
-/* --------------------------------------------------
+/* ======================================================
+   FIRE SEASON ELEMENT REFERENCES
+   ====================================================== */
+
+const currentSeasonPanel =
+    document.getElementById(
+        "currentSeasonPanel"
+    );
+
+const seasonStatusEl =
+    document.getElementById(
+        "seasonStatus"
+    );
+
+const seasonYearEl =
+    document.getElementById(
+        "seasonYear"
+    );
+
+const seasonStartDateEl =
+    document.getElementById(
+        "seasonStartDate"
+    );
+
+const seasonEndDateEl =
+    document.getElementById(
+        "seasonEndDate"
+    );
+
+const endSeasonControlsEl =
+    document.getElementById(
+        "endSeasonControls"
+    );
+
+const endSeasonDateEl =
+    document.getElementById(
+        "endSeasonDate"
+    );
+
+const endSeasonButton =
+    document.getElementById(
+        "endSeasonButton"
+    );
+
+const startSeasonPanel =
+    document.getElementById(
+        "startSeasonPanel"
+    );
+
+const newSeasonYearEl =
+    document.getElementById(
+        "newSeasonYear"
+    );
+
+const newSeasonStartDateEl =
+    document.getElementById(
+        "newSeasonStartDate"
+    );
+
+const startSeasonButton =
+    document.getElementById(
+        "startSeasonButton"
+    );
+
+const fireSeasonHistoryContainer =
+    document.getElementById(
+        "fireSeasonHistoryContainer"
+    );
+
+
+/* ======================================================
    MESSAGES
--------------------------------------------------- */
+   ====================================================== */
 
 function showMessage(
     text,
     type = "success"
 ) {
 
-    messageEl.textContent = text;
+    if (!messageEl) {
+        return;
+    }
+
+    messageEl.textContent =
+        text;
 
     messageEl.className =
         `message ${type}`;
@@ -74,16 +153,21 @@ function showMessage(
 
 function clearMessage() {
 
-    messageEl.textContent = "";
+    if (!messageEl) {
+        return;
+    }
+
+    messageEl.textContent =
+        "";
 
     messageEl.className =
         "message";
 }
 
 
-/* --------------------------------------------------
+/* ======================================================
    FORMAT PACIFIC DATE
--------------------------------------------------- */
+   ====================================================== */
 
 function formatPacificDate(
     value
@@ -120,6 +204,64 @@ function formatPacificDate(
 }
 
 
+/* ======================================================
+   FORMAT DATE-ONLY VALUES
+   ====================================================== */
+
+function formatDateOnly(
+    value
+) {
+
+    if (!value) {
+        return "—";
+    }
+
+    const parts =
+        String(value)
+            .split("-");
+
+    if (parts.length !== 3) {
+        return String(value);
+    }
+
+    const year =
+        Number(parts[0]);
+
+    const month =
+        Number(parts[1]);
+
+    const day =
+        Number(parts[2]);
+
+    const date =
+        new Date(
+            year,
+            month - 1,
+            day
+        );
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+        return String(value);
+    }
+
+    return date.toLocaleDateString(
+        "en-US",
+        {
+            month:
+                "long",
+            day:
+                "numeric",
+            year:
+                "numeric"
+        }
+    );
+}
+
+
 function formatDate(
     value
 ) {
@@ -130,21 +272,26 @@ function formatDate(
 }
 
 
-/* --------------------------------------------------
+/* ======================================================
    LEVEL OPTIONS
--------------------------------------------------- */
+   ====================================================== */
 
 function updateLevelOptions() {
+
+    if (
+        !changeTypeEl ||
+        !newLevelEl
+    ) {
+        return;
+    }
 
     const levels =
         changeTypeEl.value === "fire"
             ? FIRE_LEVELS
             : IFPL_LEVELS;
 
-
     newLevelEl.innerHTML =
         "";
-
 
     levels.forEach(
         level => {
@@ -168,9 +315,9 @@ function updateLevelOptions() {
 }
 
 
-/* --------------------------------------------------
+/* ======================================================
    IFPL SCOPE CONTROLS
--------------------------------------------------- */
+   ====================================================== */
 
 function getIfplScopeContainer() {
 
@@ -215,25 +362,22 @@ function updateIfplZoneControls() {
     const scopeEl =
         getIfplScopeEl();
 
-
     if (
         !scopeEl ||
         !scopeContainer ||
-        !zoneContainer
+        !zoneContainer ||
+        !changeTypeEl
     ) {
         return;
     }
 
-
     const isIFPL =
         changeTypeEl.value === "ifpl";
-
 
     scopeContainer.style.display =
         isIFPL
             ? ""
             : "none";
-
 
     zoneContainer.style.display =
         isIFPL &&
@@ -243,9 +387,9 @@ function updateIfplZoneControls() {
 }
 
 
-/* --------------------------------------------------
+/* ======================================================
    LOAD ADMIN DATA
--------------------------------------------------- */
+   ====================================================== */
 
 async function loadAdminData() {
 
@@ -262,10 +406,8 @@ async function loadAdminData() {
                 }
             );
 
-
         const data =
             await response.json();
-
 
         if (
             !response.ok ||
@@ -276,9 +418,7 @@ async function loadAdminData() {
                 data.error ||
                 "Unable to load administrative data."
             );
-
         }
-
 
         renderCurrentConditions(
             data
@@ -308,9 +448,70 @@ async function loadAdminData() {
 }
 
 
-/* --------------------------------------------------
+/* ======================================================
+   LOAD FIRE SEASON DATA
+   ====================================================== */
+
+async function loadFireSeasonData() {
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/fire-season`,
+                {
+                    credentials:
+                        "same-origin",
+                    cache:
+                        "no-store"
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+                data.error ||
+                "Unable to load fire season data."
+            );
+        }
+
+        renderFireSeason(
+            data
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Fire season loading error:",
+            error
+        );
+
+        if (
+            fireSeasonHistoryContainer
+        ) {
+
+            fireSeasonHistoryContainer.innerHTML =
+                "<p>Unable to load fire season history.</p>";
+        }
+
+        showMessage(
+            "Unable to load fire season data.",
+            "error"
+        );
+    }
+}
+
+
+/* ======================================================
    CURRENT CONDITIONS
--------------------------------------------------- */
+   ====================================================== */
 
 function renderCurrentConditions(
     data
@@ -319,19 +520,23 @@ function renderCurrentConditions(
     const fireRestriction =
         data.current?.fire_restrictions;
 
-
     const currentFireEffectiveEl =
         document.getElementById(
             "currentFireEffective"
         );
 
+    if (
+        currentFireLevelEl
+    ) {
 
-    currentFireLevelEl.textContent =
-        fireRestriction?.level ||
-        "Not set";
+        currentFireLevelEl.textContent =
+            fireRestriction?.level ||
+            "Not set";
+    }
 
-
-    if (currentFireEffectiveEl) {
+    if (
+        currentFireEffectiveEl
+    ) {
 
         currentFireEffectiveEl.textContent =
             fireRestriction?.effective_at
@@ -353,7 +558,7 @@ function renderCurrentConditions(
 
     /*
      * If zone-aware IFPL data exists,
-     * display all four zones.
+     * display all zones.
      */
     if (
         ifplZones.length > 0
@@ -368,16 +573,20 @@ function renderCurrentConditions(
 
 
     /*
-     * Temporary legacy fallback while
-     * the transition is in progress.
+     * Temporary legacy fallback.
      */
     const legacyIfpl =
         data.current?.ifpl;
 
 
-    currentIfplEl.innerHTML =
-        legacyIfpl?.level ||
-        "Not set";
+    if (
+        currentIfplEl
+    ) {
+
+        currentIfplEl.innerHTML =
+            legacyIfpl?.level ||
+            "Not set";
+    }
 
 
     const currentIfplEffectiveEl =
@@ -386,7 +595,9 @@ function renderCurrentConditions(
         );
 
 
-    if (currentIfplEffectiveEl) {
+    if (
+        currentIfplEffectiveEl
+    ) {
 
         currentIfplEffectiveEl.textContent =
             legacyIfpl?.effective_at
@@ -399,13 +610,20 @@ function renderCurrentConditions(
 }
 
 
-/* --------------------------------------------------
+/* ======================================================
    CURRENT IFPL ZONES
--------------------------------------------------- */
+   ====================================================== */
 
 function renderCurrentIfplZones(
     zones
 ) {
+
+    if (
+        !currentIfplEl
+    ) {
+        return;
+    }
+
 
     currentIfplEl.innerHTML =
         "";
@@ -420,8 +638,15 @@ function renderCurrentIfplZones(
         "ifpl-zone-list";
 
 
-    zones.forEach(
-        zone => {
+    IFPL_ZONES.forEach(
+        zoneName => {
+
+            const zone =
+                zones.find(
+                    record =>
+                        record.zone === zoneName
+                );
+
 
             const item =
                 document.createElement(
@@ -432,28 +657,81 @@ function renderCurrentIfplZones(
                 "ifpl-zone-item";
 
 
-            const zoneName =
+            const zoneNameEl =
                 document.createElement(
                     "div"
                 );
 
-            zoneName.className =
+            zoneNameEl.className =
                 "ifpl-zone-name";
 
-            zoneName.textContent =
-                zone.zone;
+            zoneNameEl.textContent =
+                zoneName;
 
 
-            const zoneLevel =
+            const pill =
                 document.createElement(
                     "div"
                 );
 
-            zoneLevel.className =
-                "ifpl-zone-level";
+            pill.className =
+                "status-pill status-high";
 
-            zoneLevel.textContent =
-                zone.level;
+
+            const dot =
+                document.createElement(
+                    "span"
+                );
+
+            dot.className =
+                "status-dot";
+
+            dot.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+
+            const levelEl =
+                document.createElement(
+                    "span"
+                );
+
+            levelEl.className =
+                "status-text ifpl-zone-level";
+
+            levelEl.textContent =
+                zone?.level ||
+                "Not set";
+
+
+            pill.appendChild(
+                dot
+            );
+
+            pill.appendChild(
+                levelEl
+            );
+
+
+            const level =
+                zone?.level ||
+                "Not set";
+
+
+            pill.classList.remove(
+                "status-low",
+                "status-moderate",
+                "status-high",
+                "status-extreme"
+            );
+
+
+            pill.classList.add(
+                getStatusClass(
+                    level
+                )
+            );
 
 
             const zoneEffective =
@@ -465,7 +743,7 @@ function renderCurrentIfplZones(
                 "ifpl-zone-effective";
 
             zoneEffective.textContent =
-                zone.effective_at
+                zone?.effective_at
                     ? "Effective: " +
                       formatPacificDate(
                           zone.effective_at
@@ -474,11 +752,11 @@ function renderCurrentIfplZones(
 
 
             item.appendChild(
-                zoneName
+                zoneNameEl
             );
 
             item.appendChild(
-                zoneLevel
+                pill
             );
 
             item.appendChild(
@@ -504,7 +782,9 @@ function renderCurrentIfplZones(
         );
 
 
-    if (legacyEffectiveEl) {
+    if (
+        legacyEffectiveEl
+    ) {
 
         legacyEffectiveEl.textContent =
             "";
@@ -512,9 +792,726 @@ function renderCurrentIfplZones(
 }
 
 
-/* --------------------------------------------------
+/* ======================================================
+   STATUS CLASS
+   ====================================================== */
+
+function getStatusClass(
+    level
+) {
+
+    if (!level) {
+        return "status-high";
+    }
+
+
+    const normalized =
+        String(level)
+            .toUpperCase();
+
+
+    if (
+        normalized === "LOW"
+    ) {
+        return "status-low";
+    }
+
+
+    if (
+        normalized === "MODERATE"
+    ) {
+        return "status-moderate";
+    }
+
+
+    if (
+        normalized === "HIGH"
+    ) {
+        return "status-high";
+    }
+
+
+    if (
+        normalized === "EXTREME"
+    ) {
+        return "status-extreme";
+    }
+
+
+    return "status-high";
+}
+
+
+/* ======================================================
+   FIRE SEASON
+   ====================================================== */
+
+function renderFireSeason(
+    data
+) {
+
+    const current =
+        data.current;
+
+
+    const history =
+        Array.isArray(
+            data.history
+        )
+            ? data.history
+            : [];
+
+
+    /*
+     * Active season.
+     */
+    if (
+        current
+    ) {
+
+        if (
+            seasonStatusEl
+        ) {
+
+            seasonStatusEl.textContent =
+                "ACTIVE";
+
+            seasonStatusEl.className =
+                "season-status active";
+        }
+
+
+        if (
+            seasonYearEl
+        ) {
+
+            seasonYearEl.textContent =
+                current.year;
+        }
+
+
+        if (
+            seasonStartDateEl
+        ) {
+
+            seasonStartDateEl.textContent =
+                formatDateOnly(
+                    current.start_date
+                );
+        }
+
+
+        if (
+            seasonEndDateEl
+        ) {
+
+            seasonEndDateEl.textContent =
+                current.end_date
+                    ? formatDateOnly(
+                        current.end_date
+                    )
+                    : "—";
+        }
+
+
+        if (
+            endSeasonControlsEl
+        ) {
+
+            endSeasonControlsEl.style.display =
+                "";
+        }
+
+
+        if (
+            startSeasonPanel
+        ) {
+
+            startSeasonPanel.style.display =
+                "none";
+        }
+
+
+        /*
+         * Set a sensible default year/date
+         * for the next season form.
+         */
+        const nextYear =
+            Number(current.year) + 1;
+
+
+        if (
+            newSeasonYearEl
+        ) {
+
+            newSeasonYearEl.value =
+                nextYear;
+        }
+
+
+        /*
+         * History is still displayed below.
+         */
+        renderFireSeasonHistory(
+            history
+        );
+
+        return;
+    }
+
+
+    /*
+     * No active season.
+     */
+    if (
+        currentSeasonPanel
+    ) {
+
+        currentSeasonPanel.style.display =
+            "";
+    }
+
+
+    if (
+        seasonStatusEl
+    ) {
+
+        seasonStatusEl.textContent =
+            "INACTIVE";
+
+        seasonStatusEl.className =
+            "season-status inactive";
+    }
+
+
+    /*
+     * Show most recent completed season
+     * in the current panel.
+     */
+    const mostRecentSeason =
+        history.length > 0
+            ? history[0]
+            : null;
+
+
+    if (
+        mostRecentSeason
+    ) {
+
+        if (
+            seasonYearEl
+        ) {
+
+            seasonYearEl.textContent =
+                mostRecentSeason.year;
+        }
+
+
+        if (
+            seasonStartDateEl
+        ) {
+
+            seasonStartDateEl.textContent =
+                formatDateOnly(
+                    mostRecentSeason.start_date
+                );
+        }
+
+
+        if (
+            seasonEndDateEl
+        ) {
+
+            seasonEndDateEl.textContent =
+                mostRecentSeason.end_date
+                    ? formatDateOnly(
+                        mostRecentSeason.end_date
+                    )
+                    : "—";
+        }
+
+    } else {
+
+        if (
+            seasonYearEl
+        ) {
+
+            seasonYearEl.textContent =
+                "—";
+        }
+
+
+        if (
+            seasonStartDateEl
+        ) {
+
+            seasonStartDateEl.textContent =
+                "—";
+        }
+
+
+        if (
+            seasonEndDateEl
+        ) {
+
+            seasonEndDateEl.textContent =
+                "—";
+        }
+    }
+
+
+    /*
+     * No active season means the End control
+     * should not be shown.
+     */
+    if (
+        endSeasonControlsEl
+    ) {
+
+        endSeasonControlsEl.style.display =
+            "none";
+    }
+
+
+    /*
+     * Show Start New Fire Season.
+     */
+    if (
+        startSeasonPanel
+    ) {
+
+        startSeasonPanel.style.display =
+            "";
+    }
+
+
+    /*
+     * Default next season year.
+     */
+    if (
+        newSeasonYearEl
+    ) {
+
+        const suggestedYear =
+            mostRecentSeason
+                ? Number(
+                    mostRecentSeason.year
+                ) + 1
+                : new Date()
+                    .getFullYear();
+
+        newSeasonYearEl.value =
+            suggestedYear;
+    }
+
+
+    renderFireSeasonHistory(
+        history
+    );
+}
+
+
+/* ======================================================
+   FIRE SEASON HISTORY
+   ====================================================== */
+
+function renderFireSeasonHistory(
+    history
+) {
+
+    if (
+        !fireSeasonHistoryContainer
+    ) {
+        return;
+    }
+
+
+    if (
+        history.length === 0
+    ) {
+
+        fireSeasonHistoryContainer.innerHTML =
+            "<p>No fire season history available.</p>";
+
+        return;
+    }
+
+
+    const table =
+        document.createElement(
+            "table"
+        );
+
+
+    table.innerHTML = `
+        <thead>
+            <tr>
+                <th>Season</th>
+                <th>Status</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    `;
+
+
+    const tbody =
+        table.querySelector(
+            "tbody"
+        );
+
+
+    history.forEach(
+        season => {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            const statusClass =
+                season.status === "ACTIVE"
+                    ? "scheduled"
+                    : "";
+
+
+            row.innerHTML = `
+                <td>
+                    ${escapeHtml(
+                        season.year
+                    )}
+                </td>
+
+                <td>
+                    <span class="status ${statusClass}">
+                        ${escapeHtml(
+                            season.status
+                        )}
+                    </span>
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        formatDateOnly(
+                            season.start_date
+                        )
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        formatDateOnly(
+                            season.end_date
+                        )
+                    )}
+                </td>
+            `;
+
+
+            tbody.appendChild(
+                row
+            );
+        }
+    );
+
+
+    fireSeasonHistoryContainer.innerHTML =
+        "";
+
+
+    fireSeasonHistoryContainer.appendChild(
+        table
+    );
+}
+
+
+/* ======================================================
+   END FIRE SEASON
+   ====================================================== */
+
+async function endFireSeason() {
+
+    if (
+        !endSeasonDateEl ||
+        !endSeasonButton
+    ) {
+        return;
+    }
+
+
+    const endDate =
+        endSeasonDateEl.value;
+
+
+    if (!endDate) {
+
+        showMessage(
+            "Please enter the fire season end date.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    const confirmed =
+        window.confirm(
+            `End the current fire season on ${formatDateOnly(
+                endDate
+            )}?\n\n` +
+            "The current season will be marked INACTIVE " +
+            "and the end date will be permanently recorded."
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    endSeasonButton.disabled =
+        true;
+
+    endSeasonButton.textContent =
+        "Ending Fire Season...";
+
+
+    clearMessage();
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/fire-season`,
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    credentials:
+                        "same-origin",
+
+                    body:
+                        JSON.stringify({
+                            action:
+                                "END",
+                            endDate
+                        })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+                data.error ||
+                "Unable to end fire season."
+            );
+        }
+
+
+        showMessage(
+            "Fire season ended successfully.",
+            "success"
+        );
+
+
+        endSeasonDateEl.value =
+            "";
+
+
+        await loadFireSeasonData();
+
+
+    } catch (error) {
+
+        console.error(
+            "End fire season error:",
+            error
+        );
+
+
+        showMessage(
+            error.message ||
+            "Unable to end fire season.",
+            "error"
+        );
+
+
+    } finally {
+
+        endSeasonButton.disabled =
+            false;
+
+        endSeasonButton.textContent =
+            "End Fire Season";
+    }
+}
+
+
+/* ======================================================
+   START NEW FIRE SEASON
+   ====================================================== */
+
+async function startFireSeason() {
+
+    if (
+        !newSeasonYearEl ||
+        !newSeasonStartDateEl ||
+        !startSeasonButton
+    ) {
+        return;
+    }
+
+
+    const year =
+        Number(
+            newSeasonYearEl.value
+        );
+
+
+    const startDate =
+        newSeasonStartDateEl.value;
+
+
+    if (
+        !Number.isInteger(year) ||
+        !startDate
+    ) {
+
+        showMessage(
+            "Please enter a fire season year and start date.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    const confirmed =
+        window.confirm(
+            `Start fire season ${year} on ${formatDateOnly(
+                startDate
+            )}?\n\n` +
+            "This will create a new historical fire season record."
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    startSeasonButton.disabled =
+        true;
+
+    startSeasonButton.textContent =
+        "Starting Fire Season...";
+
+
+    clearMessage();
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/fire-season`,
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    credentials:
+                        "same-origin",
+
+                    body:
+                        JSON.stringify({
+                            action:
+                                "START",
+                            year,
+                            startDate
+                        })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+                data.error ||
+                "Unable to start fire season."
+            );
+        }
+
+
+        showMessage(
+            "Fire season started successfully.",
+            "success"
+        );
+
+
+        newSeasonStartDateEl.value =
+            "";
+
+
+        await loadFireSeasonData();
+
+
+    } catch (error) {
+
+        console.error(
+            "Start fire season error:",
+            error
+        );
+
+
+        showMessage(
+            error.message ||
+            "Unable to start fire season.",
+            "error"
+        );
+
+
+    } finally {
+
+        startSeasonButton.disabled =
+            false;
+
+        startSeasonButton.textContent =
+            "Start Fire Season";
+    }
+}
+
+
+/* ======================================================
    UPCOMING CHANGES
--------------------------------------------------- */
+   ====================================================== */
 
 function renderUpcomingChanges(
     data
@@ -697,7 +1694,6 @@ function renderUpcomingChanges(
                         group.level,
                         group.effective_at
                     );
-
                 }
             );
 
@@ -718,9 +1714,9 @@ function renderUpcomingChanges(
 }
 
 
-/* --------------------------------------------------
+/* ======================================================
    GROUP UPCOMING CHANGES
--------------------------------------------------- */
+   ====================================================== */
 
 function groupUpcomingChanges(
     records
@@ -741,7 +1737,9 @@ function groupUpcomingChanges(
 
 
             if (
-                !groups.has(key)
+                !groups.has(
+                    key
+                )
             ) {
 
                 groups.set(
@@ -778,9 +1776,9 @@ function groupUpcomingChanges(
 }
 
 
-/* --------------------------------------------------
+/* ======================================================
    CANCEL FUTURE SCHEDULED CHANGE
--------------------------------------------------- */
+   ====================================================== */
 
 async function cancelScheduledChange(
     id,
@@ -799,7 +1797,7 @@ async function cancelScheduledChange(
             formatPacificDate(
                 effectiveAt
             )
-    );
+        );
 
 
     if (!confirmed) {
@@ -883,9 +1881,9 @@ async function cancelScheduledChange(
 }
 
 
-/* --------------------------------------------------
+/* ======================================================
    CHANGE HISTORY
--------------------------------------------------- */
+   ====================================================== */
 
 function renderHistory(
     data
@@ -1038,9 +2036,9 @@ function renderHistory(
 }
 
 
-/* --------------------------------------------------
+/* ======================================================
    SCHEDULE CHANGE
--------------------------------------------------- */
+   ====================================================== */
 
 scheduleForm.addEventListener(
     "submit",
@@ -1408,14 +2406,13 @@ scheduleForm.addEventListener(
             submitButton.textContent =
                 "Schedule Change";
         }
-
     }
 );
 
 
-/* --------------------------------------------------
+/* ======================================================
    HELPERS
--------------------------------------------------- */
+   ====================================================== */
 
 function escapeHtml(
     value
@@ -1447,29 +2444,60 @@ function escapeHtml(
 }
 
 
-/* --------------------------------------------------
+/* ======================================================
    INITIALIZE
--------------------------------------------------- */
+   ====================================================== */
 
-changeTypeEl.addEventListener(
-    "change",
-    () => {
+if (
+    changeTypeEl
+) {
 
-        updateLevelOptions();
+    changeTypeEl.addEventListener(
+        "change",
+        () => {
 
-        updateIfplZoneControls();
-    }
-);
+            updateLevelOptions();
+
+            updateIfplZoneControls();
+        }
+    );
+
+}
 
 
 const initialScopeEl =
     getIfplScopeEl();
 
-if (initialScopeEl) {
+
+if (
+    initialScopeEl
+) {
 
     initialScopeEl.addEventListener(
         "change",
         updateIfplZoneControls
+    );
+}
+
+
+if (
+    endSeasonButton
+) {
+
+    endSeasonButton.addEventListener(
+        "click",
+        endFireSeason
+    );
+}
+
+
+if (
+    startSeasonButton
+) {
+
+    startSeasonButton.addEventListener(
+        "click",
+        startFireSeason
     );
 }
 
@@ -1479,3 +2507,5 @@ updateLevelOptions();
 updateIfplZoneControls();
 
 loadAdminData();
+
+loadFireSeasonData();
