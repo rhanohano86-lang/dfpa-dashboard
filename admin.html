@@ -288,6 +288,65 @@
 
 
         /* --------------------------------------------------
+           SEASON STATISTICS
+        -------------------------------------------------- */
+
+        .season-statistics {
+            grid-column: 1 / -1;
+            margin-top: 2px;
+            padding-top: 22px;
+            border-top: 1px solid var(--border);
+        }
+
+
+        .season-statistics .season-management-title {
+            margin-bottom: 16px;
+        }
+
+
+        .season-stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.6fr;
+            gap: 20px;
+        }
+
+
+        .season-stat-panel {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+
+        .season-stat-panel h4 {
+            margin: 0 0 14px;
+            font-size: 14px;
+        }
+
+
+        .season-stat-panel table {
+            width: 100%;
+        }
+
+
+        .season-stat-panel th,
+        .season-stat-panel td {
+            padding: 9px 8px;
+        }
+
+
+        .season-stat-panel td:last-child {
+            font-weight: bold;
+            text-align: right;
+        }
+
+
+        .season-stat-panel .ifpl-stat-table {
+            min-width: 520px;
+        }
+
+
+        /* --------------------------------------------------
            FORM
         -------------------------------------------------- */
 
@@ -509,7 +568,8 @@
 
             .current-grid,
             .fire-season-management,
-            .form-grid {
+            .form-grid,
+            .season-stat-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -521,6 +581,11 @@
 
             .ifpl-zone-list {
                 grid-template-columns: 1fr;
+            }
+
+
+            .season-statistics {
+                grid-column: auto;
             }
 
 
@@ -543,6 +608,16 @@
             table {
                 display: block;
                 overflow-x: auto;
+            }
+
+
+            .season-history table {
+                min-width: 650px;
+            }
+
+
+            .season-stat-panel .ifpl-stat-table {
+                min-width: 520px;
             }
 
         }
@@ -878,6 +953,22 @@
 
                     </div>
 
+
+                    <div class="season-detail-row">
+
+                        <span class="season-detail-label">
+                            Total Days
+                        </span>
+
+                        <span
+                            class="season-detail-value"
+                            id="seasonTotalDays"
+                        >
+                            —
+                        </span>
+
+                    </div>
+
                 </div>
 
 
@@ -975,6 +1066,142 @@
                 >
                     Start Fire Season
                 </button>
+
+            </div>
+
+
+            <!-- SEASON STATISTICS -->
+
+            <div
+                class="season-statistics"
+                id="seasonStatistics"
+            >
+
+                <h3 class="season-management-title">
+                    Season Statistics
+                </h3>
+
+
+                <div class="season-stat-grid">
+
+
+                    <!-- FIRE DANGER STATISTICS -->
+
+                    <div class="season-stat-panel">
+
+                        <h4>
+                            Fire Danger &amp; Public Use Restrictions
+                        </h4>
+
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>Level</th>
+                                    <th>Days</th>
+                                </tr>
+                            </thead>
+
+
+                            <tbody id="fireSeasonStatsBody">
+
+                                <tr>
+                                    <td>LOW</td>
+                                    <td>—</td>
+                                </tr>
+
+                                <tr>
+                                    <td>MODERATE</td>
+                                    <td>—</td>
+                                </tr>
+
+                                <tr>
+                                    <td>HIGH</td>
+                                    <td>—</td>
+                                </tr>
+
+                                <tr>
+                                    <td>EXTREME</td>
+                                    <td>—</td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+
+                    <!-- IFPL STATISTICS -->
+
+                    <div class="season-stat-panel">
+
+                        <h4>
+                            Industrial Fire Precaution Levels
+                        </h4>
+
+
+                        <div class="season-history">
+
+                            <table class="ifpl-stat-table">
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Zone</th>
+                                        <th>Level 1</th>
+                                        <th>Level 2</th>
+                                        <th>Level 3</th>
+                                        <th>Level 4</th>
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody id="ifplSeasonStatsBody">
+
+                                    <tr>
+                                        <td>DG-1</td>
+                                        <td>—</td>
+                                        <td>—</td>
+                                        <td>—</td>
+                                        <td>—</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>DG-2</td>
+                                        <td>—</td>
+                                        <td>—</td>
+                                        <td>—</td>
+                                        <td>—</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>UA-1</td>
+                                        <td>—</td>
+                                        <td>—</td>
+                                        <td>—</td>
+                                        <td>—</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>UA-2</td>
+                                        <td>—</td>
+                                        <td>—</td>
+                                        <td>—</td>
+                                        <td>—</td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
 
             </div>
 
