@@ -14,13 +14,34 @@ const IFPL_LEVELS = [
     "LEVEL 4"
 ];
 
-const messageEl = document.getElementById("message");
-const scheduleForm = document.getElementById("scheduleForm");
-const changeTypeEl = document.getElementById("changeType");
-const newLevelEl = document.getElementById("newLevel");
-const effectiveDateEl = document.getElementById("effectiveDate");
-const effectiveTimeEl = document.getElementById("effectiveTime");
-const notesEl = document.getElementById("notes");
+const IFPL_ZONES = [
+    "DG-1",
+    "DG-2",
+    "UA-1",
+    "UA-2"
+];
+
+
+const messageEl =
+    document.getElementById("message");
+
+const scheduleForm =
+    document.getElementById("scheduleForm");
+
+const changeTypeEl =
+    document.getElementById("changeType");
+
+const newLevelEl =
+    document.getElementById("newLevel");
+
+const effectiveDateEl =
+    document.getElementById("effectiveDate");
+
+const effectiveTimeEl =
+    document.getElementById("effectiveTime");
+
+const notesEl =
+    document.getElementById("notes");
 
 const currentFireLevelEl =
     document.getElementById("currentFireLevel");
@@ -39,80 +60,24 @@ const historyContainer =
    MESSAGES
 -------------------------------------------------- */
 
-function showMessage(text, type = "success") {
+function showMessage(
+    text,
+    type = "success"
+) {
+
     messageEl.textContent = text;
-    messageEl.className = `message ${type}`;
+
+    messageEl.className =
+        `message ${type}`;
 }
+
 
 function clearMessage() {
+
     messageEl.textContent = "";
-    messageEl.className = "message";
-}
 
-
-/* --------------------------------------------------
-   LEVEL OPTIONS
--------------------------------------------------- */
-
-function updateLevelOptions() {
-    const levels =
-        changeTypeEl.value === "fire"
-            ? FIRE_LEVELS
-            : IFPL_LEVELS;
-
-    newLevelEl.innerHTML = "";
-
-    levels.forEach(level => {
-        const option = document.createElement("option");
-
-        option.value = level;
-        option.textContent = level;
-
-        newLevelEl.appendChild(option);
-    });
-}
-
-
-/* --------------------------------------------------
-   LOAD ADMIN DATA
--------------------------------------------------- */
-
-async function loadAdminData() {
-    try {
-        const response = await fetch(
-            `${API_BASE}/admin-data`,
-            {
-                credentials: "same-origin",
-                cache: "no-store"
-            }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-            throw new Error(
-                data.error ||
-                "Unable to load administrative data."
-            );
-        }
-
-        console.log("Admin data loaded:", data);
-
-        renderCurrentConditions(data);
-        renderUpcomingChanges(data);
-        renderHistory(data);
-
-    } catch (error) {
-        console.error(
-            "Admin data loading error:",
-            error
-        );
-
-        showMessage(
-            "Unable to load administrative data.",
-            "error"
-        );
-    }
+    messageEl.className =
+        "message";
 }
 
 
@@ -120,7 +85,9 @@ async function loadAdminData() {
    FORMAT PACIFIC DATE
 -------------------------------------------------- */
 
-function formatPacificDate(value) {
+function formatPacificDate(
+    value
+) {
 
     const date =
         new Date(value);
@@ -136,14 +103,208 @@ function formatPacificDate(value) {
     return date.toLocaleString(
         "en-US",
         {
-            timeZone: "America/Los_Angeles",
-            month: "long",
-            day: "numeric",
-            year: "numeric",
-            hour: "numeric",
-            minute: "2-digit"
+            timeZone:
+                "America/Los_Angeles",
+            month:
+                "long",
+            day:
+                "numeric",
+            year:
+                "numeric",
+            hour:
+                "numeric",
+            minute:
+                "2-digit"
         }
     );
+}
+
+
+function formatDate(
+    value
+) {
+
+    return formatPacificDate(
+        value
+    );
+}
+
+
+/* --------------------------------------------------
+   LEVEL OPTIONS
+-------------------------------------------------- */
+
+function updateLevelOptions() {
+
+    const levels =
+        changeTypeEl.value === "fire"
+            ? FIRE_LEVELS
+            : IFPL_LEVELS;
+
+
+    newLevelEl.innerHTML =
+        "";
+
+
+    levels.forEach(
+        level => {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                level;
+
+            option.textContent =
+                level;
+
+            newLevelEl.appendChild(
+                option
+            );
+        }
+    );
+}
+
+
+/* --------------------------------------------------
+   IFPL SCOPE CONTROLS
+-------------------------------------------------- */
+
+function getIfplScopeContainer() {
+
+    return document.getElementById(
+        "ifplScopeContainer"
+    );
+}
+
+
+function getIfplZoneContainer() {
+
+    return document.getElementById(
+        "ifplZoneContainer"
+    );
+}
+
+
+function getIfplScopeEl() {
+
+    return document.getElementById(
+        "ifplScope"
+    );
+}
+
+
+function getIfplZoneEl() {
+
+    return document.getElementById(
+        "ifplZone"
+    );
+}
+
+
+function updateIfplZoneControls() {
+
+    const scopeContainer =
+        getIfplScopeContainer();
+
+    const zoneContainer =
+        getIfplZoneContainer();
+
+    const scopeEl =
+        getIfplScopeEl();
+
+
+    if (
+        !scopeEl ||
+        !scopeContainer ||
+        !zoneContainer
+    ) {
+        return;
+    }
+
+
+    const isIFPL =
+        changeTypeEl.value === "ifpl";
+
+
+    scopeContainer.style.display =
+        isIFPL
+            ? ""
+            : "none";
+
+
+    zoneContainer.style.display =
+        isIFPL &&
+        scopeEl.value === "zone"
+            ? ""
+            : "none";
+}
+
+
+/* --------------------------------------------------
+   LOAD ADMIN DATA
+-------------------------------------------------- */
+
+async function loadAdminData() {
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/admin-data`,
+                {
+                    credentials:
+                        "same-origin",
+                    cache:
+                        "no-store"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+                data.error ||
+                "Unable to load administrative data."
+            );
+
+        }
+
+
+        renderCurrentConditions(
+            data
+        );
+
+        renderUpcomingChanges(
+            data
+        );
+
+        renderHistory(
+            data
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Admin data loading error:",
+            error
+        );
+
+        showMessage(
+            "Unable to load administrative data.",
+            "error"
+        );
+    }
 }
 
 
@@ -151,22 +312,17 @@ function formatPacificDate(value) {
    CURRENT CONDITIONS
 -------------------------------------------------- */
 
-function renderCurrentConditions(data) {
+function renderCurrentConditions(
+    data
+) {
 
     const fireRestriction =
         data.current?.fire_restrictions;
 
-    const ifpl =
-        data.current?.ifpl;
 
     const currentFireEffectiveEl =
         document.getElementById(
             "currentFireEffective"
-        );
-
-    const currentIfplEffectiveEl =
-        document.getElementById(
-            "currentIfplEffective"
         );
 
 
@@ -174,34 +330,195 @@ function renderCurrentConditions(data) {
         fireRestriction?.level ||
         "Not set";
 
-    currentIfplEl.textContent =
-        ifpl?.level ||
+
+    if (currentFireEffectiveEl) {
+
+        currentFireEffectiveEl.textContent =
+            fireRestriction?.effective_at
+                ? "Effective: " +
+                  formatPacificDate(
+                      fireRestriction.effective_at
+                  )
+                : "Effective: —";
+    }
+
+
+    const ifplZones =
+        Array.isArray(
+            data.current?.ifpl_zones
+        )
+            ? data.current.ifpl_zones
+            : [];
+
+
+    /*
+     * If zone-aware IFPL data exists,
+     * display all four zones.
+     */
+    if (
+        ifplZones.length > 0
+    ) {
+
+        renderCurrentIfplZones(
+            ifplZones
+        );
+
+        return;
+    }
+
+
+    /*
+     * Temporary legacy fallback while
+     * the transition is in progress.
+     */
+    const legacyIfpl =
+        data.current?.ifpl;
+
+
+    currentIfplEl.innerHTML =
+        legacyIfpl?.level ||
         "Not set";
 
 
-    currentFireEffectiveEl.textContent =
-        fireRestriction?.effective_at
-            ? "Effective: " +
-              formatPacificDate(
-                  fireRestriction.effective_at
-              )
-            : "Effective: —";
+    const currentIfplEffectiveEl =
+        document.getElementById(
+            "currentIfplEffective"
+        );
 
 
-    currentIfplEffectiveEl.textContent =
-        ifpl?.effective_at
-            ? "Effective: " +
-              formatPacificDate(
-                  ifpl.effective_at
-              )
-            : "Effective: —";
+    if (currentIfplEffectiveEl) {
+
+        currentIfplEffectiveEl.textContent =
+            legacyIfpl?.effective_at
+                ? "Effective: " +
+                  formatPacificDate(
+                      legacyIfpl.effective_at
+                  )
+                : "Effective: —";
+    }
 }
+
+
+/* --------------------------------------------------
+   CURRENT IFPL ZONES
+-------------------------------------------------- */
+
+function renderCurrentIfplZones(
+    zones
+) {
+
+    currentIfplEl.innerHTML =
+        "";
+
+
+    const wrapper =
+        document.createElement(
+            "div"
+        );
+
+    wrapper.className =
+        "ifpl-zone-list";
+
+
+    zones.forEach(
+        zone => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "ifpl-zone-item";
+
+
+            const zoneName =
+                document.createElement(
+                    "div"
+                );
+
+            zoneName.className =
+                "ifpl-zone-name";
+
+            zoneName.textContent =
+                zone.zone;
+
+
+            const zoneLevel =
+                document.createElement(
+                    "div"
+                );
+
+            zoneLevel.className =
+                "ifpl-zone-level";
+
+            zoneLevel.textContent =
+                zone.level;
+
+
+            const zoneEffective =
+                document.createElement(
+                    "div"
+                );
+
+            zoneEffective.className =
+                "ifpl-zone-effective";
+
+            zoneEffective.textContent =
+                zone.effective_at
+                    ? "Effective: " +
+                      formatPacificDate(
+                          zone.effective_at
+                      )
+                    : "Effective: —";
+
+
+            item.appendChild(
+                zoneName
+            );
+
+            item.appendChild(
+                zoneLevel
+            );
+
+            item.appendChild(
+                zoneEffective
+            );
+
+
+            wrapper.appendChild(
+                item
+            );
+        }
+    );
+
+
+    currentIfplEl.appendChild(
+        wrapper
+    );
+
+
+    const legacyEffectiveEl =
+        document.getElementById(
+            "currentIfplEffective"
+        );
+
+
+    if (legacyEffectiveEl) {
+
+        legacyEffectiveEl.textContent =
+            "";
+    }
+}
+
 
 /* --------------------------------------------------
    UPCOMING CHANGES
 -------------------------------------------------- */
 
-function renderUpcomingChanges(data) {
+function renderUpcomingChanges(
+    data
+) {
 
     const fireChanges =
         Array.isArray(
@@ -211,40 +528,52 @@ function renderUpcomingChanges(data) {
                 record => ({
                     ...record,
                     changeType:
-                        "Fire Danger & Public Use Restrictions",
+                        "Fire Danger Level & Public Use Restrictions",
                     tableName:
-                        "fire_restrictions"
+                        "fire_restrictions",
+                    changeGroupId:
+                        null
                 })
             )
             : [];
 
+
     const ifplChanges =
         Array.isArray(
-            data.upcoming?.ifpl
+            data.upcoming?.ifpl_zones
         )
-            ? data.upcoming.ifpl.map(
+            ? data.upcoming.ifpl_zones.map(
                 record => ({
                     ...record,
                     changeType:
                         "Industrial Fire Precaution Level",
                     tableName:
-                        "ifpl_schedule"
+                        "ifpl_schedule_zoned",
+                    changeGroupId:
+                        record.change_group_id
                 })
             )
             : [];
 
 
-    const upcoming = [
-        ...fireChanges,
-        ...ifplChanges
-    ].sort(
-        (a, b) =>
-            new Date(a.effective_at) -
-            new Date(b.effective_at)
-    );
+    const upcoming =
+        [
+            ...fireChanges,
+            ...ifplChanges
+        ].sort(
+            (a, b) =>
+                new Date(
+                    a.effective_at
+                ) -
+                new Date(
+                    b.effective_at
+                )
+        );
 
 
-    if (upcoming.length === 0) {
+    if (
+        upcoming.length === 0
+    ) {
 
         upcomingContainer.innerHTML =
             "<p>No upcoming changes scheduled.</p>";
@@ -253,8 +582,16 @@ function renderUpcomingChanges(data) {
     }
 
 
+    const grouped =
+        groupUpcomingChanges(
+            upcoming
+        );
+
+
     const table =
-        document.createElement("table");
+        document.createElement(
+            "table"
+        );
 
 
     table.innerHTML = `
@@ -262,87 +599,184 @@ function renderUpcomingChanges(data) {
             <tr>
                 <th>Change</th>
                 <th>New Level</th>
+                <th>Zones</th>
                 <th>Effective</th>
                 <th>Created By</th>
                 <th>Action</th>
             </tr>
         </thead>
-
         <tbody></tbody>
     `;
 
 
     const tbody =
-        table.querySelector("tbody");
-
-
-    upcoming.forEach(record => {
-
-        const row =
-            document.createElement("tr");
-
-
-        row.innerHTML = `
-            <td>
-                ${escapeHtml(record.changeType)}
-            </td>
-
-            <td>
-                <span class="status scheduled">
-                    ${escapeHtml(record.level)}
-                </span>
-            </td>
-
-            <td>
-                ${formatDate(record.effective_at)}
-            </td>
-
-            <td>
-                ${escapeHtml(record.created_by)}
-            </td>
-
-            <td>
-                <button
-                    type="button"
-                    class="secondary cancel-change-button"
-                >
-                    Cancel
-                </button>
-            </td>
-        `;
-
-
-        const cancelButton =
-            row.querySelector(
-                ".cancel-change-button"
-            );
-
-
-        cancelButton.addEventListener(
-            "click",
-            () => {
-
-                cancelScheduledChange(
-                    record.id,
-                    record.tableName,
-                    record.level,
-                    record.effective_at
-                );
-
-            }
+        table.querySelector(
+            "tbody"
         );
 
 
-        tbody.appendChild(row);
+    grouped.forEach(
+        group => {
 
-    });
+            const row =
+                document.createElement(
+                    "tr"
+                );
 
 
-    upcomingContainer.innerHTML = "";
+            const zonesLabel =
+                group.changeType.includes(
+                    "Industrial Fire"
+                )
+                    ? group.records
+                        .map(
+                            record =>
+                                record.zone
+                        )
+                        .join(", ")
+                    : "All";
 
-    upcomingContainer.appendChild(table);
 
+            row.innerHTML = `
+                <td>
+                    ${escapeHtml(
+                        group.changeType
+                    )}
+                </td>
+
+                <td>
+                    <span class="status scheduled">
+                        ${escapeHtml(
+                            group.level
+                        )}
+                    </span>
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        zonesLabel
+                    )}
+                </td>
+
+                <td>
+                    ${formatDate(
+                        group.effective_at
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        group.created_by
+                    )}
+                </td>
+
+                <td>
+                    <button
+                        type="button"
+                        class="secondary cancel-change-button"
+                    >
+                        Cancel
+                    </button>
+                </td>
+            `;
+
+
+            const cancelButton =
+                row.querySelector(
+                    ".cancel-change-button"
+                );
+
+
+            cancelButton.addEventListener(
+                "click",
+                () => {
+
+                    cancelScheduledChange(
+                        group.records[0].id,
+                        group.tableName,
+                        group.level,
+                        group.effective_at
+                    );
+
+                }
+            );
+
+
+            tbody.appendChild(
+                row
+            );
+        }
+    );
+
+
+    upcomingContainer.innerHTML =
+        "";
+
+    upcomingContainer.appendChild(
+        table
+    );
 }
+
+
+/* --------------------------------------------------
+   GROUP UPCOMING CHANGES
+-------------------------------------------------- */
+
+function groupUpcomingChanges(
+    records
+) {
+
+    const groups =
+        new Map();
+
+
+    records.forEach(
+        record => {
+
+            const key =
+                record.tableName ===
+                    "ifpl_schedule_zoned"
+                    ? `${record.tableName}|${record.changeGroupId}`
+                    : `${record.tableName}|${record.id}`;
+
+
+            if (
+                !groups.has(key)
+            ) {
+
+                groups.set(
+                    key,
+                    {
+                        tableName:
+                            record.tableName,
+                        changeType:
+                            record.changeType,
+                        level:
+                            record.level,
+                        effective_at:
+                            record.effective_at,
+                        created_by:
+                            record.created_by,
+                        records: []
+                    }
+                );
+            }
+
+
+            groups.get(
+                key
+            ).records.push(
+                record
+            );
+        }
+    );
+
+
+    return Array.from(
+        groups.values()
+    );
+}
+
 
 /* --------------------------------------------------
    CANCEL FUTURE SCHEDULED CHANGE
@@ -362,8 +796,11 @@ async function cancelScheduledChange(
             level +
             "\n" +
             "Effective: " +
-            formatPacificDate(effectiveAt)
+            formatPacificDate(
+                effectiveAt
+            )
     );
+
 
     if (!confirmed) {
         return;
@@ -382,19 +819,24 @@ async function cancelScheduledChange(
             await fetch(
                 "/api/admin-delete",
                 {
-                    method: "POST",
+                    method:
+                        "POST",
 
                     headers: {
                         "Content-Type":
                             "application/json"
                     },
 
-                    body: JSON.stringify({
-                        id,
-                        table,
-                        reason:
-                            "Scheduled change cancelled by administrator."
-                    })
+                    credentials:
+                        "same-origin",
+
+                    body:
+                        JSON.stringify({
+                            id,
+                            table,
+                            reason:
+                                "Scheduled change cancelled by administrator."
+                        })
                 }
             );
 
@@ -407,6 +849,7 @@ async function cancelScheduledChange(
             !response.ok ||
             !data.success
         ) {
+
             throw new Error(
                 data.error ||
                 "Unable to cancel the scheduled change."
@@ -430,21 +873,23 @@ async function cancelScheduledChange(
             error
         );
 
+
         showMessage(
             error.message ||
             "Unable to cancel the scheduled change.",
             "error"
         );
-
     }
-
 }
+
 
 /* --------------------------------------------------
    CHANGE HISTORY
 -------------------------------------------------- */
 
-function renderHistory(data) {
+function renderHistory(
+    data
+) {
 
     const fireHistory =
         Array.isArray(
@@ -454,16 +899,17 @@ function renderHistory(data) {
                 record => ({
                     ...record,
                     changeType:
-                        "Fire Danger & Public Use Restrictions"
+                        "Fire Danger Level & Public Use Restrictions"
                 })
             )
             : [];
 
+
     const ifplHistory =
         Array.isArray(
-            data.history?.ifpl
+            data.history?.ifpl_zones
         )
-            ? data.history.ifpl.map(
+            ? data.history.ifpl_zones.map(
                 record => ({
                     ...record,
                     changeType:
@@ -472,72 +918,123 @@ function renderHistory(data) {
             )
             : [];
 
-    const history = [
-        ...fireHistory,
-        ...ifplHistory
-    ].sort(
-        (a, b) =>
-            new Date(b.effective_at) -
-            new Date(a.effective_at)
-    );
 
-    if (history.length === 0) {
+    const history =
+        [
+            ...fireHistory,
+            ...ifplHistory
+        ].sort(
+            (a, b) =>
+                new Date(
+                    b.effective_at
+                ) -
+                new Date(
+                    a.effective_at
+                )
+        );
+
+
+    if (
+        history.length === 0
+    ) {
+
         historyContainer.innerHTML =
             "<p>No change history available.</p>";
+
         return;
     }
 
+
     const table =
-        document.createElement("table");
+        document.createElement(
+            "table"
+        );
+
 
     table.innerHTML = `
         <thead>
             <tr>
                 <th>Change</th>
+                <th>Zone</th>
                 <th>Level</th>
                 <th>Effective</th>
                 <th>Created By</th>
                 <th>Created</th>
             </tr>
         </thead>
+
         <tbody></tbody>
     `;
 
+
     const tbody =
-        table.querySelector("tbody");
+        table.querySelector(
+            "tbody"
+        );
 
-    history.forEach(record => {
 
-        const row =
-            document.createElement("tr");
+    history.forEach(
+        record => {
 
-        row.innerHTML = `
-            <td>
-                ${escapeHtml(record.changeType)}
-            </td>
+            const row =
+                document.createElement(
+                    "tr"
+                );
 
-            <td>
-                ${escapeHtml(record.level)}
-            </td>
 
-            <td>
-                ${formatDate(record.effective_at)}
-            </td>
+            row.innerHTML = `
+                <td>
+                    ${escapeHtml(
+                        record.changeType
+                    )}
+                </td>
 
-            <td>
-                ${escapeHtml(record.created_by)}
-            </td>
+                <td>
+                    ${escapeHtml(
+                        record.zone ||
+                        "All"
+                    )}
+                </td>
 
-            <td>
-                ${escapeHtml(record.created_at)}
-            </td>
-        `;
+                <td>
+                    ${escapeHtml(
+                        record.level
+                    )}
+                </td>
 
-        tbody.appendChild(row);
-    });
+                <td>
+                    ${formatDate(
+                        record.effective_at
+                    )}
+                </td>
 
-    historyContainer.innerHTML = "";
-    historyContainer.appendChild(table);
+                <td>
+                    ${escapeHtml(
+                        record.created_by
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        record.created_at
+                    )}
+                </td>
+            `;
+
+
+            tbody.appendChild(
+                row
+            );
+        }
+    );
+
+
+    historyContainer.innerHTML =
+        "";
+
+    historyContainer.appendChild(
+        table
+    );
 }
 
 
@@ -552,6 +1049,7 @@ scheduleForm.addEventListener(
         event.preventDefault();
 
         clearMessage();
+
 
         const changeType =
             changeTypeEl.value;
@@ -568,128 +1066,257 @@ scheduleForm.addEventListener(
         const notes =
             notesEl.value.trim();
 
-        if (!date || !time) {
+
+        if (
+            !date ||
+            !time
+        ) {
+
             showMessage(
                 "Please enter an effective date and time.",
                 "error"
             );
+
             return;
         }
 
- const localDateTime =
-    `${date}T${time}`;
 
-function convertPacificToUTC(localDateTime) {
+        const localDateTime =
+            `${date}T${time}`;
 
-    const [datePart, timePart] =
-        localDateTime.split("T");
 
-    const [year, month, day] =
-        datePart.split("-").map(Number);
+        /*
+         * Convert Pacific local time to UTC.
+         */
+        function convertPacificToUTC(
+            localDateTime
+        ) {
 
-    const [hour, minute] =
-        timePart.split(":").map(Number);
+            const [datePart, timePart] =
+                localDateTime.split(
+                    "T"
+                );
 
-    const targetUTC =
-        Date.UTC(
-            year,
-            month - 1,
-            day,
-            hour,
-            minute
-        );
+            const [year, month, day] =
+                datePart
+                    .split("-")
+                    .map(
+                        Number
+                    );
 
-    const formatter =
-        new Intl.DateTimeFormat(
-            "en-US",
-            {
-                timeZone: "America/Los_Angeles",
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-                hourCycle: "h23"
-            }
-        );
+            const [hour, minute] =
+                timePart
+                    .split(":")
+                    .map(
+                        Number
+                    );
 
-    const parts =
-        formatter.formatToParts(
-            new Date(targetUTC)
-        );
 
-    const values = {};
+            const targetUTC =
+                Date.UTC(
+                    year,
+                    month - 1,
+                    day,
+                    hour,
+                    minute
+                );
 
-    parts.forEach(part => {
-        if (part.type !== "literal") {
-            values[part.type] = Number(part.value);
+
+            const formatter =
+                new Intl.DateTimeFormat(
+                    "en-US",
+                    {
+                        timeZone:
+                            "America/Los_Angeles",
+                        year:
+                            "numeric",
+                        month:
+                            "2-digit",
+                        day:
+                            "2-digit",
+                        hour:
+                            "2-digit",
+                        minute:
+                            "2-digit",
+                        hourCycle:
+                            "h23"
+                    }
+                );
+
+
+            const parts =
+                formatter.formatToParts(
+                    new Date(
+                        targetUTC
+                    )
+                );
+
+
+            const values =
+                {};
+
+
+            parts.forEach(
+                part => {
+
+                    if (
+                        part.type !==
+                        "literal"
+                    ) {
+
+                        values[
+                            part.type
+                        ] =
+                            Number(
+                                part.value
+                            );
+                    }
+                }
+            );
+
+
+            const displayedAsUTC =
+                Date.UTC(
+                    values.year,
+                    values.month - 1,
+                    values.day,
+                    values.hour,
+                    values.minute
+                );
+
+
+            const offset =
+                displayedAsUTC -
+                targetUTC;
+
+
+            const utcTime =
+                new Date(
+                    targetUTC -
+                    offset
+                );
+
+
+            return utcTime.toISOString();
         }
-    });
 
-    const displayedAsUTC =
-        Date.UTC(
-            values.year,
-            values.month - 1,
-            values.day,
-            values.hour,
-            values.minute
-        );
 
-    const offset =
-        displayedAsUTC - targetUTC;
+        const effectiveAt =
+            convertPacificToUTC(
+                localDateTime
+            );
 
-    const utcTime =
-        new Date(
-            targetUTC - offset
-        );
 
-    return utcTime.toISOString();
-}
+        const effectiveDate =
+            new Date(
+                effectiveAt
+            );
 
-const effectiveAt =
-    convertPacificToUTC(
-        localDateTime
-    );
-
-const effectiveDate =
-    new Date(effectiveAt);
 
         if (
             Number.isNaN(
                 effectiveDate.getTime()
             )
         ) {
+
             showMessage(
                 "Please enter a valid effective date and time.",
                 "error"
             );
+
             return;
         }
 
+
+        /*
+         * Read IFPL scope controls.
+         */
+        const ifplScopeEl =
+            getIfplScopeEl();
+
+        const ifplZoneEl =
+            getIfplZoneEl();
+
+
+        const ifplApplyTo =
+            changeType === "ifpl"
+                ? (
+                    ifplScopeEl?.value ||
+                    "all"
+                )
+                : null;
+
+
+        const ifplZone =
+            changeType === "ifpl" &&
+            ifplApplyTo === "zone"
+                ? (
+                    ifplZoneEl?.value ||
+                    null
+                )
+                : null;
+
+
+        const typeLabel =
+            changeType === "fire"
+                ? "Fire Danger Level & Public Use Restrictions"
+                : "Industrial Fire Precaution Level";
+
+
+        let confirmationText =
+            `Schedule this change?\n\n` +
+            `Type: ${typeLabel}\n` +
+            `Level: ${level}\n`;
+
+
+        if (
+            changeType === "ifpl"
+        ) {
+
+            if (
+                ifplApplyTo === "all"
+            ) {
+
+                confirmationText +=
+                    "Apply To: All Regulation Use Zones\n";
+
+            } else {
+
+                confirmationText +=
+                    `Zone: ${ifplZone}\n`;
+            }
+        }
+
+
+        confirmationText +=
+            `Effective: ${formatDate(
+                effectiveAt
+            )}`;
+
+
         const confirmed =
             window.confirm(
-                `Schedule this change?\n\n` +
-                `Type: ${
-                    changeType === "fire"
-                        ? "Fire Danger & Public Use Restrictions"
-                        : "Industrial Fire Precaution Level"
-                }\n` +
-                `Level: ${level}\n` +
-                `Effective: ${formatDate(effectiveAt)}`
+                confirmationText
             );
+
 
         if (!confirmed) {
             return;
         }
+
 
         const submitButton =
             scheduleForm.querySelector(
                 'button[type="submit"]'
             );
 
-        submitButton.disabled = true;
+
+        submitButton.disabled =
+            true;
+
         submitButton.textContent =
             "Scheduling...";
+
 
         try {
 
@@ -697,7 +1324,8 @@ const effectiveDate =
                 await fetch(
                     `${API_BASE}/admin-write`,
                     {
-                        method: "POST",
+                        method:
+                            "POST",
 
                         headers: {
                             "Content-Type":
@@ -707,41 +1335,55 @@ const effectiveDate =
                         credentials:
                             "same-origin",
 
-                        body: JSON.stringify({
-                            changeType,
-                            level,
-                            effectiveAt,
-                            notes
-                        })
+                        body:
+                            JSON.stringify({
+                                changeType,
+                                level,
+                                effectiveAt,
+                                notes,
+                                ifplApplyTo,
+                                ifplZone
+                            })
                     }
                 );
 
+
             const data =
                 await response.json();
+
 
             if (
                 !response.ok ||
                 !data.success
             ) {
+
                 throw new Error(
                     data.error ||
                     "Unable to schedule the change."
                 );
             }
 
+
             showMessage(
                 "Change scheduled successfully.",
                 "success"
             );
 
+
             scheduleForm.reset();
+
 
             effectiveTimeEl.value =
                 "00:01";
 
+
             updateLevelOptions();
 
+            updateIfplZoneControls();
+
+
             await loadAdminData();
+
 
         } catch (error) {
 
@@ -750,11 +1392,13 @@ const effectiveDate =
                 error
             );
 
+
             showMessage(
                 error.message ||
                 "Unable to schedule the change.",
                 "error"
             );
+
 
         } finally {
 
@@ -764,6 +1408,7 @@ const effectiveDate =
             submitButton.textContent =
                 "Schedule Change";
         }
+
     }
 );
 
@@ -772,37 +1417,29 @@ const effectiveDate =
    HELPERS
 -------------------------------------------------- */
 
-function formatDate(value) {
+function escapeHtml(
+    value
+) {
 
-    const date =
-        new Date(value);
-
-    if (
-        Number.isNaN(
-            date.getTime()
+    return String(
+        value
+    )
+        .replaceAll(
+            "&",
+            "&amp;"
         )
-    ) {
-        return "Invalid date";
-    }
-
-    return date.toLocaleString(
-        "en-US",
-        {
-            timeZone: "America/Los_Angeles",
-            dateStyle: "medium",
-            timeStyle: "short"
-        }
-    );
-}
-
-
-function escapeHtml(value) {
-
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
         .replaceAll(
             "'",
             "&#039;"
@@ -816,9 +1453,29 @@ function escapeHtml(value) {
 
 changeTypeEl.addEventListener(
     "change",
-    updateLevelOptions
+    () => {
+
+        updateLevelOptions();
+
+        updateIfplZoneControls();
+    }
 );
 
+
+const initialScopeEl =
+    getIfplScopeEl();
+
+if (initialScopeEl) {
+
+    initialScopeEl.addEventListener(
+        "change",
+        updateIfplZoneControls
+    );
+}
+
+
 updateLevelOptions();
+
+updateIfplZoneControls();
 
 loadAdminData();
