@@ -530,15 +530,9 @@ main {
 
 
 .ifpl-zone-name {
-
     font-size: 1.15rem;
-
     font-weight: 700;
-
     color: var(--text);
-
-    letter-spacing: .03em;
-
     line-height: 1.2;
 }
 
