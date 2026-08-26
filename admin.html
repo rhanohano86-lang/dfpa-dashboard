@@ -194,6 +194,100 @@
 
 
         /* --------------------------------------------------
+           FIRE SEASON MANAGEMENT
+        -------------------------------------------------- */
+
+        .fire-season-management {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+
+        .season-management-panel {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 22px;
+        }
+
+
+        .season-management-title {
+            margin: 0 0 16px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+
+        .season-status {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 110px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+
+
+        .season-status.active {
+            background: #e8f5e9;
+            color: var(--success);
+        }
+
+
+        .season-status.inactive {
+            background: #eef1f5;
+            color: var(--muted);
+        }
+
+
+        .season-details {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+
+        .season-detail-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #edf0f4;
+        }
+
+
+        .season-detail-label {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+
+        .season-detail-value {
+            font-weight: bold;
+            font-size: 14px;
+            text-align: right;
+        }
+
+
+        .season-history {
+            overflow-x: auto;
+        }
+
+
+        .season-history table {
+            min-width: 650px;
+        }
+
+
+        .season-history .status {
+            white-space: nowrap;
+        }
+
+
+        /* --------------------------------------------------
            FORM
         -------------------------------------------------- */
 
@@ -291,6 +385,25 @@
 
         .secondary:hover:not(:disabled) {
             background: #dfe4eb;
+        }
+
+
+        .danger-button {
+            background: #c62828;
+            color: white;
+        }
+
+
+        .danger-button:hover:not(:disabled) {
+            background: #a91f1f;
+        }
+
+
+        .helper-text {
+            margin: -8px 0 18px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.4;
         }
 
 
@@ -395,6 +508,7 @@
 
 
             .current-grid,
+            .fire-season-management,
             .form-grid {
                 grid-template-columns: 1fr;
             }
@@ -407,6 +521,22 @@
 
             .ifpl-zone-list {
                 grid-template-columns: 1fr;
+            }
+
+
+            .season-detail-row {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+
+            .season-detail-value {
+                text-align: left;
+            }
+
+
+            .button-row {
+                flex-wrap: wrap;
             }
 
 
@@ -435,7 +565,7 @@
 
         <p>
             Manage current and scheduled Fire Danger,
-            Public Use Restrictions, and IFPL changes.
+            Public Use Restrictions, IFPL, and Fire Season changes.
         </p>
 
     </div>
@@ -498,7 +628,7 @@
             <div class="condition">
 
                 <div class="condition-label">
-                    Industrial Fire Precaution Level
+                    Industrial Fire Precaution Levels
                 </div>
 
 
@@ -660,6 +790,215 @@
 
             </div>
 
+        </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         FIRE SEASON MANAGEMENT
+         ================================================== -->
+
+    <section class="card">
+
+        <h2>
+            Fire Season Management
+        </h2>
+
+
+        <div class="fire-season-management">
+
+
+            <!-- CURRENT SEASON -->
+
+            <div
+                class="season-management-panel"
+                id="currentSeasonPanel"
+            >
+
+                <h3 class="season-management-title">
+                    Current Fire Season
+                </h3>
+
+
+                <div
+                    id="seasonStatus"
+                    class="season-status active"
+                >
+                    ACTIVE
+                </div>
+
+
+                <div class="season-details">
+
+                    <div class="season-detail-row">
+
+                        <span class="season-detail-label">
+                            Season
+                        </span>
+
+                        <span
+                            class="season-detail-value"
+                            id="seasonYear"
+                        >
+                            2026
+                        </span>
+
+                    </div>
+
+
+                    <div class="season-detail-row">
+
+                        <span class="season-detail-label">
+                            Start Date
+                        </span>
+
+                        <span
+                            class="season-detail-value"
+                            id="seasonStartDate"
+                        >
+                            May 30, 2026
+                        </span>
+
+                    </div>
+
+
+                    <div class="season-detail-row">
+
+                        <span class="season-detail-label">
+                            End Date
+                        </span>
+
+                        <span
+                            class="season-detail-value"
+                            id="seasonEndDate"
+                        >
+                            —
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div id="endSeasonControls">
+
+                    <div class="form-group">
+
+                        <label for="endSeasonDate">
+                            End Fire Season
+                        </label>
+
+
+                        <input
+                            type="date"
+                            id="endSeasonDate"
+                        >
+
+                    </div>
+
+
+                    <p class="helper-text">
+                        Enter the official date fire season ends.
+                    </p>
+
+
+                    <button
+                        type="button"
+                        id="endSeasonButton"
+                        class="danger-button"
+                    >
+                        End Fire Season
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- START NEW SEASON -->
+
+            <div
+                class="season-management-panel"
+                id="startSeasonPanel"
+                style="display: none;"
+            >
+
+                <h3 class="season-management-title">
+                    Start New Fire Season
+                </h3>
+
+
+                <div class="form-group">
+
+                    <label for="newSeasonYear">
+                        Fire Season Year
+                    </label>
+
+
+                    <input
+                        type="number"
+                        id="newSeasonYear"
+                        min="2000"
+                        max="2100"
+                        step="1"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="newSeasonStartDate">
+                        Start Date
+                    </label>
+
+
+                    <input
+                        type="date"
+                        id="newSeasonStartDate"
+                    >
+
+                </div>
+
+
+                <p class="helper-text">
+                    Starting a new season creates a new historical record.
+                    Previous fire seasons are never overwritten.
+                </p>
+
+
+                <button
+                    type="button"
+                    id="startSeasonButton"
+                    class="primary"
+                >
+                    Start Fire Season
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         FIRE SEASON HISTORY
+         ================================================== -->
+
+    <section class="card">
+
+        <h2>
+            Fire Season History
+        </h2>
+
+
+        <div
+            id="fireSeasonHistoryContainer"
+            class="season-history"
+        >
+            Loading...
         </div>
 
     </section>
