@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        DFPA Fire Season Report
+    </title>
+
+
+    <style>
+
+        :root {
+            --dfpa-blue: #33439A;
+            --dfpa-dark-blue: #243477;
+            --background: #f4f6f8;
+            --card: #ffffff;
+            --text: #111111;
+            --muted: #687386;
+            --border: #d8dde5;
+            --success: #2e7d32;
+            --danger: #c62828;
+        }
+
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--background);
+            color: var(--text);
+        }
+
+
+        header {
+            background: var(--dfpa-blue);
+            color: white;
+            padding: 28px 30px;
+        }
+
+
+        header .header-inner {
+            max-width: 1050px;
+            margin: auto;
+        }
+
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+
+        header p {
+            margin: 6px 0 0;
+            font-size: 15px;
+        }
+
+
+        main {
+            max-width: 1050px;
+            margin: 28px auto 60px;
+            padding: 0 20px;
+        }
+
+
+        .toolbar {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+
+        .toolbar-left {
+            display: flex;
+            align-items: end;
+            gap: 12px;
+        }
+
+
+        .form-group {
+            min-width: 180px;
+        }
+
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+
+        select {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            background: white;
+            font: inherit;
+        }
+
+
+        button {
+            border: 0;
+            border-radius: 7px;
+            padding: 11px 18px;
+            font: inherit;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+
+        .primary {
+            background: var(--dfpa-blue);
+            color: white;
+        }
+
+
+        .secondary {
+            background: #e9edf3;
+            color: #222;
+        }
+
+
+        .primary:hover {
+            background: var(--dfpa-dark-blue);
+        }
+
+
+        .secondary:hover {
+            background: #dfe4eb;
+        }
+
+
+        .report {
+            background: var(--card);
+            padding: 42px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, .08);
+            border-radius: 12px;
+        }
+
+
+        .report-header {
+            text-align: center;
+            padding-bottom: 24px;
+            border-bottom: 2px solid var(--dfpa-blue);
+            margin-bottom: 28px;
+        }
+
+
+        .report-header h2 {
+            margin: 0;
+            font-size: 30px;
+        }
+
+
+        .report-header .subtitle {
+            margin-top: 7px;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+
+        .report-meta {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 32px;
+        }
+
+
+        .meta-box {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+
+        .meta-label {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            margin-bottom: 7px;
+        }
+
+
+        .meta-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+
+        .section {
+            margin-top: 28px;
+        }
+
+
+        .section h3 {
+            margin: 0 0 14px;
+            font-size: 19px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+
+        th,
+        td {
+            padding: 11px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+
+        th {
+            font-size: 12px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .03em;
+        }
+
+
+        td.number {
+            text-align: right;
+            font-weight: bold;
+        }
+
+
+        tr.total-row td {
+            font-weight: bold;
+            border-top: 2px solid var(--border);
+        }
+
+
+        .ifpl-table {
+            margin-top: 4px;
+        }
+
+
+        .ifpl-table th,
+        .ifpl-table td {
+            text-align: center;
+        }
+
+
+        .ifpl-table th:first-child,
+        .ifpl-table td:first-child {
+            text-align: left;
+        }
+
+
+        .report-footer {
+            margin-top: 36px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+
+        .message {
+            display: none;
+            margin-bottom: 18px;
+            padding: 13px;
+            border-radius: 7px;
+            font-weight: bold;
+        }
+
+
+        .message.error {
+            display: block;
+            background: #ffebee;
+            color: var(--danger);
+        }
+
+
+        .loading {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--muted);
+        }
+
+
+        /* --------------------------------------------------
+           PRINT
+        -------------------------------------------------- */
+
+        @media print {
+
+            @page {
+                margin: 0.55in;
+            }
+
+
+            body {
+                background: white;
+            }
+
+
+            header,
+            .toolbar,
+            .message {
+                display: none !important;
+            }
+
+
+            main {
+                max-width: none;
+                margin: 0;
+                padding: 0;
+            }
+
+
+            .report {
+                padding: 0;
+                box-shadow: none;
+                border-radius: 0;
+            }
+
+
+            .report-header h2 {
+                font-size: 26px;
+            }
+
+
+            .section {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+
+            table {
+                page-break-inside: auto;
+            }
+
+
+            tr {
+                page-break-inside: avoid;
+            }
+
+
+            .report-footer {
+                margin-top: 28px;
+            }
+        }
+
+
+        /* --------------------------------------------------
+           MOBILE
+        -------------------------------------------------- */
+
+        @media (max-width: 700px) {
+
+            header {
+                padding: 22px 20px;
+            }
+
+
+            header h1 {
+                font-size: 23px;
+            }
+
+
+            main {
+                margin-top: 18px;
+                padding: 0 14px;
+            }
+
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+
+            .toolbar-left {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+
+            .form-group {
+                min-width: 0;
+            }
+
+
+            .report {
+                padding: 22px;
+            }
+
+
+            .report-header h2 {
+                font-size: 24px;
+            }
+
+
+            .report-meta {
+                grid-template-columns: 1fr;
+            }
+
+
+            .ifpl-wrapper {
+                overflow-x: auto;
+            }
+
+
+            .ifpl-table {
+                min-width: 620px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <div class="header-inner">
+
+        <h1>
+            Douglas Forest Protective Association
+        </h1>
+
+        <p>
+            Fire Season Summary Report
+        </p>
+
+    </div>
+
+</header>
+
+
+<main>
+
+
+    <!-- TOOLBAR -->
+
+    <div class="toolbar">
+
+        <div class="toolbar-left">
+
+            <div class="form-group">
+
+                <label for="seasonYear">
+                    Fire Season
+                </label>
+
+
+                <select
+                    id="seasonYear"
+                >
+                    <option value="">
+                        Loading...
+                    </option>
+                </select>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="loadReportButton"
+                class="primary"
+            >
+                Generate Report
+            </button>
+
+        </div>
+
+
+        <button
+            type="button"
+            id="printButton"
+            class="secondary"
+        >
+            Print Report
+        </button>
+
+    </div>
+
+
+    <div
+        id="message"
+        class="message"
+    ></div>
+
+
+    <!-- REPORT -->
+
+    <section
+        id="report"
+        class="report"
+    >
+
+        <div class="loading">
+            Loading report...
+        </div>
+
+    </section>
+
+
+</main>
+
+
+<script src="season-report.js"></script>
+
+
+</body>
+
+</html>
