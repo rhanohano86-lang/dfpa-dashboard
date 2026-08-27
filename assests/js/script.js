@@ -1,6 +1,7 @@
 /* ======================================================
    DFPA FIRE DANGER LEVEL STATUS DASHBOARD
    Zone-Aware IFPL + Automatic Scheduling + Wix Height
+   Accessibility-enhanced public dashboard
    ====================================================== */
 
 
@@ -136,6 +137,7 @@ async function loadPublicStatus() {
                 data.current
                     .fire_restrictions
                     .level;
+
         }
 
 
@@ -181,6 +183,7 @@ async function loadPublicStatus() {
              * Keep the legacy single IFPL value
              * synchronized with the first available zone.
              */
+
             dashboardData.ifplLevel =
                 data.current
                     .ifpl_zones[0]
@@ -342,6 +345,7 @@ function getStatusClass(
     if (
         normalized === "LOW"
     ) {
+
         return "status-low";
     }
 
@@ -349,6 +353,7 @@ function getStatusClass(
     if (
         normalized === "MODERATE"
     ) {
+
         return "status-moderate";
     }
 
@@ -356,6 +361,7 @@ function getStatusClass(
     if (
         normalized === "HIGH"
     ) {
+
         return "status-high";
     }
 
@@ -363,6 +369,7 @@ function getStatusClass(
     if (
         normalized === "EXTREME"
     ) {
+
         return "status-extreme";
     }
 
@@ -373,7 +380,44 @@ function getStatusClass(
      * standard high-status presentation
      * as the safe fallback.
      */
+
     return "status-high";
+}
+
+
+/* ======================================================
+   ACCESSIBILITY HELPERS
+   ====================================================== */
+
+function setAccessibleLabel(
+    element,
+    label
+) {
+
+    if (!element) {
+        return;
+    }
+
+
+    element.setAttribute(
+        "aria-label",
+        label
+    );
+}
+
+
+function setAccessibleText(
+    element,
+    text
+) {
+
+    if (!element) {
+        return;
+    }
+
+
+    element.textContent =
+        text;
 }
 
 
@@ -410,12 +454,20 @@ function updateFireSeason() {
     }
 
 
-    seasonStatus.textContent =
+    const seasonIsActive =
         dashboardData
             .fireSeason
-            .active
+            .active;
+
+
+    const statusText =
+        seasonIsActive
             ? "ACTIVE"
             : "INACTIVE";
+
+
+    seasonStatus.textContent =
+        statusText;
 
 
     seasonStatus.classList.remove(
@@ -425,11 +477,15 @@ function updateFireSeason() {
 
 
     seasonStatus.classList.add(
-        dashboardData
-            .fireSeason
-            .active
+        seasonIsActive
             ? "active"
             : "inactive"
+    );
+
+
+    setAccessibleLabel(
+        seasonStatus,
+        `Fire Season Status: ${statusText}`
     );
 
 
@@ -439,14 +495,27 @@ function updateFireSeason() {
             .startDate;
 
 
-    if (
-        !dashboardData
+    setAccessibleLabel(
+        seasonStartDate,
+        `Fire Season start date: ${dashboardData
             .fireSeason
-            .active
+            .startDate}`
+    );
+
+
+    if (
+        !seasonIsActive
     ) {
 
         seasonDay.textContent =
             "—";
+
+
+        setAccessibleLabel(
+            seasonDay,
+            "Current Fire Season Day: Not active"
+        );
+
 
         return;
     }
@@ -497,11 +566,21 @@ function updateFireSeason() {
         ) + 1;
 
 
-    seasonDay.textContent =
+    const currentDay =
         Math.max(
             dayCount,
             1
         );
+
+
+    seasonDay.textContent =
+        currentDay;
+
+
+    setAccessibleLabel(
+        seasonDay,
+        `Current Fire Season Day: ${currentDay}`
+    );
 
 }
 
@@ -535,7 +614,8 @@ function updateFireRestrictions() {
 
     const level =
         dashboardData
-            .fireRestrictionsLevel;
+            .fireRestrictionsLevel ||
+        "Not set";
 
 
     fireDanger.textContent =
@@ -580,6 +660,12 @@ function updateFireRestrictions() {
             statusClass
         );
 
+
+        setAccessibleLabel(
+            fireDangerPill,
+            `Current Fire Danger Level: ${level}`
+        );
+
     }
 
 
@@ -599,7 +685,25 @@ function updateFireRestrictions() {
             statusClass
         );
 
+
+        setAccessibleLabel(
+            publicUsePill,
+            `Current Public Use Restrictions Level: ${level}`
+        );
+
     }
+
+
+    setAccessibleLabel(
+        fireDanger,
+        `Current Fire Danger Level: ${level}`
+    );
+
+
+    setAccessibleLabel(
+        publicUseRestrictions,
+        `Current Public Use Restrictions Level: ${level}`
+    );
 
 }
 
@@ -613,6 +717,7 @@ function updateIFPL() {
     /*
      * Zone-aware IFPL display.
      */
+
     const zoneContainer =
         document.getElementById(
             "ifpl-zones"
@@ -622,6 +727,7 @@ function updateIFPL() {
     /*
      * Legacy single IFPL element.
      */
+
     const legacyIfplLevel =
         document.getElementById(
             "ifpl-level"
@@ -638,6 +744,7 @@ function updateIFPL() {
      * If zone data exists, populate
      * each regulation use zone.
      */
+
     if (
         zoneContainer &&
         Array.isArray(
@@ -707,6 +814,12 @@ function updateIFPL() {
                     levelElement.textContent =
                         level;
 
+
+                    setAccessibleLabel(
+                        levelElement,
+                        `${zoneName} current Industrial Fire Precaution Level: ${level}`
+                    );
+
                 }
 
 
@@ -714,7 +827,7 @@ function updateIFPL() {
                     effectiveElement
                 ) {
 
-                    effectiveElement.textContent =
+                    const effectiveText =
                         zoneData
                             ?.effective_at
                             ? formatPacificDateTime(
@@ -722,6 +835,16 @@ function updateIFPL() {
                                     .effective_at
                             )
                             : "Effective: —";
+
+
+                    effectiveElement.textContent =
+                        effectiveText;
+
+
+                    setAccessibleLabel(
+                        effectiveElement,
+                        `${zoneName} ${effectiveText}`
+                    );
 
                 }
 
@@ -744,7 +867,24 @@ function updateIFPL() {
                         )
                     );
 
+
+                    setAccessibleLabel(
+                        pill,
+                        `${zoneName} current Industrial Fire Precaution Level: ${level}`
+                    );
+
                 }
+
+
+                /*
+                 * Make the entire zone a meaningful
+                 * accessible unit.
+                 */
+
+                setAccessibleLabel(
+                    zoneElement,
+                    `${zoneName}: Industrial Fire Precaution Level ${level}`
+                );
 
             }
         );
@@ -754,6 +894,7 @@ function updateIFPL() {
          * Keep hidden legacy elements synchronized
          * for compatibility with the existing markup.
          */
+
         if (
             legacyIfplLevel
         ) {
@@ -793,6 +934,7 @@ function updateIFPL() {
     /*
      * Legacy single IFPL fallback.
      */
+
     if (
         legacyIfplLevel
     ) {
@@ -834,6 +976,12 @@ function updateLastUpdated() {
         );
 
 
+    const lastUpdatedAccessible =
+        document.getElementById(
+            "last-updated-accessible"
+        );
+
+
     if (
         lastUpdatedDate
     ) {
@@ -854,6 +1002,39 @@ function updateLastUpdated() {
             dashboardData
                 .lastUpdated
                 .time;
+
+    }
+
+
+    /*
+     * Keep a single, understandable
+     * accessible version synchronized.
+     */
+
+    if (
+        lastUpdatedAccessible
+    ) {
+
+        const date =
+            dashboardData
+                .lastUpdated
+                .date;
+
+
+        const time =
+            dashboardData
+                .lastUpdated
+                .time;
+
+
+        const accessibleText =
+            date && time
+                ? `${date} at ${time}`
+                : "Not available";
+
+
+        lastUpdatedAccessible.textContent =
+            accessibleText;
 
     }
 
@@ -920,6 +1101,7 @@ function initializeHeightMessaging() {
     /*
      * Send immediately.
      */
+
     sendHeightToWix();
 
 
@@ -927,6 +1109,7 @@ function initializeHeightMessaging() {
      * Recheck after the browser finishes
      * rendering content.
      */
+
     setTimeout(
         sendHeightToWix,
         100
@@ -966,6 +1149,7 @@ function initializeHeightMessaging() {
     /*
      * Watch for layout changes.
      */
+
     if (
         typeof ResizeObserver !==
         "undefined"
@@ -1000,6 +1184,7 @@ function initializeHeightMessaging() {
     /*
      * Watch for browser/window resizing.
      */
+
     window.addEventListener(
         "resize",
         () => {
@@ -1011,6 +1196,7 @@ function initializeHeightMessaging() {
     /*
      * Watch for device orientation changes.
      */
+
     window.addEventListener(
         "orientationchange",
         () => {
@@ -1019,6 +1205,7 @@ function initializeHeightMessaging() {
                 sendHeightToWix,
                 100
             );
+
 
             setTimeout(
                 sendHeightToWix,
@@ -1033,6 +1220,7 @@ function initializeHeightMessaging() {
      * Mobile browsers expose a visual viewport
      * that can change independently of the window.
      */
+
     if (
         window.visualViewport
     ) {
