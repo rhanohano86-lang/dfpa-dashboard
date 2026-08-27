@@ -1549,15 +1549,16 @@ function renderFireSeasonHistory(
                         )
                     )}
                 </td>
-        <td>
-    ${escapeHtml(
-        season.end_time
-            ? formatFireSeasonTime(
+           <td>
+            ${escapeHtml(
                 season.end_time
-            )
-            : "—"
-    )}
-</td>
+                    ? formatFireSeasonTime(
+                        season.end_time
+                    )
+                    : "—"
+            )}
+        </td>
+    `;
 
 
             tbody.appendChild(
