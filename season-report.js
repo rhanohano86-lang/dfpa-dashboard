@@ -421,6 +421,71 @@ async function generateReport() {
     }
 }
 
+/* ======================================================
+   FORMAT FIRE SEASON TIME
+   ====================================================== */
+
+function formatFireSeasonTime(
+    value
+) {
+
+    if (!value) {
+        return "—";
+    }
+
+
+    const parts =
+        String(value)
+            .split(":");
+
+
+    if (
+        parts.length !== 2
+    ) {
+        return String(value);
+    }
+
+
+    const hour =
+        Number(parts[0]);
+
+
+    const minute =
+        Number(parts[1]);
+
+
+    if (
+        !Number.isInteger(hour) ||
+        !Number.isInteger(minute) ||
+        hour < 0 ||
+        hour > 23 ||
+        minute < 0 ||
+        minute > 59
+    ) {
+        return String(value);
+    }
+
+
+    const date =
+        new Date(
+            2000,
+            0,
+            1,
+            hour,
+            minute
+        );
+
+
+    return date.toLocaleTimeString(
+        "en-US",
+        {
+            hour:
+                "numeric",
+            minute:
+                "2-digit"
+        }
+    );
+}
 
 /* ======================================================
    RENDER REPORT
@@ -556,6 +621,23 @@ function renderReport(
 
             </div>
 
+<div class="meta-box">
+
+    <div class="meta-label">
+        End Time
+    </div>
+
+    <div class="meta-value">
+        ${escapeHtml(
+            season.end_time
+                ? formatFireSeasonTime(
+                    season.end_time
+                )
+                : "—"
+        )}
+    </div>
+
+</div>
 
             <div class="meta-box">
 
