@@ -433,6 +433,7 @@ async function getSeason(
                     status,
                     start_date,
                     end_date,
+                    end_time,
                     created_by,
                     created_at,
                     updated_by,
@@ -456,6 +457,7 @@ async function getSeason(
                 status,
                 start_date,
                 end_date,
+                end_time,
                 created_by,
                 created_at,
                 updated_by,
@@ -741,6 +743,9 @@ export async function onRequestGet(
 
                     end_date:
                         season.end_date,
+
+                   end_time:
+                        season.end_time,     
 
                     report_end_date:
                         reportEndDate,
