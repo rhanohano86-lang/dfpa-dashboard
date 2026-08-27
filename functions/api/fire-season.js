@@ -23,6 +23,7 @@ export async function onRequestGet(context) {
                         status,
                         start_date,
                         end_date,
+                        end_time,
                         created_by,
                         created_at,
                         updated_by,
@@ -47,6 +48,7 @@ export async function onRequestGet(context) {
                         status,
                         start_date,
                         end_date,
+                        end_time,
                         created_by,
                         created_at,
                         updated_by,
@@ -121,8 +123,7 @@ export async function onRequestPost(context) {
 
 
         /*
-         * Confirm the authenticated user is an
-         * active DFPA administrator.
+         * Confirm active administrator.
          */
         const administrator =
             await context.env.DFPA_DB
@@ -185,10 +186,14 @@ export async function onRequestPost(context) {
            START NEW FIRE SEASON
            ================================================== */
 
-        if (action === "START") {
+        if (
+            action === "START"
+        ) {
 
             const year =
-                Number(body.year);
+                Number(
+                    body.year
+                );
 
 
             const startDate =
@@ -262,7 +267,8 @@ export async function onRequestPost(context) {
                             year,
                             status,
                             start_date,
-                            end_date
+                            end_date,
+                            end_time
                         FROM fire_seasons
                         WHERE status = 'ACTIVE'
                         LIMIT 1
@@ -293,7 +299,8 @@ export async function onRequestPost(context) {
                             year,
                             status,
                             start_date,
-                            end_date
+                            end_date,
+                            end_time
                         FROM fire_seasons
                         WHERE year = ?
                         LIMIT 1
@@ -327,16 +334,14 @@ export async function onRequestPost(context) {
                     start_date:
                         startDate,
                     end_date:
+                        null,
+                    end_time:
                         null
                 });
 
 
             /*
-             * START is fully atomic.
-             *
-             * The audit record obtains the newly created
-             * season ID by looking it up using the unique
-             * season year inside the same D1 batch.
+             * START is atomic.
              */
             await context.env.DFPA_DB.batch([
 
@@ -351,15 +356,17 @@ export async function onRequestPost(context) {
                             status,
                             start_date,
                             end_date,
+                            end_time,
                             created_by,
                             updated_by
                         )
-                        VALUES (?, ?, ?, ?, ?, ?)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
                     `)
                     .bind(
                         year,
                         "ACTIVE",
                         startDate,
+                        null,
                         null,
                         email,
                         email
@@ -367,8 +374,7 @@ export async function onRequestPost(context) {
 
 
                 /*
-                 * Create audit record using the ID
-                 * of the newly inserted season.
+                 * Create audit record.
                  */
                 context.env.DFPA_DB
                     .prepare(`
@@ -433,7 +439,7 @@ export async function onRequestPost(context) {
 
 
             /*
-             * Retrieve the new record for the response.
+             * Retrieve created season.
              */
             const createdSeason =
                 await context.env.DFPA_DB
@@ -444,6 +450,7 @@ export async function onRequestPost(context) {
                             status,
                             start_date,
                             end_date,
+                            end_time,
                             created_by,
                             created_at,
                             updated_by,
@@ -472,10 +479,15 @@ export async function onRequestPost(context) {
            END CURRENT FIRE SEASON
            ================================================== */
 
-        if (action === "END") {
+        if (
+            action === "END"
+        ) {
 
             const endDate =
                 body.endDate;
+
+            const endTime =
+                body.endTime;
 
 
             /*
@@ -493,6 +505,24 @@ export async function onRequestPost(context) {
             }
 
 
+            /*
+             * Validate end time.
+             */
+            if (!endTime) {
+                return Response.json(
+                    {
+                        success: false,
+                        error:
+                            "Fire season end time is required."
+                    },
+                    { status: 400 }
+                );
+            }
+
+
+            /*
+             * Validate date format.
+             */
             const parsedEndDate =
                 new Date(
                     `${endDate}T00:00:00`
@@ -516,7 +546,52 @@ export async function onRequestPost(context) {
 
 
             /*
-             * Get the currently active season.
+             * Validate time format HH:MM.
+             */
+            if (
+                !/^\d{2}:\d{2}$/.test(
+                    String(endTime)
+                )
+            ) {
+                return Response.json(
+                    {
+                        success: false,
+                        error:
+                            "Invalid fire season end time."
+                    },
+                    { status: 400 }
+                );
+            }
+
+
+            const [
+                endHour,
+                endMinute
+            ] =
+                String(endTime)
+                    .split(":")
+                    .map(Number);
+
+
+            if (
+                endHour < 0 ||
+                endHour > 23 ||
+                endMinute < 0 ||
+                endMinute > 59
+            ) {
+                return Response.json(
+                    {
+                        success: false,
+                        error:
+                            "Invalid fire season end time."
+                    },
+                    { status: 400 }
+                );
+            }
+
+
+            /*
+             * Get active season.
              */
             const activeSeason =
                 await context.env.DFPA_DB
@@ -527,6 +602,7 @@ export async function onRequestPost(context) {
                             status,
                             start_date,
                             end_date,
+                            end_time,
                             created_by,
                             created_at,
                             updated_by,
@@ -552,7 +628,8 @@ export async function onRequestPost(context) {
 
 
             /*
-             * Prevent an end date before the start date.
+             * Compare calendar dates only.
+             * Fire-season reporting is operational-day based.
              */
             const startDate =
                 new Date(
@@ -575,7 +652,7 @@ export async function onRequestPost(context) {
 
 
             /*
-             * Build audit details before the update.
+             * Build audit details.
              */
             const auditDetails =
                 JSON.stringify({
@@ -591,6 +668,8 @@ export async function onRequestPost(context) {
                         activeSeason.start_date,
                     end_date:
                         endDate,
+                    end_time:
+                        endTime,
                     original_created_by:
                         activeSeason.created_by,
                     original_created_at:
@@ -599,20 +678,21 @@ export async function onRequestPost(context) {
 
 
             /*
-             * END is fully atomic:
-             *
-             * 1. Update season
-             * 2. Write audit record
-             * 3. Update Last Updated
+             * END is atomic.
              */
             await context.env.DFPA_DB.batch([
 
+                /*
+                 * Mark season inactive and preserve
+                 * both end date and end time.
+                 */
                 context.env.DFPA_DB
                     .prepare(`
                         UPDATE fire_seasons
                         SET
                             status = 'INACTIVE',
                             end_date = ?,
+                            end_time = ?,
                             updated_by = ?,
                             updated_at =
                                 CURRENT_TIMESTAMP
@@ -621,11 +701,15 @@ export async function onRequestPost(context) {
                     `)
                     .bind(
                         endDate,
+                        endTime,
                         email,
                         activeSeason.id
                     ),
 
 
+                /*
+                 * Preserve administrative history.
+                 */
                 context.env.DFPA_DB
                     .prepare(`
                         INSERT INTO audit_log
@@ -647,6 +731,9 @@ export async function onRequestPost(context) {
                     ),
 
 
+                /*
+                 * Update dashboard Last Updated.
+                 */
                 context.env.DFPA_DB
                     .prepare(`
                         INSERT INTO dashboard_settings
@@ -675,7 +762,7 @@ export async function onRequestPost(context) {
 
 
             /*
-             * Retrieve the updated season for the response.
+             * Retrieve updated season.
              */
             const endedSeason =
                 await context.env.DFPA_DB
@@ -686,6 +773,7 @@ export async function onRequestPost(context) {
                             status,
                             start_date,
                             end_date,
+                            end_time,
                             created_by,
                             created_at,
                             updated_by,
@@ -710,10 +798,6 @@ export async function onRequestPost(context) {
         }
 
 
-        /*
-         * Should never be reached because action
-         * was validated above.
-         */
         return Response.json(
             {
                 success: false,
