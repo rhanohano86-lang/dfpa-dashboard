@@ -14,17 +14,41 @@
         DFPA Fire Danger Level Status Dashboard
     </title>
 
+
     <!-- DFPA DASHBOARD STYLES -->
     <!-- IMPORTANT: "assests" is the actual folder name in GitHub -->
+
     <link
         rel="stylesheet"
         href="./assests/css/styles.css"
     >
 
+
+    <style>
+
+        /*
+         * Visually hidden content that remains
+         * available to screen readers.
+         */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+    </style>
+
 </head>
 
 
 <body>
+
 
     <a
         href="#main-content"
@@ -38,7 +62,10 @@
          HEADER
          ================================================== -->
 
-    <header class="dashboard-header">
+    <header
+        class="dashboard-header"
+        aria-labelledby="dashboard-title"
+    >
 
         <div class="container">
 
@@ -53,7 +80,7 @@
 
                 <div class="header-text">
 
-                    <h1>
+                    <h1 id="dashboard-title">
                         Fire Danger Level Status Dashboard
                     </h1>
 
@@ -64,7 +91,9 @@
 
 
                     <p>
-                        Current Fire Danger, Public Use Restrictions, and Industrial Fire Precaution Levels for DFPA protected lands in the Douglas District
+                        Current Fire Danger, Public Use Restrictions,
+                        and Industrial Fire Precaution Levels for
+                        DFPA protected lands in the Douglas District
                     </p>
 
                 </div>
@@ -80,7 +109,10 @@
          MAIN CONTENT
          ================================================== -->
 
-    <main id="main-content">
+    <main
+        id="main-content"
+        aria-labelledby="dashboard-title"
+    >
 
         <div class="container">
 
@@ -89,9 +121,12 @@
                  FIRE SEASON
                  ================================================== -->
 
-            <section class="card fire-season-card">
+            <section
+                class="card fire-season-card"
+                aria-labelledby="fire-season-heading"
+            >
 
-                <h2>
+                <h2 id="fire-season-heading">
                     FIRE SEASON
                 </h2>
 
@@ -101,9 +136,15 @@
 
                     <!-- STATUS -->
 
-                    <div class="season-item">
+                    <div
+                        class="season-item"
+                        aria-labelledby="season-status-label"
+                    >
 
-                        <span class="label">
+                        <span
+                            class="label"
+                            id="season-status-label"
+                        >
                             Status
                         </span>
 
@@ -111,6 +152,9 @@
                         <div
                             class="status-badge active"
                             id="season-status"
+                            role="status"
+                            aria-live="polite"
+                            aria-atomic="true"
                         >
                             ACTIVE
                         </div>
@@ -120,9 +164,15 @@
 
                     <!-- CURRENT DAY -->
 
-                    <div class="season-item">
+                    <div
+                        class="season-item"
+                        aria-labelledby="season-day-label"
+                    >
 
-                        <span class="label">
+                        <span
+                            class="label"
+                            id="season-day-label"
+                        >
                             Current Day
                         </span>
 
@@ -130,6 +180,9 @@
                         <span
                             class="value large"
                             id="season-day"
+                            role="status"
+                            aria-live="polite"
+                            aria-atomic="true"
                         >
                             —
                         </span>
@@ -139,9 +192,15 @@
 
                     <!-- START DATE -->
 
-                    <div class="season-item">
+                    <div
+                        class="season-item"
+                        aria-labelledby="season-start-date-label"
+                    >
 
-                        <span class="label">
+                        <span
+                            class="label"
+                            id="season-start-date-label"
+                        >
                             Since
                         </span>
 
@@ -171,9 +230,12 @@
                      FIRE DANGER + PUBLIC USE RESTRICTIONS
                      ================================================== -->
 
-                <section class="card fire-danger-card">
+                <section
+                    class="card fire-danger-card"
+                    aria-labelledby="fire-danger-heading"
+                >
 
-                    <h2>
+                    <h2 id="fire-danger-heading">
                         FIRE DANGER LEVEL &amp;<br>
                         PUBLIC USE RESTRICTIONS
                     </h2>
@@ -184,14 +246,23 @@
 
                         <!-- FIRE DANGER LEVEL -->
 
-                        <div class="status-section">
+                        <div
+                            class="status-section"
+                            aria-labelledby="fire-danger-label"
+                        >
 
-                            <div class="label">
+                            <div
+                                class="label"
+                                id="fire-danger-label"
+                            >
                                 Fire Danger Level
                             </div>
 
 
-                            <div class="status-pill status-high">
+                            <div
+                                class="status-pill status-high"
+                                aria-label="Current Fire Danger Level"
+                            >
 
                                 <span
                                     class="status-dot"
@@ -202,6 +273,9 @@
                                 <span
                                     class="status-text"
                                     id="fire-danger"
+                                    role="status"
+                                    aria-live="polite"
+                                    aria-atomic="true"
                                 >
                                     HIGH
                                 </span>
@@ -213,14 +287,23 @@
 
                         <!-- PUBLIC USE RESTRICTIONS -->
 
-                        <div class="status-section">
+                        <div
+                            class="status-section"
+                            aria-labelledby="public-use-restrictions-label"
+                        >
 
-                            <div class="label">
+                            <div
+                                class="label"
+                                id="public-use-restrictions-label"
+                            >
                                 Public Use Restrictions
                             </div>
 
 
-                            <div class="status-pill status-high">
+                            <div
+                                class="status-pill status-high"
+                                aria-label="Current Public Use Restrictions Level"
+                            >
 
                                 <span
                                     class="status-dot"
@@ -231,6 +314,9 @@
                                 <span
                                     class="status-text"
                                     id="public-use-restrictions"
+                                    role="status"
+                                    aria-live="polite"
+                                    aria-atomic="true"
                                 >
                                     HIGH
                                 </span>
@@ -245,6 +331,9 @@
                         <div
                             class="effective-date"
                             id="fire-restrictions-effective"
+                            role="status"
+                            aria-live="polite"
+                            aria-atomic="true"
                         >
                             Effective: —
                         </div>
@@ -259,9 +348,12 @@
                      IFPL
                      ================================================== -->
 
-                <section class="card ifpl-card">
+                <section
+                    class="card ifpl-card"
+                    aria-labelledby="ifpl-heading"
+                >
 
-                    <h2>
+                    <h2 id="ifpl-heading">
                         IFPL
                     </h2>
 
@@ -275,21 +367,23 @@
 
                         <!-- ==================================================
                              ZONE-AWARE IFPL DISPLAY
-
-                             script.js will populate this container
-                             with DG-1, DG-2, UA-1, and UA-2.
                              ================================================== -->
 
                         <div
                             id="ifpl-zones"
                             class="ifpl-zone-list"
+                            role="list"
+                            aria-label="Industrial Fire Precaution Levels by regulation use zone"
                         >
+
 
                             <!-- DG-1 -->
 
                             <div
                                 class="ifpl-zone-item"
                                 data-zone="DG-1"
+                                role="listitem"
+                                aria-label="DG-1 Industrial Fire Precaution Level"
                             >
 
                                 <div class="ifpl-zone-name">
@@ -297,7 +391,10 @@
                                 </div>
 
 
-                                <div class="status-pill status-high">
+                                <div
+                                    class="status-pill status-high"
+                                    aria-label="DG-1 current Industrial Fire Precaution Level"
+                                >
 
                                     <span
                                         class="status-dot"
@@ -307,6 +404,9 @@
 
                                     <span
                                         class="status-text ifpl-zone-level"
+                                        role="status"
+                                        aria-live="polite"
+                                        aria-atomic="true"
                                     >
                                         LEVEL 3
                                     </span>
@@ -314,7 +414,12 @@
                                 </div>
 
 
-                                <div class="effective-date ifpl-zone-effective">
+                                <div
+                                    class="effective-date ifpl-zone-effective"
+                                    role="status"
+                                    aria-live="polite"
+                                    aria-atomic="true"
+                                >
                                     Effective: —
                                 </div>
 
@@ -326,6 +431,8 @@
                             <div
                                 class="ifpl-zone-item"
                                 data-zone="DG-2"
+                                role="listitem"
+                                aria-label="DG-2 Industrial Fire Precaution Level"
                             >
 
                                 <div class="ifpl-zone-name">
@@ -333,7 +440,10 @@
                                 </div>
 
 
-                                <div class="status-pill status-high">
+                                <div
+                                    class="status-pill status-high"
+                                    aria-label="DG-2 current Industrial Fire Precaution Level"
+                                >
 
                                     <span
                                         class="status-dot"
@@ -343,6 +453,9 @@
 
                                     <span
                                         class="status-text ifpl-zone-level"
+                                        role="status"
+                                        aria-live="polite"
+                                        aria-atomic="true"
                                     >
                                         LEVEL 3
                                     </span>
@@ -350,7 +463,12 @@
                                 </div>
 
 
-                                <div class="effective-date ifpl-zone-effective">
+                                <div
+                                    class="effective-date ifpl-zone-effective"
+                                    role="status"
+                                    aria-live="polite"
+                                    aria-atomic="true"
+                                >
                                     Effective: —
                                 </div>
 
@@ -362,6 +480,8 @@
                             <div
                                 class="ifpl-zone-item"
                                 data-zone="UA-1"
+                                role="listitem"
+                                aria-label="UA-1 Industrial Fire Precaution Level"
                             >
 
                                 <div class="ifpl-zone-name">
@@ -369,7 +489,10 @@
                                 </div>
 
 
-                                <div class="status-pill status-high">
+                                <div
+                                    class="status-pill status-high"
+                                    aria-label="UA-1 current Industrial Fire Precaution Level"
+                                >
 
                                     <span
                                         class="status-dot"
@@ -379,6 +502,9 @@
 
                                     <span
                                         class="status-text ifpl-zone-level"
+                                        role="status"
+                                        aria-live="polite"
+                                        aria-atomic="true"
                                     >
                                         LEVEL 3
                                     </span>
@@ -386,7 +512,12 @@
                                 </div>
 
 
-                                <div class="effective-date ifpl-zone-effective">
+                                <div
+                                    class="effective-date ifpl-zone-effective"
+                                    role="status"
+                                    aria-live="polite"
+                                    aria-atomic="true"
+                                >
                                     Effective: —
                                 </div>
 
@@ -398,6 +529,8 @@
                             <div
                                 class="ifpl-zone-item"
                                 data-zone="UA-2"
+                                role="listitem"
+                                aria-label="UA-2 Industrial Fire Precaution Level"
                             >
 
                                 <div class="ifpl-zone-name">
@@ -405,7 +538,10 @@
                                 </div>
 
 
-                                <div class="status-pill status-high">
+                                <div
+                                    class="status-pill status-high"
+                                    aria-label="UA-2 current Industrial Fire Precaution Level"
+                                >
 
                                     <span
                                         class="status-dot"
@@ -415,6 +551,9 @@
 
                                     <span
                                         class="status-text ifpl-zone-level"
+                                        role="status"
+                                        aria-live="polite"
+                                        aria-atomic="true"
                                     >
                                         LEVEL 3
                                     </span>
@@ -422,21 +561,23 @@
                                 </div>
 
 
-                                <div class="effective-date ifpl-zone-effective">
+                                <div
+                                    class="effective-date ifpl-zone-effective"
+                                    role="status"
+                                    aria-live="polite"
+                                    aria-atomic="true"
+                                >
                                     Effective: —
                                 </div>
 
                             </div>
+
 
                         </div>
 
 
                         <!-- ==================================================
                              LEGACY IFPL ELEMENTS
-
-                             Retained temporarily so the existing script
-                             does not fail while the JavaScript migration
-                             is completed.
                              ================================================== -->
 
                         <div
@@ -454,6 +595,7 @@
                             Effective: —
                         </div>
 
+
                     </div>
 
                 </section>
@@ -465,9 +607,12 @@
                  DASHBOARD UPDATED
                  ================================================== -->
 
-            <section class="card dashboard-updated-card">
+            <section
+                class="card dashboard-updated-card"
+                aria-labelledby="dashboard-updated-heading"
+            >
 
-                <h2>
+                <h2 id="dashboard-updated-heading">
                     Dashboard Updated
                 </h2>
 
@@ -492,6 +637,14 @@
                         id="last-updated-time"
                     >
                         11:31 AM
+                    </div>
+
+
+                    <div class="sr-only">
+                        Last updated date and time:
+                        <span id="last-updated-accessible">
+                            August 21, 2026 at 11:31 AM
+                        </span>
                     </div>
 
                 </div>
