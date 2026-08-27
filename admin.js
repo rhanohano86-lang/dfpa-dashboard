@@ -99,6 +99,11 @@ const endSeasonDateEl =
         "endSeasonDate"
     );
 
+const endSeasonTimeEl =
+    document.getElementById(
+        "endSeasonTime"
+    );
+
 const endSeasonButton =
     document.getElementById(
         "endSeasonButton"
@@ -1402,7 +1407,6 @@ function renderFireSeasonHistory(
         return;
     }
 
-
     const table =
         document.createElement(
             "table"
@@ -1492,6 +1496,66 @@ function renderFireSeasonHistory(
     );
 }
 
+function formatFireSeasonTime(
+    value
+) {
+
+    if (!value) {
+        return "—";
+    }
+
+
+    const parts =
+        String(value)
+            .split(":");
+
+
+    if (
+        parts.length !== 2
+    ) {
+        return String(value);
+    }
+
+
+    const hour =
+        Number(parts[0]);
+
+    const minute =
+        Number(parts[1]);
+
+
+    if (
+        !Number.isInteger(hour) ||
+        !Number.isInteger(minute) ||
+        hour < 0 ||
+        hour > 23 ||
+        minute < 0 ||
+        minute > 59
+    ) {
+        return String(value);
+    }
+
+
+    const date =
+        new Date(
+            2000,
+            0,
+            1,
+            hour,
+            minute
+        );
+
+
+    return date.toLocaleTimeString(
+        "en-US",
+        {
+            hour:
+                "numeric",
+            minute:
+                "2-digit"
+        }
+    );
+}
 
 /* ======================================================
    END FIRE SEASON
@@ -1501,6 +1565,7 @@ async function endFireSeason() {
 
     if (
         !endSeasonDateEl ||
+        !endSeasonTimeEl ||
         !endSeasonButton
     ) {
         return;
@@ -1509,6 +1574,10 @@ async function endFireSeason() {
 
     const endDate =
         endSeasonDateEl.value;
+
+
+    const endTime =
+        endSeasonTimeEl.value;
 
 
     if (!endDate) {
@@ -1522,13 +1591,26 @@ async function endFireSeason() {
     }
 
 
+    if (!endTime) {
+
+        showMessage(
+            "Please enter the fire season end time.",
+            "error"
+        );
+
+        return;
+    }
+
+
     const confirmed =
         window.confirm(
             `End the current fire season on ${formatDateOnly(
                 endDate
+            )} at ${formatFireSeasonTime(
+                endTime
             )}?\n\n` +
             "The current season will be marked INACTIVE " +
-            "and the end date will be permanently recorded."
+            "and the end date and time will be permanently recorded."
         );
 
 
@@ -1539,6 +1621,7 @@ async function endFireSeason() {
 
     endSeasonButton.disabled =
         true;
+
 
     endSeasonButton.textContent =
         "Ending Fire Season...";
@@ -1568,7 +1651,10 @@ async function endFireSeason() {
                         JSON.stringify({
                             action:
                                 "END",
-                            endDate
+
+                            endDate,
+
+                            endTime
                         })
                 }
             );
@@ -1598,6 +1684,10 @@ async function endFireSeason() {
 
         endSeasonDateEl.value =
             "";
+
+
+        endSeasonTimeEl.value =
+            "00:01";
 
 
         await loadFireSeasonData();
