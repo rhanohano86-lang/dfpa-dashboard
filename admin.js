@@ -89,6 +89,11 @@ const seasonEndDateEl =
         "seasonEndDate"
     );
 
+const seasonEndTimeEl =
+    document.getElementById(
+        "seasonEndTime"
+    );
+
 const endSeasonControlsEl =
     document.getElementById(
         "endSeasonControls"
@@ -148,6 +153,7 @@ const ifplSeasonStatsBody =
     document.getElementById(
         "ifplSeasonStatsBody"
     );
+
 
 /* ======================================================
    MESSAGES
@@ -504,21 +510,23 @@ async function loadFireSeasonData() {
             data
         );
 
-const currentYear =
-    data.current?.year ||
-    (
-        Array.isArray(data.history) &&
-        data.history.length > 0
-            ? data.history[0].year
-            : null
-    );
+        const currentYear =
+            data.current?.year ||
+            (
+                Array.isArray(data.history) &&
+                data.history.length > 0
+                    ? data.history[0].year
+                    : null
+            );
 
-if (currentYear) {
-    await loadFireSeasonReport(
-        currentYear
-    );
-}
-        
+        if (currentYear) {
+
+            await loadFireSeasonReport(
+                currentYear
+            );
+        }
+
+
     } catch (error) {
 
         console.error(
@@ -540,6 +548,7 @@ if (currentYear) {
         );
     }
 }
+
 
 /* ======================================================
    LOAD FIRE SEASON REPORT
@@ -780,6 +789,7 @@ function renderFireSeasonReport(
     }
 }
 
+
 /* ======================================================
    CURRENT CONDITIONS
    ====================================================== */
@@ -791,10 +801,12 @@ function renderCurrentConditions(
     const fireRestriction =
         data.current?.fire_restrictions;
 
+
     const currentFireEffectiveEl =
         document.getElementById(
             "currentFireEffective"
         );
+
 
     if (
         currentFireLevelEl
@@ -804,6 +816,7 @@ function renderCurrentConditions(
             fireRestriction?.level ||
             "Not set";
     }
+
 
     if (
         currentFireEffectiveEl
@@ -905,6 +918,7 @@ function renderCurrentIfplZones(
             "div"
         );
 
+
     wrapper.className =
         "ifpl-zone-list";
 
@@ -924,6 +938,7 @@ function renderCurrentIfplZones(
                     "div"
                 );
 
+
             item.className =
                 "ifpl-zone-item";
 
@@ -933,8 +948,10 @@ function renderCurrentIfplZones(
                     "div"
                 );
 
+
             zoneNameEl.className =
                 "ifpl-zone-name";
+
 
             zoneNameEl.textContent =
                 zoneName;
@@ -945,6 +962,7 @@ function renderCurrentIfplZones(
                     "div"
                 );
 
+
             pill.className =
                 "status-pill status-high";
 
@@ -954,8 +972,10 @@ function renderCurrentIfplZones(
                     "span"
                 );
 
+
             dot.className =
                 "status-dot";
+
 
             dot.setAttribute(
                 "aria-hidden",
@@ -968,8 +988,10 @@ function renderCurrentIfplZones(
                     "span"
                 );
 
+
             levelEl.className =
                 "status-text ifpl-zone-level";
+
 
             levelEl.textContent =
                 zone?.level ||
@@ -979,6 +1001,7 @@ function renderCurrentIfplZones(
             pill.appendChild(
                 dot
             );
+
 
             pill.appendChild(
                 levelEl
@@ -1010,8 +1033,10 @@ function renderCurrentIfplZones(
                     "div"
                 );
 
+
             zoneEffective.className =
                 "ifpl-zone-effective";
+
 
             zoneEffective.textContent =
                 zone?.effective_at
@@ -1026,9 +1051,11 @@ function renderCurrentIfplZones(
                 zoneNameEl
             );
 
+
             item.appendChild(
                 pill
             );
+
 
             item.appendChild(
                 zoneEffective
@@ -1084,6 +1111,7 @@ function getStatusClass(
     if (
         normalized === "LOW"
     ) {
+
         return "status-low";
     }
 
@@ -1091,6 +1119,7 @@ function getStatusClass(
     if (
         normalized === "MODERATE"
     ) {
+
         return "status-moderate";
     }
 
@@ -1098,6 +1127,7 @@ function getStatusClass(
     if (
         normalized === "HIGH"
     ) {
+
         return "status-high";
     }
 
@@ -1105,6 +1135,7 @@ function getStatusClass(
     if (
         normalized === "EXTREME"
     ) {
+
         return "status-extreme";
     }
 
@@ -1186,6 +1217,19 @@ function renderFireSeason(
 
 
         if (
+            seasonEndTimeEl
+        ) {
+
+            seasonEndTimeEl.textContent =
+                current.end_time
+                    ? formatFireSeasonTime(
+                        current.end_time
+                    )
+                    : "—";
+        }
+
+
+        if (
             endSeasonControlsEl
         ) {
 
@@ -1226,6 +1270,7 @@ function renderFireSeason(
         renderFireSeasonHistory(
             history
         );
+
 
         return;
     }
@@ -1301,6 +1346,20 @@ function renderFireSeason(
                     : "—";
         }
 
+
+        if (
+            seasonEndTimeEl
+        ) {
+
+            seasonEndTimeEl.textContent =
+                mostRecentSeason.end_time
+                    ? formatFireSeasonTime(
+                        mostRecentSeason.end_time
+                    )
+                    : "—";
+        }
+
+
     } else {
 
         if (
@@ -1326,6 +1385,15 @@ function renderFireSeason(
         ) {
 
             seasonEndDateEl.textContent =
+                "—";
+        }
+
+
+        if (
+            seasonEndTimeEl
+        ) {
+
+            seasonEndTimeEl.textContent =
                 "—";
         }
     }
@@ -1371,6 +1439,7 @@ function renderFireSeason(
                 : new Date()
                     .getFullYear();
 
+
         newSeasonYearEl.value =
             suggestedYear;
     }
@@ -1393,6 +1462,7 @@ function renderFireSeasonHistory(
     if (
         !fireSeasonHistoryContainer
     ) {
+
         return;
     }
 
@@ -1407,23 +1477,25 @@ function renderFireSeasonHistory(
         return;
     }
 
+
     const table =
         document.createElement(
             "table"
         );
 
 
-    table.innerHTML = `
-        <thead>
-            <tr>
-                <th>Season</th>
-                <th>Status</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    `;
+   table.innerHTML = `
+    <thead>
+        <tr>
+            <th>Season</th>
+            <th>Status</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>End Time</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+`;
 
 
     const tbody =
@@ -1477,7 +1549,15 @@ function renderFireSeasonHistory(
                         )
                     )}
                 </td>
-            `;
+        <td>
+    ${escapeHtml(
+        season.end_time
+            ? formatFireSeasonTime(
+                season.end_time
+            )
+            : "—"
+    )}
+</td>
 
 
             tbody.appendChild(
@@ -1496,6 +1576,11 @@ function renderFireSeasonHistory(
     );
 }
 
+
+/* ======================================================
+   FORMAT FIRE SEASON TIME
+   ====================================================== */
+
 function formatFireSeasonTime(
     value
 ) {
@@ -1513,12 +1598,14 @@ function formatFireSeasonTime(
     if (
         parts.length !== 2
     ) {
+
         return String(value);
     }
 
 
     const hour =
         Number(parts[0]);
+
 
     const minute =
         Number(parts[1]);
@@ -1532,6 +1619,7 @@ function formatFireSeasonTime(
         minute < 0 ||
         minute > 59
     ) {
+
         return String(value);
     }
 
@@ -1557,6 +1645,7 @@ function formatFireSeasonTime(
     );
 }
 
+
 /* ======================================================
    END FIRE SEASON
    ====================================================== */
@@ -1568,6 +1657,7 @@ async function endFireSeason() {
         !endSeasonTimeEl ||
         !endSeasonButton
     ) {
+
         return;
     }
 
@@ -1713,6 +1803,7 @@ async function endFireSeason() {
         endSeasonButton.disabled =
             false;
 
+
         endSeasonButton.textContent =
             "End Fire Season";
     }
@@ -1730,6 +1821,7 @@ async function startFireSeason() {
         !newSeasonStartDateEl ||
         !startSeasonButton
     ) {
+
         return;
     }
 
@@ -1775,6 +1867,7 @@ async function startFireSeason() {
     startSeasonButton.disabled =
         true;
 
+
     startSeasonButton.textContent =
         "Starting Fire Season...";
 
@@ -1803,7 +1896,9 @@ async function startFireSeason() {
                         JSON.stringify({
                             action:
                                 "START",
+
                             year,
+
                             startDate
                         })
                 }
@@ -1858,6 +1953,7 @@ async function startFireSeason() {
 
         startSeasonButton.disabled =
             false;
+
 
         startSeasonButton.textContent =
             "Start Fire Season";
@@ -1958,6 +2054,7 @@ function renderUpcomingChanges(
                 <th>Action</th>
             </tr>
         </thead>
+
         <tbody></tbody>
     `;
 
@@ -2064,6 +2161,7 @@ function renderUpcomingChanges(
     upcomingContainer.innerHTML =
         "";
 
+
     upcomingContainer.appendChild(
         table
     );
@@ -2103,14 +2201,19 @@ function groupUpcomingChanges(
                     {
                         tableName:
                             record.tableName,
+
                         changeType:
                             record.changeType,
+
                         level:
                             record.level,
+
                         effective_at:
                             record.effective_at,
+
                         created_by:
                             record.created_by,
+
                         records: []
                     }
                 );
@@ -2187,7 +2290,9 @@ async function cancelScheduledChange(
                     body:
                         JSON.stringify({
                             id,
+
                             table,
+
                             reason:
                                 "Scheduled change cancelled by administrator."
                         })
@@ -2386,6 +2491,7 @@ function renderHistory(
     historyContainer.innerHTML =
         "";
 
+
     historyContainer.appendChild(
         table
     );
@@ -2408,14 +2514,18 @@ scheduleForm.addEventListener(
         const changeType =
             changeTypeEl.value;
 
+
         const level =
             newLevelEl.value;
+
 
         const date =
             effectiveDateEl.value;
 
+
         const time =
             effectiveTimeEl.value;
+
 
         const notes =
             notesEl.value.trim();
@@ -2451,12 +2561,14 @@ scheduleForm.addEventListener(
                     "T"
                 );
 
+
             const [year, month, day] =
                 datePart
                     .split("-")
                     .map(
                         Number
                     );
+
 
             const [hour, minute] =
                 timePart
@@ -2482,16 +2594,22 @@ scheduleForm.addEventListener(
                     {
                         timeZone:
                             "America/Los_Angeles",
+
                         year:
                             "numeric",
+
                         month:
                             "2-digit",
+
                         day:
                             "2-digit",
+
                         hour:
                             "2-digit",
+
                         minute:
                             "2-digit",
+
                         hourCycle:
                             "h23"
                     }
@@ -2588,6 +2706,7 @@ scheduleForm.addEventListener(
         const ifplScopeEl =
             getIfplScopeEl();
 
+
         const ifplZoneEl =
             getIfplZoneEl();
 
@@ -2668,6 +2787,7 @@ scheduleForm.addEventListener(
         submitButton.disabled =
             true;
 
+
         submitButton.textContent =
             "Scheduling...";
 
@@ -2733,6 +2853,7 @@ scheduleForm.addEventListener(
 
             updateLevelOptions();
 
+
             updateIfplZoneControls();
 
 
@@ -2758,6 +2879,7 @@ scheduleForm.addEventListener(
 
             submitButton.disabled =
                 false;
+
 
             submitButton.textContent =
                 "Schedule Change";
