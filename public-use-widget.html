@@ -11,7 +11,7 @@
     >
 
     <title>
-        DFPA Public Use Restriction Time Widget
+        DFPA Public Use Restrictions
     </title>
 
 
@@ -55,7 +55,6 @@
             width: 100%;
             max-width: 700px;
             margin: 0 auto;
-
             padding: 18px 20px;
 
             background:
@@ -84,8 +83,8 @@
         }
 
 
-        .widget-message {
-            margin: 0;
+        .widget-level {
+            margin: 0 0 8px;
 
             font-size: 20px;
             line-height: 1.35;
@@ -94,10 +93,10 @@
         }
 
 
-        .widget-status {
-            margin-top: 8px;
+        .widget-message {
+            margin: 0;
 
-            font-size: 14px;
+            font-size: 17px;
             line-height: 1.4;
 
             font-weight: normal;
@@ -147,13 +146,13 @@
             }
 
 
-            .widget-message {
-                font-size: 17px;
+            .widget-level {
+                font-size: 18px;
             }
 
 
-            .widget-status {
-                font-size: 12px;
+            .widget-message {
+                font-size: 15px;
             }
 
         }
@@ -181,8 +180,8 @@
 
 
         <p
-            id="widgetMessage"
-            class="widget-message"
+            id="widgetLevel"
+            class="widget-level"
             role="status"
             aria-live="polite"
             aria-atomic="true"
@@ -192,12 +191,13 @@
 
 
         <p
-            id="widgetStatus"
-            class="widget-status"
+            id="widgetMessage"
+            class="widget-message"
+            role="status"
             aria-live="polite"
             aria-atomic="true"
         >
-            Checking current DFPA fire restrictions.
+            Loading current restriction information.
         </p>
 
     </section>
@@ -211,15 +211,15 @@
             );
 
 
-        const widgetMessage =
+        const widgetLevel =
             document.getElementById(
-                "widgetMessage"
+                "widgetLevel"
             );
 
 
-        const widgetStatus =
+        const widgetMessage =
             document.getElementById(
-                "widgetStatus"
+                "widgetMessage"
             );
 
 
@@ -229,7 +229,7 @@
                 className:
                     "low",
 
-                restrictionText:
+                message:
                     "Allowed all day."
             },
 
@@ -237,7 +237,7 @@
                 className:
                     "moderate",
 
-                restrictionText:
+                message:
                     "Allowed before 1 PM or after 8 PM."
             },
 
@@ -245,7 +245,7 @@
                 className:
                     "high",
 
-                restrictionText:
+                message:
                     "Allowed before 10 AM or after 8 PM."
             },
 
@@ -253,7 +253,7 @@
                 className:
                     "extreme",
 
-                restrictionText:
+                message:
                     "Prohibited at all times."
             }
 
@@ -262,7 +262,7 @@
 
         function setWidgetState(
             stateClass,
-            message,
+            levelText,
             restrictionText
         ) {
 
@@ -281,17 +281,17 @@
             );
 
 
+            widgetLevel.textContent =
+                levelText;
+
+
             widgetMessage.textContent =
-                message;
-
-
-            widgetStatus.textContent =
                 restrictionText;
 
 
             widget.setAttribute(
                 "aria-label",
-                `Public Use Restrictions: ${message}. ${restrictionText}`
+                `Public Use Restrictions: ${levelText}. ${restrictionText}`
             );
 
         }
@@ -355,8 +355,8 @@
 
 
                 /*
-                 * When fire season is inactive,
-                 * time restrictions do not apply.
+                 * Fire season inactive:
+                 * Allowed all day.
                  */
 
                 const season =
@@ -408,7 +408,7 @@
 
                     setWidgetState(
                         "moderate",
-                        "Restriction information unavailable.",
+                        "Information unavailable.",
                         "Please check the current DFPA Public Use Restrictions."
                     );
 
@@ -418,156 +418,15 @@
 
 
                 /*
-                 * LOW
+                 * Display the current level
+                 * and its complete restriction
+                 * language.
                  */
-
-                if (
-                    level === "LOW"
-                ) {
-
-                    setWidgetState(
-                        config.className,
-                        "Allowed now.",
-                        config.restrictionText
-                    );
-
-
-                    return;
-                }
-
-
-                /*
-                 * EXTREME
-                 */
-
-                if (
-                    level === "EXTREME"
-                ) {
-
-                    setWidgetState(
-                        config.className,
-                        "Prohibited.",
-                        config.restrictionText
-                    );
-
-
-                    return;
-                }
-
-
-                /*
-                 * MODERATE and HIGH use
-                 * time-based restrictions.
-                 */
-
-                const now =
-                    new Date();
-
-
-                const pacificParts =
-                    new Intl.DateTimeFormat(
-                        "en-US",
-                        {
-                            timeZone:
-                                "America/Los_Angeles",
-
-                            hour:
-                                "numeric",
-
-                            minute:
-                                "numeric",
-
-                            hourCycle:
-                                "h23"
-                        }
-                    )
-                        .formatToParts(
-                            now
-                        );
-
-
-                let hour =
-                    0;
-
-
-                let minute =
-                    0;
-
-
-                pacificParts.forEach(
-                    part => {
-
-                        if (
-                            part.type ===
-                            "hour"
-                        ) {
-
-                            hour =
-                                Number(
-                                    part.value
-                                );
-                        }
-
-
-                        if (
-                            part.type ===
-                            "minute"
-                        ) {
-
-                            minute =
-                                Number(
-                                    part.value
-                                );
-                        }
-
-                    }
-                );
-
-
-                const currentMinutes =
-                    (
-                        hour *
-                        60
-                    ) +
-                    minute;
-
-
-                const morningCutoff =
-                    level === "MODERATE"
-                        ? 13 * 60
-                        : 10 * 60;
-
-
-                const eveningStart =
-                    20 * 60;
-
-
-                const currentlyAllowed =
-                    currentMinutes <
-                        morningCutoff ||
-                    currentMinutes >=
-                        eveningStart;
-
-
-                if (
-                    currentlyAllowed
-                ) {
-
-                    setWidgetState(
-                        config.className,
-                        "Allowed now.",
-                        config.restrictionText
-                    );
-
-
-                    return;
-                }
-
 
                 setWidgetState(
                     config.className,
-                    "Restricted right now.",
-                    config.restrictionText
+                    level,
+                    config.message
                 );
 
 
@@ -581,7 +440,7 @@
 
                 setWidgetState(
                     "moderate",
-                    "Restriction information unavailable.",
+                    "Information unavailable.",
                     "Please check the current DFPA Public Use Restrictions."
                 );
 
@@ -598,9 +457,9 @@
 
 
         /*
-         * Recheck every minute so the widget
-         * changes automatically when the
-         * restriction time changes.
+         * Check periodically so the widget
+         * automatically reflects the current
+         * effective Fire Danger/PUR level.
          */
 
         setInterval(
