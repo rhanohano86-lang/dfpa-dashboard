@@ -55,6 +55,7 @@
             width: 100%;
             max-width: 700px;
             margin: 0 auto;
+
             padding: 18px 20px;
 
             background:
@@ -96,7 +97,9 @@
         .widget-status {
             margin-top: 8px;
 
-            font-size: 13px;
+            font-size: 14px;
+            line-height: 1.4;
+
             font-weight: normal;
         }
 
@@ -226,7 +229,7 @@
                 className:
                     "low",
 
-                message:
+                restrictionText:
                     "Allowed all day."
             },
 
@@ -234,7 +237,7 @@
                 className:
                     "moderate",
 
-                message:
+                restrictionText:
                     "Allowed before 1 PM or after 8 PM."
             },
 
@@ -242,7 +245,7 @@
                 className:
                     "high",
 
-                message:
+                restrictionText:
                     "Allowed before 10 AM or after 8 PM."
             },
 
@@ -250,8 +253,8 @@
                 className:
                     "extreme",
 
-                message:
-                    "Prohibited."
+                restrictionText:
+                    "Prohibited at all times."
             }
 
         };
@@ -260,7 +263,7 @@
         function setWidgetState(
             stateClass,
             message,
-            statusText
+            restrictionText
         ) {
 
             widget.classList.remove(
@@ -283,49 +286,12 @@
 
 
             widgetStatus.textContent =
-                statusText;
+                restrictionText;
 
 
             widget.setAttribute(
                 "aria-label",
-                `Public Use Restrictions: ${message}`
-            );
-
-        }
-
-
-        function formatPacificTime(
-            value
-        ) {
-
-            if (!value) {
-                return "";
-            }
-
-
-            const date =
-                new Date(value);
-
-
-            if (
-                Number.isNaN(
-                    date.getTime()
-                )
-            ) {
-                return "";
-            }
-
-
-            return date.toLocaleTimeString(
-                "en-US",
-                {
-                    timeZone:
-                        "America/Los_Angeles",
-                    hour:
-                        "numeric",
-                    minute:
-                        "2-digit"
-                }
+                `Public Use Restrictions: ${message}. ${restrictionText}`
             );
 
         }
@@ -389,8 +355,8 @@
 
 
                 /*
-                 * Fire Season inactive:
-                 * allow all day.
+                 * When fire season is inactive,
+                 * time restrictions do not apply.
                  */
 
                 const season =
@@ -417,12 +383,9 @@
 
 
                 /*
-                 * Current Fire Danger / PUR level.
-                 *
-                 * The public-status API already resolves
-                 * the currently effective change, so the
-                 * widget automatically changes when a
-                 * scheduled change takes effect.
+                 * Get the current effective
+                 * Fire Danger / Public Use
+                 * Restriction level.
                  */
 
                 const level =
@@ -464,8 +427,8 @@
 
                     setWidgetState(
                         config.className,
-                        config.message,
-                        "Current Fire Danger/PUR level: LOW."
+                        "Allowed now.",
+                        config.restrictionText
                     );
 
 
@@ -483,8 +446,8 @@
 
                     setWidgetState(
                         config.className,
-                        config.message,
-                        "Current Fire Danger/PUR level: EXTREME."
+                        "Prohibited.",
+                        config.restrictionText
                     );
 
 
@@ -493,10 +456,8 @@
 
 
                 /*
-                 * MODERATE and HIGH use time restrictions.
-                 *
-                 * Evaluate the current time in the
-                 * America/Los_Angeles timezone.
+                 * MODERATE and HIGH use
+                 * time-based restrictions.
                  */
 
                 const now =
@@ -509,10 +470,13 @@
                         {
                             timeZone:
                                 "America/Los_Angeles",
+
                             hour:
                                 "numeric",
+
                             minute:
                                 "numeric",
+
                             hourCycle:
                                 "h23"
                         }
@@ -589,22 +553,10 @@
                     currentlyAllowed
                 ) {
 
-                    const allowedUntil =
-                        currentMinutes <
-                            morningCutoff
-                            ? (
-                                level ===
-                                    "MODERATE"
-                                    ? "1 PM"
-                                    : "10 AM"
-                            )
-                            : "10 AM tomorrow";
-
-
                     setWidgetState(
                         config.className,
                         "Allowed now.",
-                        `Current Fire Danger/PUR level: ${level}. Allowed until ${allowedUntil}.`
+                        config.restrictionText
                     );
 
 
@@ -615,7 +567,7 @@
                 setWidgetState(
                     config.className,
                     "Restricted right now.",
-                    `Current Fire Danger/PUR level: ${level}. Allowed after 8 PM.`
+                    config.restrictionText
                 );
 
 
@@ -646,9 +598,9 @@
 
 
         /*
-         * Check periodically so the widget
-         * changes automatically when the time
-         * crosses a restriction boundary.
+         * Recheck every minute so the widget
+         * changes automatically when the
+         * restriction time changes.
          */
 
         setInterval(
