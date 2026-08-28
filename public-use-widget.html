@@ -420,7 +420,7 @@
 
                 /*
                  * Display the current level
-                 * and its complete restriction
+                 * and complete restriction
                  * language.
                  */
 
@@ -451,22 +451,10 @@
 
 
         /*
-         * Initial load.
+         * Load once when the widget opens.
          */
 
         loadWidgetData();
-
-
-        /*
-         * Check periodically so the widget
-         * automatically reflects the current
-         * effective Fire Danger/PUR level.
-         */
-
-        setInterval(
-            loadWidgetData,
-            60000
-        );
 
     </script>
 
