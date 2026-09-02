@@ -336,34 +336,64 @@ function getStatusClass(
         return "status-high";
     }
 
-
     const normalized =
         String(level)
             .toUpperCase();
 
+    /* Fire Danger / Public Use Restrictions */
 
     if (
         normalized === "LOW"
     ) {
-
         return "status-low";
     }
-
 
     if (
         normalized === "MODERATE"
     ) {
-
         return "status-moderate";
     }
-
 
     if (
         normalized === "HIGH"
     ) {
-
         return "status-high";
     }
+
+    if (
+        normalized === "EXTREME"
+    ) {
+        return "status-extreme";
+    }
+
+    /* IFPL */
+
+    if (
+        normalized === "LEVEL 1"
+    ) {
+        return "status-low";
+    }
+
+    if (
+        normalized === "LEVEL 2"
+    ) {
+        return "status-moderate";
+    }
+
+    if (
+        normalized === "LEVEL 3"
+    ) {
+        return "status-high";
+    }
+
+    if (
+        normalized === "LEVEL 4"
+    ) {
+        return "status-extreme";
+    }
+
+    return "status-high";
+}
 
 
     if (
