@@ -381,6 +381,49 @@ return "status-high";
 }
 
 /* ======================================================
+   IFPL STATUS CSS CLASS
+   ====================================================== */
+
+function getIFPLStatusClass(
+    level
+) {
+
+    if (!level) {
+        return "status-high";
+    }
+
+    const normalized =
+        String(level)
+            .toUpperCase();
+
+    if (
+        normalized === "LEVEL 1"
+    ) {
+        return "status-low";
+    }
+
+    if (
+        normalized === "LEVEL 2"
+    ) {
+        return "status-moderate";
+    }
+
+    if (
+        normalized === "LEVEL 3"
+    ) {
+        return "status-high";
+    }
+
+    if (
+        normalized === "LEVEL 4"
+    ) {
+        return "status-extreme";
+    }
+
+    return "status-high";
+}
+
+/* ======================================================
 ACCESSIBILITY HELPERS
 ====================================================== */
 
@@ -855,7 +898,7 @@ if (
 
 
                 pill.classList.add(
-                    getStatusClass(
+                getIFPLStatusClass(
                         level
                     )
                 );
