@@ -340,8 +340,6 @@ function getStatusClass(
         String(level)
             .toUpperCase();
 
-    /* Fire Danger / Public Use Restrictions */
-
     if (
         normalized === "LOW"
     ) {
@@ -366,35 +364,15 @@ function getStatusClass(
         return "status-extreme";
     }
 
-    /* IFPL */
-
-    if (
-        normalized === "LEVEL 1"
-    ) {
-        return "status-low";
-    }
-
-    if (
-        normalized === "LEVEL 2"
-    ) {
-        return "status-moderate";
-    }
-
-    if (
-        normalized === "LEVEL 3"
-    ) {
-        return "status-high";
-    }
-
-    if (
-        normalized === "LEVEL 4"
-    ) {
-        return "status-extreme";
-    }
+    /*
+     * IFPL levels do not have their own
+     * status-color classes, so use the
+     * standard high-status presentation
+     * as the safe fallback.
+     */
 
     return "status-high";
 }
-
 
     if (
         normalized === "EXTREME"
