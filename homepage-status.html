@@ -11,21 +11,39 @@
 
   <main aria-labelledby="fire-status-heading">
 
-    <header class="status-header">
-      <h1 id="fire-status-heading">
-        Current Fire Status
-        <span
-          id="fire-season-status"
-          aria-live="polite"
-        >
-          Loading status...
-        </span>
-      </h1>
+  <header class="status-header">
 
-      <p class="status-subtitle">
-        For DFPA Protected Lands in the Douglas District
-      </p>
-    </header>
+  <div class="status-title-group">
+
+    <h1 id="fire-status-heading">
+      Current Fire Status
+    </h1>
+
+    <p class="status-subtitle">
+      DFPA Protected Lands
+      <span aria-hidden="true">|</span>
+      Douglas District
+    </p>
+
+    <p
+      id="fire-season-status"
+      class="fire-season-indicator"
+      aria-live="polite"
+    >
+      Loading status...
+    </p>
+
+  </div>
+
+  <p class="prevention-message">
+    Know Before You Go
+    <span aria-hidden="true">|</span>
+    Prevent Wildfires
+    <span aria-hidden="true">|</span>
+    Keep Oregon Green
+  </p>
+
+</header>
 
     <div class="status-grid">
 
