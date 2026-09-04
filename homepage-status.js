@@ -124,13 +124,9 @@ function applyStatusClass(element, statusClass) {
    ========================================================= */
 
 function displayFireSeason(isActive) {
-  if (!fireSeasonStatus) {
-    return;
-  }
-
-   const statusText = isActive
-    ? "— ACTIVE"
-    : "— INACTIVE";
+  const statusText = isActive
+    ? "FIRE SEASON: ACTIVE"
+    : "FIRE SEASON: INACTIVE";
 
   fireSeasonStatus.textContent = statusText;
 
@@ -142,10 +138,7 @@ function displayFireSeason(isActive) {
   );
 
   if (statusHeader) {
-    statusHeader.classList.toggle(
-      "status-inactive",
-      !isActive
-    );
+    statusHeader.classList.toggle("status-inactive", !isActive);
   }
 }
 
