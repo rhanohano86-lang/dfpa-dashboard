@@ -67,6 +67,19 @@ main {
   line-height: 1.4;
 }
 
+.status-subtitle .protected-lands {
+  display: block;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.status-subtitle .district-name {
+  display: block;
+  margin-top: 2px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
 .fire-season-indicator {
   display: inline-block;
   margin: 10px 0 0;
