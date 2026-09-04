@@ -36,12 +36,17 @@ main {
   text-align: center;
 }
 
+.status-title-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .status-header h1 {
   margin: 0;
   color: #17324d;
   font-size: 2rem;
   line-height: 1.2;
-  font-weight: 700;
 }
 
 .status-subtitle {
@@ -49,6 +54,26 @@ main {
   color: #17324d;
   font-size: 1.05rem;
   line-height: 1.4;
+}
+
+.fire-season-indicator {
+  display: inline-block;
+  margin: 10px 0 0;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: #e8f4ec;
+  color: #176b35;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.prevention-message {
+  margin: 18px 0 0;
+  color: #17324d;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
 }
 
 /* Fire season status */
