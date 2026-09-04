@@ -32,8 +32,19 @@ main {
    --------------------------------------------------------- */
 
 .status-header {
+  position: relative;
   margin-bottom: 24px;
+  padding: 0 150px 0;
   text-align: center;
+}
+
+.dfpa-logo {
+  position: absolute;
+  top: 0;
+  left: 4%;
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
 }
 
 .status-title-group {
@@ -357,6 +368,18 @@ button:focus-visible {
 }
 
 @media (max-width: 500px) {
+  .status-header {
+    padding: 0;
+  }
+
+  .dfpa-logo {
+    position: static;
+    display: block;
+    width: 90px;
+    height: 90px;
+    margin: 0 auto 12px;
+  }
+
   .status-header h1 {
     font-size: 1.65rem;
   }
