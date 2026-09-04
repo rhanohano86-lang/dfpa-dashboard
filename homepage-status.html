@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Current Fire Status</title>
+</head>
+
+<body>
+
+  <main aria-labelledby="fire-status-heading">
+
+    <h1 id="fire-status-heading">Current Fire Status</h1>
+
+    <section aria-labelledby="fire-danger-heading">
+      <h2 id="fire-danger-heading">Fire Danger</h2>
+      <p id="fire-danger-status">Loading current fire danger...</p>
+    </section>
+
+    <section aria-labelledby="public-use-heading">
+      <h2 id="public-use-heading">Public Use Restrictions</h2>
+      <p id="public-use-status">Loading current public use restrictions...</p>
+    </section>
+
+    <section aria-labelledby="ifpl-heading">
+      <h2 id="ifpl-heading">Industrial Fire Precaution Level</h2>
+
+      <div id="ifpl-status" aria-live="polite">
+        <p>Loading current industrial fire precaution levels...</p>
+      </div>
+    </section>
+
+  </main>
+
+</body>
+</html>
