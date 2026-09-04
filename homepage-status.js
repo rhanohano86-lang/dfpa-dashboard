@@ -128,31 +128,23 @@ function displayFireSeason(isActive) {
     return;
   }
 
-  const statusText = isActive
-    ? "ACTIVE"
-    : "INACTIVE";
+   const statusText = isActive
+    ? "— ACTIVE"
+    : "— INACTIVE";
 
   fireSeasonStatus.textContent = statusText;
 
   fireSeasonStatus.setAttribute(
     "aria-label",
-    `Fire Season Status: ${statusText}`
+    isActive
+      ? "Fire Season Status: Active"
+      : "Fire Season Status: Inactive"
   );
 
   if (statusHeader) {
     statusHeader.classList.toggle(
       "status-inactive",
       !isActive
-    );
-  }
-
-  if (!isActive) {
-    fireSeasonStatus.textContent =
-      "— INACTIVE";
-
-    fireSeasonStatus.setAttribute(
-      "aria-label",
-      "Fire Season Status: Inactive"
     );
   }
 }
