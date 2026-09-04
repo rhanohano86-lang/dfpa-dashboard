@@ -1,0 +1,123 @@
+/* =========================================================
+   DFPA Homepage Fire Status Widget
+   Accessibility-first styling
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  color: #1f2933;
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.5;
+}
+
+main {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+h1,
+h2 {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 24px;
+  text-align: center;
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+section {
+  margin-bottom: 20px;
+  padding: 20px;
+  border: 1px solid #c7cdd3;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+section:last-child {
+  margin-bottom: 0;
+}
+
+h2 {
+  margin-bottom: 10px;
+  font-size: 1.25rem;
+  line-height: 1.3;
+}
+
+p {
+  margin: 0;
+}
+
+#fire-danger-status,
+#public-use-status {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+#ifpl-status {
+  font-size: 1.1rem;
+}
+
+#ifpl-status p {
+  margin-bottom: 8px;
+}
+
+#ifpl-status p:last-child {
+  margin-bottom: 0;
+}
+
+/* Keyboard focus */
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid #1f5f8b;
+  outline-offset: 3px;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Smaller screens */
+@media (max-width: 600px) {
+  main {
+    padding: 24px 16px;
+  }
+
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  section {
+    padding: 16px;
+  }
+
+  h2 {
+    font-size: 1.15rem;
+  }
+
+  #fire-danger-status,
+  #public-use-status,
+  #ifpl-status {
+    font-size: 1rem;
+  }
+}
