@@ -11,8 +11,9 @@ DASHBOARD DATA
 const dashboardData = {
 
 fireSeason: {
-    active: true,
-    startDate: "May 30, 2026"
+    active: null,
+    startDate: "—",
+    loaded: false
 },
 
 fireRestrictionsLevel: "LOW",
@@ -87,7 +88,113 @@ return (
 );
 
 }
+/* ======================================================
+   LOAD OFFICIAL FIRE SEASON STATUS FROM D1
+   ====================================================== */
 
+function formatSeasonDate(dateValue) {
+
+    if (!dateValue) {
+        return "—";
+    }
+
+    const match = String(dateValue).match(
+        /^(\d{4})-(\d{2})-(\d{2})$/
+    );
+
+    if (match) {
+
+        const date = new Date(
+            Date.UTC(
+                Number(match[1]),
+                Number(match[2]) - 1,
+                Number(match[3])
+            )
+        );
+
+        return date.toLocaleDateString("en-US", {
+            timeZone: "UTC",
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+        });
+    }
+
+    const date = new Date(dateValue);
+
+    if (Number.isNaN(date.getTime())) {
+        return "—";
+    }
+
+    return date.toLocaleDateString("en-US", {
+        timeZone: "America/Los_Angeles",
+        month: "long",
+        day: "numeric",
+        year: "numeric"
+    });
+}
+
+
+async function loadFireSeasonStatus() {
+
+    try {
+
+        const response = await fetch(
+            "/api/fire-season",
+            {
+                cache: "no-store"
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                "Unable to load current fire season status."
+            );
+        }
+
+        /*
+         * When a season is active, use data.current.
+         * When the season has ended, current is null,
+         * so use the most recent season in history.
+         */
+
+        const season =
+            data.current ||
+            (
+                Array.isArray(data.history)
+                    ? data.history[0]
+                    : null
+            );
+
+        if (!season) {
+
+            dashboardData.fireSeason.active = false;
+            dashboardData.fireSeason.startDate = "—";
+            dashboardData.fireSeason.loaded = true;
+
+            return;
+        }
+
+        dashboardData.fireSeason.active =
+            String(season.status || "").toUpperCase() === "ACTIVE";
+
+        dashboardData.fireSeason.startDate =
+            formatSeasonDate(season.start_date);
+
+        dashboardData.fireSeason.loaded = true;
+
+    } catch (error) {
+
+        dashboardData.fireSeason.loaded = false;
+
+        console.error(
+            "Public fire season loading error:",
+            error
+        );
+    }
+}
 /* ======================================================
 LOAD PUBLIC STATUS FROM D1
 ====================================================== */
@@ -482,6 +589,40 @@ const seasonStartDate =
         "season-start-date"
     );
 
+        /*
+     * Never display a stale or assumed status if the
+     * official fire season record could not be retrieved.
+     */
+
+    if (!dashboardData.fireSeason.loaded) {
+
+        seasonStatus.textContent = "UNAVAILABLE";
+
+        seasonStatus.classList.remove(
+            "active",
+            "inactive"
+        );
+
+        seasonDay.textContent = "—";
+        seasonStartDate.textContent = "—";
+
+        setAccessibleLabel(
+            seasonStatus,
+            "Fire Season Status: Unavailable"
+        );
+
+        setAccessibleLabel(
+            seasonDay,
+            "Current Fire Season Day: Unavailable"
+        );
+
+        setAccessibleLabel(
+            seasonStartDate,
+            "Fire Season start date: Unavailable"
+        );
+
+        return;
+    }
 
 if (
     !seasonStatus ||
@@ -1285,7 +1426,12 @@ document.addEventListener(
 "DOMContentLoaded",
 async () => {
 
-    await loadPublicStatus();
+  await Promise.all([
+    loadPublicStatus(),
+    loadFireSeasonStatus()
+]);
+
+updateFireSeason();
 
     updateFireSeason();
 
