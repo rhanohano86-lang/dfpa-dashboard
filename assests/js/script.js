@@ -375,10 +375,7 @@ function updateFireSeason() {
 
 /* ======================================================
    FIRE DANGER + PUBLIC USE RESTRICTIONS
-
-   Fire Danger keeps its recorded level.
-   Public Use Restrictions display INACTIVE when
-   the official fire season has ended.
+   Show INACTIVE when fire season has ended.
    ====================================================== */
 
 function updateFireRestrictions() {
@@ -396,26 +393,30 @@ function updateFireRestrictions() {
         dashboardData.fireSeason.loaded &&
         dashboardData.fireSeason.active === false;
 
-    const level =
+    const recordedLevel =
         dashboardData.fireRestrictionsLevel || "Not set";
 
-    const publicUseLevel =
-        seasonIsInactive ? "INACTIVE" : level;
+    const displayLevel =
+        seasonIsInactive ? "INACTIVE" : recordedLevel;
 
-    // Fire Danger remains at its last recorded level.
-    fireDanger.textContent = level;
+    // Display current season status for both fields.
+    fireDanger.textContent = displayLevel;
+    publicUseRestrictions.textContent = displayLevel;
 
-    // Only the Public Use Restrictions display changes.
-    publicUseRestrictions.textContent = publicUseLevel;
+    const statusClass = seasonIsInactive
+        ? "inactive"
+        : getStatusClass(recordedLevel);
 
-    const fireDangerPill =
-        fireDanger.closest(".status-pill");
-
+    const fireDangerPill = fireDanger.closest(".status-pill");
     const publicUsePill =
         publicUseRestrictions.closest(".status-pill");
 
-    if (fireDangerPill) {
-        fireDangerPill.classList.remove(
+    [fireDangerPill, publicUsePill].forEach(pill => {
+        if (!pill) {
+            return;
+        }
+
+        pill.classList.remove(
             "status-low",
             "status-moderate",
             "status-high",
@@ -423,53 +424,30 @@ function updateFireRestrictions() {
             "inactive"
         );
 
-        fireDangerPill.classList.add(
-            getStatusClass(level)
-        );
+        pill.classList.add(statusClass);
 
         setAccessibleLabel(
-            fireDangerPill,
-            `Current Fire Danger Level: ${level}`
-        );
-    }
-
-    if (publicUsePill) {
-        publicUsePill.classList.remove(
-            "status-low",
-            "status-moderate",
-            "status-high",
-            "status-extreme",
-            "inactive"
-        );
-
-        publicUsePill.classList.add(
+            pill,
             seasonIsInactive
-                ? "inactive"
-                : getStatusClass(level)
+                ? "Status: INACTIVE — Fire season has ended"
+                : `Current Status: ${recordedLevel}`
         );
-
-        setAccessibleLabel(
-            publicUsePill,
-            seasonIsInactive
-                ? "Public Use Restrictions: INACTIVE"
-                : `Current Public Use Restrictions Level: ${level}`
-        );
-    }
+    });
 
     setAccessibleLabel(
         fireDanger,
-        `Current Fire Danger Level: ${level}`
+        seasonIsInactive
+            ? "Fire Danger: INACTIVE — Fire season has ended"
+            : `Current Fire Danger Level: ${recordedLevel}`
     );
 
     setAccessibleLabel(
         publicUseRestrictions,
         seasonIsInactive
-            ? "Public Use Restrictions: INACTIVE"
-            : `Current Public Use Restrictions Level: ${level}`
+            ? "Public Use Restrictions: INACTIVE — Fire season has ended"
+            : `Current Public Use Restrictions Level: ${recordedLevel}`
     );
 }
-
-
 /* ======================================================
    INDUSTRIAL FIRE PRECAUTION LEVELS (IFPL)
 
