@@ -1,377 +1,214 @@
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        DFPA Current IFPL Levels
-    </title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFPA Current IFPL Levels</title>
 
     <style>
-
         :root {
             --dfpa-green: #2e7d32;
             --dfpa-blue: #33439a;
             --dfpa-yellow: #d8a900;
             --dfpa-red: #c62828;
+            --dfpa-inactive: #6B7280;
             --dfpa-text: #222222;
             --dfpa-background: #ffffff;
         }
-
 
         * {
             box-sizing: border-box;
         }
 
-
-        html,
-        body {
+        html, body {
             margin: 0;
             padding: 0;
             background: transparent;
         }
 
-
         body {
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-
-            color:
-                var(--dfpa-text);
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--dfpa-text);
         }
-
 
         .widget {
             width: 100%;
             max-width: 700px;
             margin: 0 auto;
-
             padding: 18px 20px;
-
-            background:
-                var(--dfpa-background);
-
-            border: 4px solid
-                var(--dfpa-yellow);
-
+            background: var(--dfpa-background);
+            border: 4px solid var(--dfpa-yellow);
             border-radius: 8px;
-
             text-align: center;
         }
 
-
         .widget-title {
             margin: 0 0 6px;
-
             font-size: 14px;
             font-weight: 700;
-
-            text-transform:
-                uppercase;
-
-            letter-spacing:
-                0.04em;
+            text-transform: uppercase;
+            letter-spacing: .04em;
         }
-
 
         .widget-current-level {
             margin: 0 0 16px;
-
             font-size: 24px;
             line-height: 1.2;
-
             font-weight: 700;
+            overflow-wrap: anywhere;
         }
-
 
         .widget-zones {
             display: grid;
-
-            grid-template-columns:
-                repeat(4, 1fr);
-
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 10px;
         }
 
-
         .zone {
+            min-width: 0;
             padding: 11px 8px;
-
-            border: 2px solid
-                var(--dfpa-yellow);
-
+            border: 2px solid var(--dfpa-yellow);
             border-radius: 6px;
-
-            background:
-                #ffffff;
+            background: #ffffff;
         }
-
 
         .zone-name {
             margin-bottom: 5px;
-
             font-size: 13px;
             font-weight: 700;
         }
 
-
         .zone-level {
             font-size: 16px;
             font-weight: 700;
+            overflow-wrap: anywhere;
         }
 
-
-        .widget.loading {
-            border-color:
-                var(--dfpa-blue);
+        .loading {
+            border-color: var(--dfpa-blue) !important;
         }
 
-
-        .widget.level-1 {
-            border-color:
-                var(--dfpa-green);
+        .level-1 {
+            border-color: var(--dfpa-green) !important;
         }
 
-
-        .widget.level-2 {
-            border-color:
-                var(--dfpa-blue);
+        .level-2 {
+            border-color: var(--dfpa-blue) !important;
         }
 
-
-        .widget.level-3 {
-            border-color:
-                var(--dfpa-yellow);
+        .level-3 {
+            border-color: var(--dfpa-yellow) !important;
         }
 
-
-        .widget.level-4 {
-            border-color:
-                var(--dfpa-red);
+        .level-4 {
+            border-color: var(--dfpa-red) !important;
         }
 
-
-        .zone.level-1 {
-            border-color:
-                var(--dfpa-green);
+        .inactive {
+            border-color: var(--dfpa-inactive) !important;
         }
-
-
-        .zone.level-2 {
-            border-color:
-                var(--dfpa-blue);
-        }
-
-
-        .zone.level-3 {
-            border-color:
-                var(--dfpa-yellow);
-        }
-
-
-        .zone.level-4 {
-            border-color:
-                var(--dfpa-red);
-        }
-
 
         @media (max-width: 600px) {
-
             .widget {
                 padding: 15px 16px;
             }
-
 
             .widget-current-level {
                 font-size: 21px;
             }
 
-
             .widget-zones {
-                grid-template-columns:
-                    repeat(2, 1fr);
-
+                grid-template-columns: repeat(2, minmax(0, 1fr));
                 gap: 8px;
             }
-
 
             .zone {
                 padding: 9px 6px;
             }
 
-
             .zone-name {
                 font-size: 12px;
             }
 
-
             .zone-level {
                 font-size: 15px;
             }
-
         }
-
     </style>
-
 </head>
 
-
 <body>
-
-
-    <section
-        id="ifplWidget"
-        class="widget loading"
-        aria-labelledby="widgetTitle"
-    >
-
-        <h1
-            id="widgetTitle"
-            class="widget-title"
+    <main>
+        <section
+            id="ifplWidget"
+            class="widget loading"
+            aria-labelledby="widgetTitle"
         >
-            Current IFPL Level
-        </h1>
+            <h1 id="widgetTitle" class="widget-title">
+                Current IFPL Level
+            </h1>
 
-
-        <p
-            id="currentLevel"
-            class="widget-current-level"
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
-        >
-            Loading...
-        </p>
-
-
-        <div
-            id="zoneList"
-            class="widget-zones"
-            role="list"
-            aria-label="Current IFPL levels by regulation use zone"
-        >
+            <p
+                id="currentLevel"
+                class="widget-current-level"
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+            >
+                Loading...
+            </p>
 
             <div
-                class="zone"
-                data-zone="DG-1"
-                role="listitem"
+                id="zoneList"
+                class="widget-zones"
+                role="list"
+                aria-label="Current IFPL levels by regulation use zone"
             >
-
-                <div class="zone-name">
-                    DG-1
+                <div class="zone loading" data-zone="DG-1" role="listitem">
+                    <div class="zone-name">DG-1</div>
+                    <div class="zone-level" role="status" aria-live="polite">Loading...</div>
                 </div>
 
-                <div
-                    class="zone-level"
-                    role="status"
-                    aria-live="polite"
-                    aria-atomic="true"
-                >
-                    Loading...
+                <div class="zone loading" data-zone="DG-2" role="listitem">
+                    <div class="zone-name">DG-2</div>
+                    <div class="zone-level" role="status" aria-live="polite">Loading...</div>
                 </div>
 
+                <div class="zone loading" data-zone="UA-1" role="listitem">
+                    <div class="zone-name">UA-1</div>
+                    <div class="zone-level" role="status" aria-live="polite">Loading...</div>
+                </div>
+
+                <div class="zone loading" data-zone="UA-2" role="listitem">
+                    <div class="zone-name">UA-2</div>
+                    <div class="zone-level" role="status" aria-live="polite">Loading...</div>
+                </div>
             </div>
-
-
-            <div
-                class="zone"
-                data-zone="DG-2"
-                role="listitem"
-            >
-
-                <div class="zone-name">
-                    DG-2
-                </div>
-
-                <div
-                    class="zone-level"
-                    role="status"
-                    aria-live="polite"
-                    aria-atomic="true"
-                >
-                    Loading...
-                </div>
-
-            </div>
-
-
-            <div
-                class="zone"
-                data-zone="UA-1"
-                role="listitem"
-            >
-
-                <div class="zone-name">
-                    UA-1
-                </div>
-
-                <div
-                    class="zone-level"
-                    role="status"
-                    aria-live="polite"
-                    aria-atomic="true"
-                >
-                    Loading...
-                </div>
-
-            </div>
-
-
-            <div
-                class="zone"
-                data-zone="UA-2"
-                role="listitem"
-            >
-
-                <div class="zone-name">
-                    UA-2
-                </div>
-
-                <div
-                    class="zone-level"
-                    role="status"
-                    aria-live="polite"
-                    aria-atomic="true"
-                >
-                    Loading...
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-
+        </section>
+    </main>
 
     <script>
+        /*
+         * DFPA IFPL WIDGET
+         *
+         * Checks the official fire-season status and
+         * IFPL zone levels once per page load.
+         *
+         * No polling. No automatic refresh.
+         */
+
+        const API_BASE =
+            "https://dfpa-dashboard.pages.dev";
 
         const widget =
-            document.getElementById(
-                "ifplWidget"
-            );
-
+            document.getElementById("ifplWidget");
 
         const currentLevel =
-            document.getElementById(
-                "currentLevel"
-            );
-
+            document.getElementById("currentLevel");
 
         const zoneList =
-            document.getElementById(
-                "zoneList"
-            );
-
+            document.getElementById("zoneList");
 
         const IFPL_ZONES = [
             "DG-1",
@@ -380,348 +217,235 @@
             "UA-2"
         ];
 
+        function getLevelNumber(level) {
+            const match = String(level || "")
+                .toUpperCase()
+                .match(/LEVEL\s+([1-4])/);
 
-        function getLevelNumber(
-            level
-        ) {
-
-            const match =
-                String(level)
-                    .toUpperCase()
-                    .match(
-                        /LEVEL\s+([1-4])/
-                    );
-
-
-            return match
-                ? match[1]
-                : null;
+            return match ? match[1] : null;
         }
 
-
-        function setBorderClass(
-            element,
-            levelNumber
-        ) {
-
-            if (!element) {
-                return;
-            }
-
+        function setBorderClass(element, levelNumber, inactive = false) {
+            if (!element) return;
 
             element.classList.remove(
                 "loading",
                 "level-1",
                 "level-2",
                 "level-3",
-                "level-4"
+                "level-4",
+                "inactive"
             );
 
-
-            if (
-                levelNumber
-            ) {
-
-                element.classList.add(
-                    `level-${levelNumber}`
-                );
-
+            if (inactive) {
+                element.classList.add("inactive");
+            } else if (levelNumber) {
+                element.classList.add(`level-${levelNumber}`);
             } else {
-
-                element.classList.add(
-                    "loading"
-                );
-
+                element.classList.add("loading");
             }
-
         }
 
+        function displayUnavailable() {
+            currentLevel.textContent = "Information unavailable";
+
+            currentLevel.setAttribute(
+                "aria-label",
+                "Current IFPL information unavailable"
+            );
+
+            setBorderClass(widget, null);
+
+            IFPL_ZONES.forEach(zoneName => {
+                const zoneElement = zoneList.querySelector(
+                    `[data-zone="${zoneName}"]`
+                );
+
+                if (!zoneElement) return;
+
+                const levelElement = zoneElement.querySelector(
+                    ".zone-level"
+                );
+
+                if (levelElement) {
+                    levelElement.textContent = "Not available";
+                    levelElement.setAttribute(
+                        "aria-label",
+                        `${zoneName}: IFPL information unavailable`
+                    );
+                }
+
+                setBorderClass(zoneElement, null);
+
+                zoneElement.setAttribute(
+                    "aria-label",
+                    `${zoneName}: IFPL information unavailable`
+                );
+            });
+        }
 
         async function loadIFPLData() {
-
             try {
-
-                const response =
-                    await fetch(
-                        "/api/public-status",
-                        {
-                            cache:
-                                "no-store"
-                        }
-                    );
-
-
-                if (
-                    !response.ok
-                ) {
-
-                    throw new Error(
-                        "Unable to load current IFPL."
-                    );
-
-                }
-
-
-                const data =
-                    await response.json();
-
-
-                if (
-                    !data.success
-                ) {
-
-                    throw new Error(
-                        "Unable to load current IFPL."
-                    );
-
-                }
-
-
-                const zones =
-                    Array.isArray(
-                        data.current
-                            ?.ifpl_zones
-                    )
-                        ? data.current.ifpl_zones
-                        : [];
-
-
-                const zoneMap =
-                    new Map(
-                        zones.map(
-                            zone => [
-                                zone.zone,
-                                zone
-                            ]
+                const [statusResponse, seasonResponse] =
+                    await Promise.all([
+                        fetch(
+                            `${API_BASE}/api/public-status`,
+                            { cache: "no-store" }
+                        ),
+                        fetch(
+                            `${API_BASE}/api/fire-season`,
+                            { cache: "no-store" }
                         )
-                    );
+                    ]);
 
+                if (!statusResponse.ok || !seasonResponse.ok) {
+                    throw new Error("Unable to load DFPA status.");
+                }
+
+                const [statusData, seasonData] =
+                    await Promise.all([
+                        statusResponse.json(),
+                        seasonResponse.json()
+                    ]);
+
+                if (!statusData.success || !seasonData.success) {
+                    throw new Error("Invalid DFPA status response.");
+                }
 
                 /*
-                 * Determine the overall current
-                 * IFPL level.
-                 *
-                 * When all four zones have the
-                 * same level, that level is shown.
-                 *
-                 * If they differ, display:
-                 * "VARIES"
+                 * The active-season endpoint returns current.
+                 * After season end, current is null and the most
+                 * recent season is available in history.
                  */
+                const season =
+                    seasonData.current ||
+                    (
+                        Array.isArray(seasonData.history)
+                            ? seasonData.history[0]
+                            : null
+                    );
 
-                const zoneLevels =
-                    IFPL_ZONES
-                        .map(
-                            zoneName =>
-                                zoneMap
-                                    .get(zoneName)
-                                    ?.level ||
-                                null
-                        )
-                        .filter(
-                            Boolean
-                        );
+                if (!season || !season.status) {
+                    throw new Error("Season status unavailable.");
+                }
 
+                const seasonStatus =
+                    String(season.status).toUpperCase();
 
-                const uniqueLevels =
-                    [
+                if (!["ACTIVE", "INACTIVE"].includes(seasonStatus)) {
+                    throw new Error("Unrecognized season status.");
+                }
+
+                const seasonIsInactive =
+                    seasonStatus === "INACTIVE";
+
+                const zones =
+                    Array.isArray(statusData.current?.ifpl_zones)
+                        ? statusData.current.ifpl_zones
+                        : [];
+
+                const zoneMap = new Map(
+                    zones.map(zone => [zone.zone, zone])
+                );
+
+                /*
+                 * After season end, suppress all old IFPL levels
+                 * in the public display. Historical database values
+                 * remain untouched.
+                 */
+                if (seasonIsInactive) {
+                    currentLevel.textContent = "INACTIVE";
+
+                    currentLevel.setAttribute(
+                        "aria-label",
+                        "Current IFPL status: INACTIVE for the season"
+                    );
+
+                    setBorderClass(widget, null, true);
+
+                } else {
+                    const zoneLevels = IFPL_ZONES
+                        .map(zoneName => zoneMap.get(zoneName)?.level || null)
+                        .filter(Boolean);
+
+                    const uniqueLevels = [
                         ...new Set(
-                            zoneLevels.map(
-                                level =>
-                                    String(
-                                        level
-                                    ).toUpperCase()
+                            zoneLevels.map(level =>
+                                String(level).toUpperCase()
                             )
                         )
                     ];
 
+                    const overallLevel =
+                        uniqueLevels.length === 1
+                            ? uniqueLevels[0]
+                            : uniqueLevels.length > 1
+                                ? "VARIES"
+                                : "Not available";
 
-                let overallLevel =
-                    "VARIES";
+                    currentLevel.textContent = overallLevel;
 
-
-                if (
-                    uniqueLevels.length === 1
-                ) {
-
-                    overallLevel =
-                        uniqueLevels[0];
-
-                }
-
-
-                const overallNumber =
-                    getLevelNumber(
-                        overallLevel
+                    currentLevel.setAttribute(
+                        "aria-label",
+                        `Current IFPL level: ${overallLevel}`
                     );
 
+                    setBorderClass(
+                        widget,
+                        getLevelNumber(overallLevel)
+                    );
+                }
 
-                currentLevel.textContent =
-                    overallLevel;
+                IFPL_ZONES.forEach(zoneName => {
+                    const zone = zoneMap.get(zoneName);
 
+                    const zoneElement = zoneList.querySelector(
+                        `[data-zone="${zoneName}"]`
+                    );
 
-                setBorderClass(
-                    widget,
-                    overallNumber
-                );
+                    if (!zoneElement) return;
 
+                    const levelElement = zoneElement.querySelector(
+                        ".zone-level"
+                    );
 
-                currentLevel.setAttribute(
-                    "aria-label",
-                    `Current IFPL Level: ${overallLevel}`
-                );
+                    const level = seasonIsInactive
+                        ? "INACTIVE"
+                        : (zone?.level || "Not available");
 
+                    if (levelElement) {
+                        levelElement.textContent = level;
 
-                /*
-                 * Populate each zone.
-                 */
-
-                IFPL_ZONES.forEach(
-                    zoneName => {
-
-                        const zone =
-                            zoneMap.get(
-                                zoneName
-                            );
-
-
-                        const zoneElement =
-                            zoneList.querySelector(
-                                `[data-zone="${zoneName}"]`
-                            );
-
-
-                        if (
-                            !zoneElement
-                        ) {
-                            return;
-                        }
-
-
-                        const levelElement =
-                            zoneElement.querySelector(
-                                ".zone-level"
-                            );
-
-
-                        const level =
-                            zone?.level ||
-                            "Not available";
-
-
-                        if (
-                            levelElement
-                        ) {
-
-                            levelElement.textContent =
-                                level;
-
-
-                            levelElement.setAttribute(
-                                "aria-label",
-                                `${zoneName} current IFPL: ${level}`
-                            );
-
-                        }
-
-
-                        const levelNumber =
-                            getLevelNumber(
-                                level
-                            );
-
-
-                        setBorderClass(
-                            zoneElement,
-                            levelNumber
-                        );
-
-
-                        zoneElement.setAttribute(
+                        levelElement.setAttribute(
                             "aria-label",
-                            `${zoneName}: ${level}`
+                            seasonIsInactive
+                                ? `${zoneName}: IFPL inactive for the season`
+                                : `${zoneName} current IFPL: ${level}`
                         );
-
                     }
-                );
 
+                    setBorderClass(
+                        zoneElement,
+                        getLevelNumber(level),
+                        seasonIsInactive
+                    );
+
+                    zoneElement.setAttribute(
+                        "aria-label",
+                        seasonIsInactive
+                            ? `${zoneName}: IFPL inactive for the season`
+                            : `${zoneName}: ${level}`
+                    );
+                });
 
             } catch (error) {
-
-                console.error(
-                    "DFPA IFPL widget error:",
-                    error
-                );
-
-
-                currentLevel.textContent =
-                    "Information unavailable";
-
-
-                currentLevel.setAttribute(
-                    "aria-label",
-                    "Current IFPL level information unavailable"
-                );
-
-
-                IFPL_ZONES.forEach(
-                    zoneName => {
-
-                        const zoneElement =
-                            zoneList.querySelector(
-                                `[data-zone="${zoneName}"]`
-                            );
-
-
-                        if (
-                            zoneElement
-                        ) {
-
-                            const levelElement =
-                                zoneElement.querySelector(
-                                    ".zone-level"
-                                );
-
-
-                            if (
-                                levelElement
-                            ) {
-
-                                levelElement.textContent =
-                                    "Not available";
-
-                            }
-
-
-                            setBorderClass(
-                                zoneElement,
-                                null
-                            );
-
-                        }
-
-                    }
-                );
-
-
-                setBorderClass(
-                    widget,
-                    null
-                );
-
+                console.error("DFPA IFPL widget error:", error);
+                displayUnavailable();
             }
-
         }
 
-
-        /*
-         * Initial load.
-         */
-
+        // Load once. Intentionally no timer or polling.
         loadIFPLData();
-
     </script>
-
-
 </body>
-
 </html>
