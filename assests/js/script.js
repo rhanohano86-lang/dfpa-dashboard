@@ -1,116 +1,65 @@
 /* ======================================================
-DFPA FIRE DANGER LEVEL STATUS DASHBOARD
-Zone-Aware IFPL + Automatic Scheduling + Wix Height
-Accessibility-enhanced public dashboard
-====================================================== */
-
-/* ======================================================
-DASHBOARD DATA
-====================================================== */
-
-const dashboardData = {
-
-fireSeason: {
-    active: null,
-    startDate: "—",
-    loaded: false
-},
-
-fireRestrictionsLevel: "LOW",
-
-ifplLevel: "LEVEL 1",
-
-ifplZones: [],
-
-lastUpdated: {
-    date: "",
-    time: ""
-}
-
-};
-
-/* ======================================================
-IFPL REGULATION USE ZONES
-====================================================== */
-
-const IFPL_ZONES = [
-"DG-1",
-"DG-2",
-"UA-1",
-"UA-2"
-];
-
-/* ======================================================
-FORMAT PACIFIC DATE/TIME
-====================================================== */
-
-function formatPacificDateTime(
-timestamp
-) {
-
-if (!timestamp) {
-    return "Effective: —";
-}
-
-
-const date =
-    new Date(timestamp);
-
-
-if (
-    Number.isNaN(
-        date.getTime()
-    )
-) {
-    return "Effective: —";
-}
-
-
-return (
-    "Effective: " +
-    date.toLocaleString(
-        "en-US",
-        {
-            timeZone:
-                "America/Los_Angeles",
-            month:
-                "long",
-            day:
-                "numeric",
-            year:
-                "numeric",
-            hour:
-                "numeric",
-            minute:
-                "2-digit"
-        }
-    )
-);
-
-}
-/* ======================================================
-   LOAD OFFICIAL FIRE SEASON STATUS FROM D1
+   DFPA FIRE DANGER LEVEL STATUS DASHBOARD
+   Zone-aware IFPL, official fire-season status,
+   accessibility support, and responsive Wix height.
    ====================================================== */
 
-function formatSeasonDate(dateValue) {
 
-    if (!dateValue) {
-        return "—";
+/* ======================================================
+   DASHBOARD DATA
+   ====================================================== */
+
+const dashboardData = {
+    fireSeason: {
+        active: null,
+        startDate: "—",
+        loaded: false
+    },
+    fireRestrictionsLevel: "LOW",
+    ifplLevel: "LEVEL 1",
+    ifplZones: [],
+    lastUpdated: {
+        date: "",
+        time: ""
     }
+};
 
-    const match = String(dateValue).match(
-        /^(\d{4})-(\d{2})-(\d{2})$/
-    );
+const IFPL_ZONES = ["DG-1", "DG-2", "UA-1", "UA-2"];
+
+
+/* ======================================================
+   DATE FORMATTING
+   ====================================================== */
+
+function formatPacificDateTime(timestamp) {
+    if (!timestamp) return "Effective: —";
+
+    const date = new Date(timestamp);
+    if (Number.isNaN(date.getTime())) return "Effective: —";
+
+    return "Effective: " + date.toLocaleString("en-US", {
+        timeZone: "America/Los_Angeles",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+    });
+}
+
+function formatSeasonDate(dateValue) {
+    if (!dateValue) return "—";
+
+    // Parse YYYY-MM-DD as a calendar date to prevent
+    // timezone conversion from shifting the displayed date.
+    const match = String(dateValue).match(/^(\d{4})-(\d{2})-(\d{2})$/);
 
     if (match) {
-
-        const date = new Date(
-            Date.UTC(
-                Number(match[1]),
-                Number(match[2]) - 1,
-                Number(match[3])
-            )
-        );
+        const date = new Date(Date.UTC(
+            Number(match[1]),
+            Number(match[2]) - 1,
+            Number(match[3])
+        ));
 
         return date.toLocaleDateString("en-US", {
             timeZone: "UTC",
@@ -121,10 +70,7 @@ function formatSeasonDate(dateValue) {
     }
 
     const date = new Date(dateValue);
-
-    if (Number.isNaN(date.getTime())) {
-        return "—";
-    }
+    if (Number.isNaN(date.getTime())) return "—";
 
     return date.toLocaleDateString("en-US", {
         timeZone: "America/Los_Angeles",
@@ -135,16 +81,36 @@ function formatSeasonDate(dateValue) {
 }
 
 
+/* ======================================================
+   ACCESSIBILITY HELPERS
+   ====================================================== */
+
+function setAccessibleLabel(element, label) {
+    if (element) {
+        element.setAttribute("aria-label", label);
+    }
+}
+
+function setAccessibleText(element, text) {
+    if (element) {
+        element.textContent = text;
+    }
+}
+
+
+/* ======================================================
+   LOAD OFFICIAL FIRE SEASON STATUS
+
+   The admin fire-season record is authoritative.
+   When no season is active, the latest season in
+   history is used to display the official status.
+   ====================================================== */
+
 async function loadFireSeasonStatus() {
-
     try {
-
-        const response = await fetch(
-            "/api/fire-season",
-            {
-                cache: "no-store"
-            }
-        );
+        const response = await fetch("/api/fire-season", {
+            cache: "no-store"
+        });
 
         const data = await response.json();
 
@@ -154,26 +120,16 @@ async function loadFireSeasonStatus() {
             );
         }
 
-        /*
-         * When a season is active, use data.current.
-         * When the season has ended, current is null,
-         * so use the most recent season in history.
-         */
-
-        const season =
-            data.current ||
-            (
-                Array.isArray(data.history)
-                    ? data.history[0]
-                    : null
-            );
+        const season = data.current || (
+            Array.isArray(data.history)
+                ? data.history[0]
+                : null
+        );
 
         if (!season) {
-
             dashboardData.fireSeason.active = false;
             dashboardData.fireSeason.startDate = "—";
             dashboardData.fireSeason.loaded = true;
-
             return;
         }
 
@@ -186,7 +142,6 @@ async function loadFireSeasonStatus() {
         dashboardData.fireSeason.loaded = true;
 
     } catch (error) {
-
         dashboardData.fireSeason.loaded = false;
 
         console.error(
@@ -195,413 +150,147 @@ async function loadFireSeasonStatus() {
         );
     }
 }
+
+
 /* ======================================================
-LOAD PUBLIC STATUS FROM D1
-====================================================== */
+   LOAD CURRENT PUBLIC FIRE STATUS
+   ====================================================== */
 
 async function loadPublicStatus() {
+    try {
+        const response = await fetch("/api/public-status", {
+            cache: "no-store"
+        });
 
-try {
+        const data = await response.json();
 
-    const response =
-        await fetch(
-            "/api/public-status",
-            {
-                cache:
-                    "no-store"
-            }
-        );
+        if (!response.ok || !data.success) {
+            throw new Error("Unable to load current fire status.");
+        }
 
+        // Preserve the recorded Fire Danger/PUR level.
+        // The PUR display is changed to INACTIVE below
+        // whenever the official fire season is inactive.
+        if (data.current?.fire_restrictions) {
+            dashboardData.fireRestrictionsLevel =
+                data.current.fire_restrictions.level ||
+                dashboardData.fireRestrictionsLevel;
+        }
 
-    const data =
-        await response.json();
-
-
-    if (
-        !response.ok ||
-        !data.success
-    ) {
-
-        throw new Error(
-            "Unable to load current fire status."
-        );
-    }
-
-
-    /* --------------------------------------------------
-       FIRE DANGER + PUBLIC USE RESTRICTIONS
-       -------------------------------------------------- */
-
-    if (
-        data.current?.fire_restrictions
-    ) {
-
-        dashboardData.fireRestrictionsLevel =
-            data.current
-                .fire_restrictions
-                .level;
-
-    }
-
-
-    const fireRestrictionsEffective =
-        document.getElementById(
+        const fireRestrictionsEffective = document.getElementById(
             "fire-restrictions-effective"
         );
 
-
-    if (
-        fireRestrictionsEffective &&
-        data.current
-            ?.fire_restrictions
-            ?.effective_at
-    ) {
-
-        fireRestrictionsEffective.textContent =
-            formatPacificDateTime(
-                data.current
-                    .fire_restrictions
-                    .effective_at
-            );
-
-    }
-
-
-    /* --------------------------------------------------
-       ZONE-AWARE IFPL
-       -------------------------------------------------- */
-
-    if (
-        Array.isArray(
-            data.current?.ifpl_zones
-        ) &&
-        data.current.ifpl_zones.length > 0
-    ) {
-
-        dashboardData.ifplZones =
-            data.current.ifpl_zones;
-
-
-        /*
-         * Keep the legacy single IFPL value
-         * synchronized with the first available zone.
-         */
-
-        dashboardData.ifplLevel =
-            data.current
-                .ifpl_zones[0]
-                ?.level ||
-            dashboardData.ifplLevel;
-
-    }
-
-
-    /* --------------------------------------------------
-       LEGACY IFPL FALLBACK
-       -------------------------------------------------- */
-
-    else if (
-        data.current?.ifpl
-    ) {
-
-        dashboardData.ifplLevel =
-            data.current
-                .ifpl
-                .level;
-
-    }
-
-
-    /* --------------------------------------------------
-       DASHBOARD LAST UPDATED
-       -------------------------------------------------- */
-
-    if (
-        data.last_updated
-    ) {
-
-        const lastUpdated =
-            new Date(
-                data.last_updated
-            );
-
-
-        if (
-            !Number.isNaN(
-                lastUpdated.getTime()
-            )
-        ) {
-
-            dashboardData
-                .lastUpdated
-                .date =
-                lastUpdated
-                    .toLocaleDateString(
-                        "en-US",
-                        {
-                            timeZone:
-                                "America/Los_Angeles",
-                            month:
-                                "long",
-                            day:
-                                "numeric",
-                            year:
-                                "numeric"
-                        }
-                    );
-
-
-            dashboardData
-                .lastUpdated
-                .time =
-                lastUpdated
-                    .toLocaleTimeString(
-                        "en-US",
-                        {
-                            timeZone:
-                                "America/Los_Angeles",
-                            hour:
-                                "numeric",
-                            minute:
-                                "2-digit"
-                        }
-                    );
-
+        if (fireRestrictionsEffective) {
+            fireRestrictionsEffective.textContent =
+                formatPacificDateTime(
+                    data.current?.fire_restrictions?.effective_at
+                );
         }
 
-    }
-
-
-} catch (error) {
-
-    console.error(
-        "Public status loading error:",
-        error
-    );
-
-}
-
-}
-
-/* ======================================================
-GET CURRENT SCHEDULED VALUE
-====================================================== */
-
-function getScheduledValue(
-schedule,
-fallback
-) {
-
-const now =
-    new Date();
-
-
-let currentValue =
-    fallback;
-
-
-schedule.forEach(
-    item => {
-
-        const effectiveDate =
-            new Date(
-                item.effective
-            );
-
-
+        // Load zone-specific IFPL data.
         if (
-            now >= effectiveDate
+            Array.isArray(data.current?.ifpl_zones) &&
+            data.current.ifpl_zones.length > 0
         ) {
+            dashboardData.ifplZones = data.current.ifpl_zones;
 
-            currentValue =
-                item.level;
+            dashboardData.ifplLevel =
+                data.current.ifpl_zones[0]?.level ||
+                dashboardData.ifplLevel;
 
+        } else if (data.current?.ifpl) {
+            // Fallback for older, single-level IFPL data.
+            dashboardData.ifplLevel =
+                data.current.ifpl.level ||
+                dashboardData.ifplLevel;
         }
 
+        // Load the authoritative last-updated timestamp.
+        if (data.last_updated) {
+            const lastUpdated = new Date(data.last_updated);
+
+            if (!Number.isNaN(lastUpdated.getTime())) {
+                dashboardData.lastUpdated.date =
+                    lastUpdated.toLocaleDateString("en-US", {
+                        timeZone: "America/Los_Angeles",
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric"
+                    });
+
+                dashboardData.lastUpdated.time =
+                    lastUpdated.toLocaleTimeString("en-US", {
+                        timeZone: "America/Los_Angeles",
+                        hour: "numeric",
+                        minute: "2-digit"
+                    });
+            }
+        }
+
+    } catch (error) {
+        console.error("Public status loading error:", error);
     }
-);
-
-
-return currentValue;
-
 }
+
 
 /* ======================================================
-GET STATUS CSS CLASS
-====================================================== */
-
-function getStatusClass(
-level
-) {
-
-if (!level) {
-    return "status-high";
-}
-
-
-const normalized =
-    String(level)
-        .toUpperCase();
-
-
-if (
-    normalized === "LOW"
-) {
-
-    return "status-low";
-}
-
-
-if (
-    normalized === "MODERATE"
-) {
-
-    return "status-moderate";
-}
-
-
-if (
-    normalized === "HIGH"
-) {
-
-    return "status-high";
-}
-
-
-if (
-    normalized === "EXTREME"
-) {
-
-    return "status-extreme";
-}
-
-
-/*
- * IFPL levels do not have their own
- * status-color classes, so use the
- * standard high-status presentation
- * as the safe fallback.
- */
-
-return "status-high";
-
-}
-
-/* ======================================================
-   IFPL STATUS CSS CLASS
+   GET CURRENT SCHEDULED VALUE
    ====================================================== */
 
-function getIFPLStatusClass(
-    level
-) {
+function getScheduledValue(schedule, fallback) {
+    const now = new Date();
+    let currentValue = fallback;
 
-    if (!level) {
-        return "status-high";
-    }
+    schedule.forEach(item => {
+        const effectiveDate = new Date(item.effective);
 
-    const normalized =
-        String(level)
-            .toUpperCase();
+        if (now >= effectiveDate) {
+            currentValue = item.level;
+        }
+    });
 
-    if (
-        normalized === "LEVEL 1"
-    ) {
-        return "status-low";
-    }
+    return currentValue;
+}
 
-    if (
-        normalized === "LEVEL 2"
-    ) {
-        return "status-moderate";
-    }
 
-    if (
-        normalized === "LEVEL 3"
-    ) {
-        return "status-high";
-    }
+/* ======================================================
+   STATUS CSS CLASS
+   ====================================================== */
 
-    if (
-        normalized === "LEVEL 4"
-    ) {
-        return "status-extreme";
-    }
+function getStatusClass(level) {
+    const normalized = String(level || "").toUpperCase();
 
+    if (normalized === "LOW") return "status-low";
+    if (normalized === "MODERATE") return "status-moderate";
+    if (normalized === "HIGH") return "status-high";
+    if (normalized === "EXTREME") return "status-extreme";
+
+    // Existing fallback for level labels without
+    // a dedicated color class.
     return "status-high";
 }
 
-/* ======================================================
-ACCESSIBILITY HELPERS
-====================================================== */
-
-function setAccessibleLabel(
-element,
-label
-) {
-
-if (!element) {
-    return;
-}
-
-
-element.setAttribute(
-    "aria-label",
-    label
-);
-
-}
-
-function setAccessibleText(
-element,
-text
-) {
-
-if (!element) {
-    return;
-}
-
-
-element.textContent =
-    text;
-
-}
 
 /* ======================================================
-FIRE SEASON
-====================================================== */
+   FIRE SEASON DISPLAY
+   ====================================================== */
 
 function updateFireSeason() {
+    const seasonStatus = document.getElementById("season-status");
+    const seasonDay = document.getElementById("season-day");
+    const seasonStartDate = document.getElementById("season-start-date");
 
-const seasonStatus =
-    document.getElementById(
-        "season-status"
-    );
+    if (!seasonStatus || !seasonDay || !seasonStartDate) {
+        return;
+    }
 
-
-const seasonDay =
-    document.getElementById(
-        "season-day"
-    );
-
-
-const seasonStartDate =
-    document.getElementById(
-        "season-start-date"
-    );
-
-        /*
-     * Never display a stale or assumed status if the
-     * official fire season record could not be retrieved.
-     */
-
+    // Never display a stale or assumed status when the
+    // authoritative fire-season record cannot be retrieved.
     if (!dashboardData.fireSeason.loaded) {
-
         seasonStatus.textContent = "UNAVAILABLE";
 
-        seasonStatus.classList.remove(
-            "active",
-            "inactive"
-        );
+        seasonStatus.classList.remove("active", "inactive");
 
         seasonDay.textContent = "—";
         seasonStartDate.textContent = "—";
@@ -624,839 +313,478 @@ const seasonStartDate =
         return;
     }
 
-if (
-    !seasonStatus ||
-    !seasonDay ||
-    !seasonStartDate
-) {
-    return;
-}
+    const seasonIsActive = dashboardData.fireSeason.active;
+    const statusText = seasonIsActive ? "ACTIVE" : "INACTIVE";
 
+    seasonStatus.textContent = statusText;
 
-const seasonIsActive =
-    dashboardData
-        .fireSeason
-        .active;
-
-
-const statusText =
-    seasonIsActive
-        ? "ACTIVE"
-        : "INACTIVE";
-
-
-seasonStatus.textContent =
-    statusText;
-
-
-seasonStatus.classList.remove(
-    "active",
-    "inactive"
-);
-
-
-seasonStatus.classList.add(
-    seasonIsActive
-        ? "active"
-        : "inactive"
-);
-
-
-setAccessibleLabel(
-    seasonStatus,
-    `Fire Season Status: ${statusText}`
-);
-
-
-seasonStartDate.textContent =
-    dashboardData
-        .fireSeason
-        .startDate;
-
-
-setAccessibleLabel(
-    seasonStartDate,
-    `Fire Season start date: ${dashboardData
-        .fireSeason
-        .startDate}`
-);
-
-
-if (
-    !seasonIsActive
-) {
-
-    seasonDay.textContent =
-        "—";
-
+    seasonStatus.classList.remove("active", "inactive");
+    seasonStatus.classList.add(
+        seasonIsActive ? "active" : "inactive"
+    );
 
     setAccessibleLabel(
-        seasonDay,
-        "Current Fire Season Day: Not active"
+        seasonStatus,
+        `Fire Season Status: ${statusText}`
     );
 
+    seasonStartDate.textContent =
+        dashboardData.fireSeason.startDate;
 
-    return;
-}
-
-
-const startDate =
-    new Date(
-        dashboardData
-            .fireSeason
-            .startDate
+    setAccessibleLabel(
+        seasonStartDate,
+        `Fire Season start date: ${dashboardData.fireSeason.startDate}`
     );
 
+    if (!seasonIsActive) {
+        seasonDay.textContent = "—";
 
-const today =
-    new Date();
+        setAccessibleLabel(
+            seasonDay,
+            "Current Fire Season Day: Not active"
+        );
 
+        return;
+    }
 
-startDate.setHours(
-    0,
-    0,
-    0,
-    0
-);
+    // Count inclusive calendar days from the official start date.
+    const startDate = new Date(
+        dashboardData.fireSeason.startDate
+    );
 
+    const today = new Date();
 
-today.setHours(
-    0,
-    0,
-    0,
-    0
-);
+    startDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
 
+    const millisecondsPerDay = 1000 * 60 * 60 * 24;
 
-const millisecondsPerDay =
-    1000 *
-    60 *
-    60 *
-    24;
-
-
-const dayCount =
-    Math.floor(
-        (
-            today -
-            startDate
-        ) /
-        millisecondsPerDay
-    ) + 1;
-
-
-const currentDay =
-    Math.max(
-        dayCount,
+    const currentDay = Math.max(
+        Math.floor((today - startDate) / millisecondsPerDay) + 1,
         1
     );
 
+    seasonDay.textContent = currentDay;
 
-seasonDay.textContent =
-    currentDay;
-
-
-setAccessibleLabel(
-    seasonDay,
-    `Current Fire Season Day: ${currentDay}`
-);
-
+    setAccessibleLabel(
+        seasonDay,
+        `Current Fire Season Day: ${currentDay}`
+    );
 }
 
+
 /* ======================================================
-FIRE DANGER + PUBLIC USE RESTRICTIONS
-SYNCHRONIZED
-====================================================== */
+   FIRE DANGER + PUBLIC USE RESTRICTIONS
+
+   Fire Danger keeps its recorded level.
+   Public Use Restrictions display INACTIVE when
+   the official fire season has ended.
+   ====================================================== */
 
 function updateFireRestrictions() {
+    const fireDanger = document.getElementById("fire-danger");
 
-const fireDanger =
-    document.getElementById(
-        "fire-danger"
-    );
-
-
-const publicUseRestrictions =
-    document.getElementById(
+    const publicUseRestrictions = document.getElementById(
         "public-use-restrictions"
     );
 
+    if (!fireDanger || !publicUseRestrictions) {
+        return;
+    }
 
-if (
-    !fireDanger ||
-    !publicUseRestrictions
-) {
-    return;
-}
+    const seasonIsInactive =
+        dashboardData.fireSeason.loaded &&
+        dashboardData.fireSeason.active === false;
 
+    const level =
+        dashboardData.fireRestrictionsLevel || "Not set";
 
-const level =
-    dashboardData
-        .fireRestrictionsLevel ||
-    "Not set";
+    const publicUseLevel =
+        seasonIsInactive ? "INACTIVE" : level;
 
+    // Fire Danger remains at its last recorded level.
+    fireDanger.textContent = level;
 
-fireDanger.textContent =
-    level;
+    // Only the Public Use Restrictions display changes.
+    publicUseRestrictions.textContent = publicUseLevel;
 
+    const fireDangerPill =
+        fireDanger.closest(".status-pill");
 
-publicUseRestrictions.textContent =
-    level;
+    const publicUsePill =
+        publicUseRestrictions.closest(".status-pill");
 
+    if (fireDangerPill) {
+        fireDangerPill.classList.remove(
+            "status-low",
+            "status-moderate",
+            "status-high",
+            "status-extreme",
+            "inactive"
+        );
 
-const statusClass =
-    getStatusClass(
-        level
-    );
+        fireDangerPill.classList.add(
+            getStatusClass(level)
+        );
 
+        setAccessibleLabel(
+            fireDangerPill,
+            `Current Fire Danger Level: ${level}`
+        );
+    }
 
-const fireDangerPill =
-    fireDanger.closest(
-        ".status-pill"
-    );
+    if (publicUsePill) {
+        publicUsePill.classList.remove(
+            "status-low",
+            "status-moderate",
+            "status-high",
+            "status-extreme",
+            "inactive"
+        );
 
+        publicUsePill.classList.add(
+            seasonIsInactive
+                ? "inactive"
+                : getStatusClass(level)
+        );
 
-const publicUsePill =
-    publicUseRestrictions.closest(
-        ".status-pill"
-    );
-
-
-if (
-    fireDangerPill
-) {
-
-    fireDangerPill.classList.remove(
-        "status-low",
-        "status-moderate",
-        "status-high",
-        "status-extreme"
-    );
-
-
-    fireDangerPill.classList.add(
-        statusClass
-    );
-
+        setAccessibleLabel(
+            publicUsePill,
+            seasonIsInactive
+                ? "Public Use Restrictions: INACTIVE"
+                : `Current Public Use Restrictions Level: ${level}`
+        );
+    }
 
     setAccessibleLabel(
-        fireDangerPill,
+        fireDanger,
         `Current Fire Danger Level: ${level}`
     );
 
-}
-
-
-if (
-    publicUsePill
-) {
-
-    publicUsePill.classList.remove(
-        "status-low",
-        "status-moderate",
-        "status-high",
-        "status-extreme"
-    );
-
-
-    publicUsePill.classList.add(
-        statusClass
-    );
-
-
     setAccessibleLabel(
-        publicUsePill,
-        `Current Public Use Restrictions Level: ${level}`
+        publicUseRestrictions,
+        seasonIsInactive
+            ? "Public Use Restrictions: INACTIVE"
+            : `Current Public Use Restrictions Level: ${level}`
     );
-
 }
 
-
-setAccessibleLabel(
-    fireDanger,
-    `Current Fire Danger Level: ${level}`
-);
-
-
-setAccessibleLabel(
-    publicUseRestrictions,
-    `Current Public Use Restrictions Level: ${level}`
-);
-
-}
 
 /* ======================================================
-IFPL
-====================================================== */
+   INDUSTRIAL FIRE PRECAUTION LEVELS (IFPL)
+
+   All four zones display INACTIVE when the official
+   fire season is inactive. The recorded IFPL data
+   remains unchanged in the database.
+   ====================================================== */
 
 function updateIFPL() {
+    const zoneContainer = document.getElementById("ifpl-zones");
 
-/*
- * Zone-aware IFPL display.
- */
+    const legacyIfplLevel = document.getElementById("ifpl-level");
 
-const zoneContainer =
-    document.getElementById(
-        "ifpl-zones"
-    );
-
-
-/*
- * Legacy single IFPL element.
- */
-
-const legacyIfplLevel =
-    document.getElementById(
-        "ifpl-level"
-    );
-
-
-const legacyIfplEffective =
-    document.getElementById(
+    const legacyIfplEffective = document.getElementById(
         "ifpl-effective"
     );
 
+    const seasonIsInactive =
+        dashboardData.fireSeason.loaded &&
+        dashboardData.fireSeason.active === false;
 
-/*
- * If zone data exists, populate
- * each regulation use zone.
- */
-
-if (
-    zoneContainer &&
-    Array.isArray(
-        dashboardData.ifplZones
-    ) &&
-    dashboardData.ifplZones.length > 0
-) {
-
-    const zoneMap =
-        new Map(
+    // Update DG-1, DG-2, UA-1 and UA-2 when zone markup exists.
+    if (
+        zoneContainer &&
+        Array.isArray(dashboardData.ifplZones) &&
+        dashboardData.ifplZones.length > 0
+    ) {
+        const zoneMap = new Map(
             dashboardData.ifplZones.map(
-                zone => [
-                    zone.zone,
-                    zone
-                ]
+                zone => [zone.zone, zone]
             )
         );
 
+        IFPL_ZONES.forEach(zoneName => {
+            const zoneData = zoneMap.get(zoneName);
 
-    IFPL_ZONES.forEach(
-        zoneName => {
-
-            const zoneData =
-                zoneMap.get(
-                    zoneName
-                );
-
-
-            const zoneElement =
-                zoneContainer.querySelector(
-                    `[data-zone="${zoneName}"]`
-                );
-
+            const zoneElement = zoneContainer.querySelector(
+                `[data-zone="${zoneName}"]`
+            );
 
             if (!zoneElement) {
                 return;
             }
 
+            const levelElement = zoneElement.querySelector(
+                ".ifpl-zone-level"
+            );
 
-            const levelElement =
-                zoneElement.querySelector(
-                    ".ifpl-zone-level"
-                );
+            const effectiveElement = zoneElement.querySelector(
+                ".ifpl-zone-effective"
+            );
 
+            const pill = zoneElement.querySelector(
+                ".status-pill"
+            );
 
-            const effectiveElement =
-                zoneElement.querySelector(
-                    ".ifpl-zone-effective"
-                );
+            const level = seasonIsInactive
+                ? "INACTIVE"
+                : (zoneData?.level || "Not set");
 
-
-            const pill =
-                zoneElement.querySelector(
-                    ".status-pill"
-                );
-
-
-            const level =
-                zoneData?.level ||
-                "Not set";
-
-
-            if (
-                levelElement
-            ) {
-
-                levelElement.textContent =
-                    level;
-
+            if (levelElement) {
+                levelElement.textContent = level;
 
                 setAccessibleLabel(
                     levelElement,
-                    `${zoneName} current Industrial Fire Precaution Level: ${level}`
+                    seasonIsInactive
+                        ? `${zoneName}: Industrial Fire Precaution Level INACTIVE`
+                        : `${zoneName} current Industrial Fire Precaution Level: ${level}`
                 );
-
             }
 
+            if (effectiveElement) {
+                const effectiveText = seasonIsInactive
+                    ? "Inactive for the season"
+                    : (
+                        zoneData?.effective_at
+                            ? formatPacificDateTime(
+                                zoneData.effective_at
+                            )
+                            : "Effective: —"
+                    );
 
-            if (
-                effectiveElement
-            ) {
-
-                const effectiveText =
-                    zoneData
-                        ?.effective_at
-                        ? formatPacificDateTime(
-                            zoneData
-                                .effective_at
-                        )
-                        : "Effective: —";
-
-
-                effectiveElement.textContent =
-                    effectiveText;
-
+                effectiveElement.textContent = effectiveText;
 
                 setAccessibleLabel(
                     effectiveElement,
-                    `${zoneName} ${effectiveText}`
+                    `${zoneName}: ${effectiveText}`
                 );
-
             }
 
-
-            if (
-                pill
-            ) {
-
+            if (pill) {
                 pill.classList.remove(
                     "status-low",
                     "status-moderate",
                     "status-high",
-                    "status-extreme"
+                    "status-extreme",
+                    "inactive"
                 );
-
 
                 pill.classList.add(
-                getIFPLStatusClass(
-                        level
-                    )
+                    seasonIsInactive
+                        ? "inactive"
+                        : getStatusClass(level)
                 );
-
 
                 setAccessibleLabel(
                     pill,
-                    `${zoneName} current Industrial Fire Precaution Level: ${level}`
+                    seasonIsInactive
+                        ? `${zoneName}: Industrial Fire Precaution Level INACTIVE`
+                        : `${zoneName} current Industrial Fire Precaution Level: ${level}`
                 );
-
             }
-
-
-            /*
-             * Make the entire zone a meaningful
-             * accessible unit.
-             */
 
             setAccessibleLabel(
                 zoneElement,
-                `${zoneName}: Industrial Fire Precaution Level ${level}`
+                seasonIsInactive
+                    ? `${zoneName}: Industrial Fire Precaution Level INACTIVE`
+                    : `${zoneName}: Industrial Fire Precaution Level ${level}`
             );
+        });
 
+        // Keep any existing single-level/legacy fields synchronized.
+        if (legacyIfplLevel) {
+            const legacyLevel = seasonIsInactive
+                ? "INACTIVE"
+                : (
+                    dashboardData.ifplZones[0]?.level ||
+                    dashboardData.ifplLevel
+                );
+
+            legacyIfplLevel.textContent = legacyLevel;
+
+            setAccessibleLabel(
+                legacyIfplLevel,
+                seasonIsInactive
+                    ? "Industrial Fire Precaution Level: INACTIVE"
+                    : `Industrial Fire Precaution Level: ${legacyLevel}`
+            );
         }
-    );
 
+        if (legacyIfplEffective) {
+            legacyIfplEffective.textContent = seasonIsInactive
+                ? "Inactive for the season"
+                : (
+                    dashboardData.ifplZones[0]?.effective_at
+                        ? formatPacificDateTime(
+                            dashboardData.ifplZones[0].effective_at
+                        )
+                        : "Effective: —"
+                );
+        }
 
-    /*
-     * Keep hidden legacy elements synchronized
-     * for compatibility with the existing markup.
-     */
-
-    if (
-        legacyIfplLevel
-    ) {
-
-        legacyIfplLevel.textContent =
-            dashboardData
-                .ifplZones[0]
-                ?.level ||
-            dashboardData
-                .ifplLevel;
-
+        return;
     }
 
+    // Fallback for older markup that has only one IFPL display.
+    if (legacyIfplLevel) {
+        const level = seasonIsInactive
+            ? "INACTIVE"
+            : dashboardData.ifplLevel;
 
-    if (
-        legacyIfplEffective
-    ) {
+        legacyIfplLevel.textContent = level;
 
-        legacyIfplEffective.textContent =
-            dashboardData
-                .ifplZones[0]
-                ?.effective_at
-                ? formatPacificDateTime(
-                    dashboardData
-                        .ifplZones[0]
-                        .effective_at
-                )
-                : "Effective: —";
-
+        setAccessibleLabel(
+            legacyIfplLevel,
+            seasonIsInactive
+                ? "Industrial Fire Precaution Level: INACTIVE"
+                : `Industrial Fire Precaution Level: ${level}`
+        );
     }
 
-
-    return;
+    if (legacyIfplEffective) {
+        legacyIfplEffective.textContent = seasonIsInactive
+            ? "Inactive for the season"
+            : "Effective: —";
+    }
 }
 
-
-/*
- * Legacy single IFPL fallback.
- */
-
-if (
-    legacyIfplLevel
-) {
-
-    legacyIfplLevel.textContent =
-        dashboardData
-            .ifplLevel;
-
-}
-
-
-if (
-    legacyIfplEffective
-) {
-
-    legacyIfplEffective.textContent =
-        "Effective: —";
-
-}
-
-}
 
 /* ======================================================
-DASHBOARD UPDATED
-====================================================== */
+   DASHBOARD UPDATED
+   ====================================================== */
 
 function updateLastUpdated() {
-
-const lastUpdatedDate =
-    document.getElementById(
+    const lastUpdatedDate = document.getElementById(
         "last-updated-date"
     );
 
-
-const lastUpdatedTime =
-    document.getElementById(
+    const lastUpdatedTime = document.getElementById(
         "last-updated-time"
     );
 
-
-const lastUpdatedAccessible =
-    document.getElementById(
+    const lastUpdatedAccessible = document.getElementById(
         "last-updated-accessible"
     );
 
+    if (lastUpdatedDate) {
+        lastUpdatedDate.textContent =
+            dashboardData.lastUpdated.date;
+    }
 
-if (
-    lastUpdatedDate
-) {
+    if (lastUpdatedTime) {
+        lastUpdatedTime.textContent =
+            dashboardData.lastUpdated.time;
+    }
 
-    lastUpdatedDate.textContent =
-        dashboardData
-            .lastUpdated
-            .date;
+    if (lastUpdatedAccessible) {
+        const date = dashboardData.lastUpdated.date;
+        const time = dashboardData.lastUpdated.time;
 
+        lastUpdatedAccessible.textContent =
+            date && time
+                ? `${date} at ${time}`
+                : "Not available";
+    }
 }
 
-
-if (
-    lastUpdatedTime
-) {
-
-    lastUpdatedTime.textContent =
-        dashboardData
-            .lastUpdated
-            .time;
-
-}
-
-
-/*
- * Keep a single, understandable
- * accessible version synchronized.
- */
-
-if (
-    lastUpdatedAccessible
-) {
-
-    const date =
-        dashboardData
-            .lastUpdated
-            .date;
-
-
-    const time =
-        dashboardData
-            .lastUpdated
-            .time;
-
-
-    const accessibleText =
-        date && time
-            ? `${date} at ${time}`
-            : "Not available";
-
-
-    lastUpdatedAccessible.textContent =
-        accessibleText;
-
-}
-
-}
 
 /* ======================================================
-WIX AUTO HEIGHT
-====================================================== */
+   WIX AUTO HEIGHT
+   ====================================================== */
 
 function getDashboardHeight() {
-
-const documentHeight =
-    document.documentElement
+    const documentHeight = document.documentElement
         ? document.documentElement.scrollHeight
         : 0;
 
-
-const bodyHeight =
-    document.body
+    const bodyHeight = document.body
         ? document.body.scrollHeight
         : 0;
 
-
-const offsetHeight =
-    document.documentElement
+    const offsetHeight = document.documentElement
         ? document.documentElement.offsetHeight
         : 0;
 
-
-return Math.max(
-    documentHeight,
-    bodyHeight,
-    offsetHeight
-);
-
+    return Math.max(
+        documentHeight,
+        bodyHeight,
+        offsetHeight
+    );
 }
 
 function sendHeightToWix() {
-
-const height =
-    getDashboardHeight();
-
-
-window.parent.postMessage(
-    {
-        type:
-            "DFPA_DASHBOARD_HEIGHT",
-        height:
-            height
-    },
-    "*"
-);
-
+    window.parent.postMessage(
+        {
+            type: "DFPA_DASHBOARD_HEIGHT",
+            height: getDashboardHeight()
+        },
+        "*"
+    );
 }
-
-/* ======================================================
-SEND HEIGHT AFTER PAGE LOAD
-====================================================== */
 
 function initializeHeightMessaging() {
-
-/*
- * Send immediately.
- */
-
-sendHeightToWix();
-
-
-/*
- * Recheck after the browser finishes
- * rendering content.
- */
-
-setTimeout(
-    sendHeightToWix,
-    100
-);
-
-
-setTimeout(
-    sendHeightToWix,
-    300
-);
-
-
-setTimeout(
-    sendHeightToWix,
-    500
-);
-
-
-setTimeout(
-    sendHeightToWix,
-    1000
-);
-
-
-setTimeout(
-    sendHeightToWix,
-    1500
-);
-
-
-setTimeout(
-    sendHeightToWix,
-    2500
-);
-
-
-/*
- * Watch for layout changes.
- */
-
-if (
-    typeof ResizeObserver !==
-    "undefined"
-) {
-
-    const observer =
-        new ResizeObserver(
-            () => {
-                sendHeightToWix();
-            }
-        );
-
-
-    observer.observe(
-        document.documentElement
-    );
-
-
-    if (
-        document.body
-    ) {
-
-        observer.observe(
-            document.body
-        );
-
-    }
-
-}
-
-
-/*
- * Watch for browser/window resizing.
- */
-
-window.addEventListener(
-    "resize",
-    () => {
-        sendHeightToWix();
-    }
-);
-
-
-/*
- * Watch for device orientation changes.
- */
-
-window.addEventListener(
-    "orientationchange",
-    () => {
-
-        setTimeout(
-            sendHeightToWix,
-            100
-        );
-
-
-        setTimeout(
-            sendHeightToWix,
-            500
-        );
-
-    }
-);
-
-
-/*
- * Mobile browsers expose a visual viewport
- * that can change independently of the window.
- */
-
-if (
-    window.visualViewport
-) {
-
-    window.visualViewport.addEventListener(
-        "resize",
-        () => {
-            sendHeightToWix();
-        }
-    );
-
-
-    window.visualViewport.addEventListener(
-        "scroll",
-        () => {
-            sendHeightToWix();
-        }
-    );
-
-}
-
-}
-
-/* ======================================================
-INITIALIZE DASHBOARD
-====================================================== */
-
-document.addEventListener(
-"DOMContentLoaded",
-async () => {
-
-  await Promise.all([
-    loadPublicStatus(),
-    loadFireSeasonStatus()
-]);
-
-updateFireSeason();
-
-    updateFireSeason();
-
-    updateFireRestrictions();
-
-    updateIFPL();
-
-    updateLastUpdated();
-
-    initializeHeightMessaging();
-
-}
-
-);
-
-/* ======================================================
-WINDOW LOAD
-====================================================== */
-
-window.addEventListener(
-"load",
-() => {
-
     sendHeightToWix();
 
+    // Recheck height after initial rendering settles.
+    [100, 300, 500, 1000, 1500, 2500].forEach(delay => {
+        setTimeout(sendHeightToWix, delay);
+    });
+
+    // Watch for layout changes.
+    if (typeof ResizeObserver !== "undefined") {
+        const observer = new ResizeObserver(sendHeightToWix);
+
+        observer.observe(document.documentElement);
+
+        if (document.body) {
+            observer.observe(document.body);
+        }
+    }
+
+    window.addEventListener("resize", sendHeightToWix);
+
+    window.addEventListener("orientationchange", () => {
+        setTimeout(sendHeightToWix, 100);
+        setTimeout(sendHeightToWix, 500);
+    });
+
+    // Handle mobile viewport changes.
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener(
+            "resize",
+            sendHeightToWix
+        );
+
+        window.visualViewport.addEventListener(
+            "scroll",
+            sendHeightToWix
+        );
+    }
 }
 
-);
+
+/* ======================================================
+   INITIALIZE DASHBOARD
+   ====================================================== */
+
+document.addEventListener("DOMContentLoaded", async () => {
+    await Promise.all([
+        loadPublicStatus(),
+        loadFireSeasonStatus()
+    ]);
+
+    updateFireSeason();
+    updateFireRestrictions();
+    updateIFPL();
+    updateLastUpdated();
+    initializeHeightMessaging();
+});
+
+
+/* ======================================================
+   WINDOW LOAD
+   ====================================================== */
+
+window.addEventListener("load", () => {
+    sendHeightToWix();
+});
