@@ -1,417 +1,373 @@
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        DFPA Motor Vehicles
-    </title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFPA Motor Vehicles</title>
 
     <style>
-
         :root {
-            --dfpa-green: #2e7d32;
-            --dfpa-blue: #33439a;
-            --dfpa-yellow: #d8a900;
-            --dfpa-red: #c62828;
-            --dfpa-text: #222222;
-            --dfpa-background: #ffffff;
+            --dfpa-blue: #33439A;
+            --low: #4CAF50;
+            --moderate: #1976D2;
+            --high: #F4C430;
+            --extreme: #D32F2F;
+            --inactive: #6B7280;
+            --text: #1A1A1A;
+            --muted: #6B7280;
+            --card: #FFFFFF;
         }
 
-
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
 
-
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            background: transparent;
-        }
-
-
-        body {
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-
-            color:
-                var(--dfpa-text);
-        }
-
-
-        .widget {
+        html, body {
             width: 100%;
-            max-width: 700px;
-            margin: 0 auto;
-
-            padding: 18px 20px;
-
-            background:
-                var(--dfpa-background);
-
-            border: 4px solid
-                var(--dfpa-yellow);
-
-            border-radius: 8px;
-
-            text-align: center;
+            min-height: 100%;
         }
 
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: transparent;
+            color: var(--text);
+        }
+
+        .motor-vehicles-card {
+            width: 100%;
+            background: var(--card);
+            border-radius: 18px;
+            padding: 28px 32px;
+            border: 2px solid #E5E7EB;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, .08);
+        }
 
         .widget-title {
-            margin: 0 0 8px;
-
-            font-size: 14px;
+            font-size: 1.7rem;
             font-weight: 700;
-
-            text-transform:
-                uppercase;
-
-            letter-spacing:
-                0.04em;
+            line-height: 1.15;
+            margin-bottom: 22px;
+            color: var(--dfpa-blue);
+            letter-spacing: .02em;
         }
 
-
-        .widget-level {
-            margin: 0 0 8px;
-
-            font-size: 24px;
-            line-height: 1.35;
-
+        .status-label {
+            font-size: 1rem;
             font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            margin-bottom: 8px;
         }
 
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            background: #FFFFFF;
+            border: 2px solid #D1D5DB;
+            border-left: 7px solid;
+            border-radius: 10px;
+            width: 100%;
+        }
 
-        .widget-message {
-            margin: 0;
+        .status-dot {
+            width: 11px;
+            height: 11px;
+            min-width: 11px;
+            border-radius: 50%;
+        }
 
-            font-size: 20px;
+        .status-level {
+            font-size: 1.45rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .restriction {
+            margin-top: 16px;
+            font-size: 1.2rem;
+            font-weight: 700;
             line-height: 1.4;
-
-            font-weight: 700;
         }
 
-
-        .widget.loading {
-            border-color:
-                var(--dfpa-blue);
+        .status-low {
+            border-left-color: var(--low);
         }
 
-
-        .widget.low {
-            border-color:
-                var(--dfpa-green);
+        .status-low .status-dot {
+            background: var(--low);
         }
 
-
-        .widget.moderate {
-            border-color:
-                var(--dfpa-blue);
+        .status-moderate {
+            border-left-color: var(--moderate);
         }
 
-
-        .widget.high {
-            border-color:
-                var(--dfpa-yellow);
+        .status-moderate .status-dot {
+            background: var(--moderate);
         }
 
-
-        .widget.extreme {
-            border-color:
-                var(--dfpa-red);
+        .status-high {
+            border-left-color: var(--high);
         }
 
-
-        .widget.inactive {
-            border-color:
-                var(--dfpa-green);
+        .status-high .status-dot {
+            background: var(--high);
         }
 
+        .status-extreme {
+            border-left-color: var(--extreme);
+        }
+
+        .status-extreme .status-dot {
+            background: var(--extreme);
+        }
+
+        .inactive {
+            border-left-color: var(--inactive);
+        }
+
+        .inactive .status-dot {
+            background: var(--inactive);
+        }
+
+        .loading, .error {
+            color: var(--muted);
+            font-size: 1rem;
+            line-height: 1.5;
+        }
 
         @media (max-width: 600px) {
-
-            .widget {
-                padding: 15px 16px;
+            .motor-vehicles-card {
+                padding: 20px;
+                border-radius: 12px;
             }
 
-
-            .widget-level {
-                font-size: 21px;
+            .widget-title {
+                font-size: 1.35rem;
+                margin-bottom: 16px;
             }
 
-
-            .widget-message {
-                font-size: 18px;
+            .status-label {
+                font-size: .8rem;
             }
 
+            .status-pill {
+                padding: 11px 14px;
+                border-left-width: 6px;
+            }
+
+            .status-level {
+                font-size: 1.2rem;
+            }
+
+            .restriction {
+                font-size: 1rem;
+            }
         }
-
     </style>
-
 </head>
 
-
 <body>
-
-
-    <section
-        id="motorVehicleWidget"
-        class="widget loading"
-        aria-labelledby="widgetTitle"
-    >
-
-        <h1
-            id="widgetTitle"
-            class="widget-title"
+    <main>
+        <section
+            class="motor-vehicles-card"
+            aria-labelledby="motor-vehicles-heading"
         >
-            Motor Vehicles
-        </h1>
+            <h1
+                class="widget-title"
+                id="motor-vehicles-heading"
+            >
+                MOTOR VEHICLES
+            </h1>
 
-
-        <p
-            id="widgetLevel"
-            class="widget-level"
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
-        >
-            Loading...
-        </p>
-
-
-        <p
-            id="widgetMessage"
-            class="widget-message"
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
-        >
-            Loading current motor vehicle restrictions.
-        </p>
-
-    </section>
-
+            <div id="widget-content" aria-live="polite">
+                <div class="loading">
+                    Loading current status...
+                </div>
+            </div>
+        </section>
+    </main>
 
     <script>
+        /*
+         * DFPA MOTOR VEHICLES WIDGET
+         *
+         * Checks the official fire-season status and
+         * current public fire status once on page load.
+         *
+         * No polling. No automatic refresh.
+         */
 
-        const widget =
-            document.getElementById(
-                "motorVehicleWidget"
-            );
+        const API_BASE =
+            "https://dfpa-dashboard.pages.dev";
 
+        function getStatusClass(level) {
+            const normalized =
+                String(level || "").toUpperCase();
 
-        const widgetLevel =
-            document.getElementById(
-                "widgetLevel"
-            );
+            if (normalized === "LOW") return "status-low";
+            if (normalized === "MODERATE") return "status-moderate";
+            if (normalized === "HIGH") return "status-high";
+            if (normalized === "EXTREME") return "status-extreme";
 
-
-        const widgetMessage =
-            document.getElementById(
-                "widgetMessage"
-            );
-
-
-        const LEVEL_CONFIG = {
-
-            LOW: {
-                className:
-                    "low",
-
-                message:
-                    "Allowed with Landowner Permission."
-            },
-
-            MODERATE: {
-                className:
-                    "moderate",
-
-                message:
-                    "Restricted at all times."
-            },
-
-            HIGH: {
-                className:
-                    "high",
-
-                message:
-                    "Restricted at all times."
-            },
-
-            EXTREME: {
-                className:
-                    "extreme",
-
-                message:
-                    "Restricted at all times."
-            }
-
-        };
-
-
-        function setWidgetState(
-            stateClass,
-            levelText,
-            restrictionText
-        ) {
-
-            widget.classList.remove(
-                "loading",
-                "low",
-                "moderate",
-                "high",
-                "extreme",
-                "inactive"
-            );
-
-
-            widget.classList.add(
-                stateClass
-            );
-
-
-            widgetLevel.textContent =
-                levelText;
-
-
-            widgetMessage.textContent =
-                restrictionText;
-
-
-            widget.setAttribute(
-                "aria-label",
-                `Motor Vehicles: ${levelText}. ${restrictionText}`
-            );
-
+            return "inactive";
         }
 
+        function getRestrictionText(level) {
+            const normalized =
+                String(level || "").toUpperCase();
 
-        async function loadWidgetData() {
+            if (normalized === "LOW") {
+                return "Allowed with Landowner Permission";
+            }
 
+            return "Restricted at all times";
+        }
+
+        function displayStatus(level, seasonInactive) {
+            const widgetContent =
+                document.getElementById("widget-content");
+
+            if (!widgetContent) return;
+
+            const statusClass = seasonInactive
+                ? "inactive"
+                : getStatusClass(level);
+
+            const label = seasonInactive
+                ? "Fire Season Status"
+                : "Current Fire Danger";
+
+            const restriction = seasonInactive
+                ? "Fire season has ended. Seasonal motor vehicle restrictions are inactive."
+                : getRestrictionText(level);
+
+            widgetContent.innerHTML = `
+                <div class="status-label">
+                    ${label}
+                </div>
+
+                <div
+                    class="status-pill ${statusClass}"
+                    role="status"
+                    aria-label="${label}: ${level}"
+                >
+                    <span
+                        class="status-dot"
+                        aria-hidden="true"
+                    ></span>
+
+                    <span class="status-level">
+                        ${level}
+                    </span>
+                </div>
+
+                <div class="restriction">
+                    ${restriction}
+                </div>
+            `;
+        }
+
+        function displayError() {
+            const widgetContent =
+                document.getElementById("widget-content");
+
+            if (!widgetContent) return;
+
+            widgetContent.innerHTML = `
+                <div class="error" role="status">
+                    Current fire-season information is temporarily
+                    unavailable. Please check the DFPA Fire Danger
+                    Level Status Dashboard.
+                </div>
+            `;
+        }
+
+        async function loadMotorVehicleStatus() {
             try {
+                const [statusResponse, seasonResponse] =
+                    await Promise.all([
+                        fetch(
+                            `${API_BASE}/api/public-status`,
+                            { cache: "no-store" }
+                        ),
+                        fetch(
+                            `${API_BASE}/api/fire-season`,
+                            { cache: "no-store" }
+                        )
+                    ]);
 
-                const response =
-                    await fetch(
-                        "/api/public-status",
-                        {
-                            cache:
-                                "no-store"
-                        }
-                    );
-
-
-                if (
-                    !response.ok
-                ) {
-
-                    throw new Error(
-                        "Unable to load DFPA status."
-                    );
-
+                if (!statusResponse.ok || !seasonResponse.ok) {
+                    throw new Error("Unable to load DFPA status.");
                 }
 
+                const [statusData, seasonData] =
+                    await Promise.all([
+                        statusResponse.json(),
+                        seasonResponse.json()
+                    ]);
 
-                const data =
-                    await response.json();
-
-
-                if (
-                    !data.success
-                ) {
-
-                    throw new Error(
-                        "Unable to load DFPA status."
-                    );
-
+                if (!statusData.success || !seasonData.success) {
+                    throw new Error("Invalid DFPA status response.");
                 }
-
 
                 /*
-                 * Get the current effective
-                 * Fire Danger level.
+                 * After the season ends, current is null.
+                 * The most recent season remains in history.
                  */
-
-                const level =
-                    String(
-                        data
-                            .current
-                            ?.fire_restrictions
-                            ?.level ||
-                        ""
-                    )
-                        .toUpperCase()
-                        .trim();
-
-
-                const config =
-                    LEVEL_CONFIG[level];
-
-
-                if (!config) {
-
-                    setWidgetState(
-                        "moderate",
-                        "Information unavailable.",
-                        "Please check the current DFPA Fire Danger level."
+                const season =
+                    seasonData.current ||
+                    (
+                        Array.isArray(seasonData.history)
+                            ? seasonData.history[0]
+                            : null
                     );
 
+                if (!season || !season.status) {
+                    throw new Error("Season status unavailable.");
+                }
 
+                const seasonStatus =
+                    String(season.status).toUpperCase();
+
+                if (seasonStatus === "INACTIVE") {
+                    displayStatus("INACTIVE", true);
                     return;
                 }
 
+                if (seasonStatus !== "ACTIVE") {
+                    throw new Error("Unrecognized season status.");
+                }
 
-                /*
-                 * Display the current Fire Danger
-                 * level and motor vehicle restriction.
-                 */
+                const level =
+                    statusData.current?.fire_restrictions?.level;
 
-                setWidgetState(
-                    config.className,
-                    level,
-                    config.message
-                );
+                if (!level) {
+                    throw new Error("Fire danger level unavailable.");
+                }
 
+                displayStatus(level, false);
 
             } catch (error) {
-
                 console.error(
-                    "DFPA motor vehicle widget error:",
+                    "Motor Vehicles widget error:",
                     error
                 );
 
-
-                setWidgetState(
-                    "moderate",
-                    "Information unavailable.",
-                    "Please check the current DFPA Fire Danger level."
-                );
-
+                displayError();
             }
-
         }
 
-
-        /*
-         * Load once when the widget opens.
-         */
-
-        loadWidgetData();
-
+        // Load once. Intentionally no timer or polling.
+        document.addEventListener(
+            "DOMContentLoaded",
+            loadMotorVehicleStatus
+        );
     </script>
-
-
 </body>
-
 </html>
